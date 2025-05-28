@@ -88,6 +88,14 @@ NULL
 #' @param i numeric vector index if `j` is not given. Row index if `j` is also
 #' present. Works like `matrix-like` indexing.
 #' @param j numeric. Column index
+#' @param tile_fun (internal) function used to define tile bounds based on the
+#' iterator object and ij indices.
+#' @param fun (internal) post-processing function used to convert bounds to
+#' expected output. Such as `ext()` for `spatialTileIterator`
+#' @param zero logical. Whether to zero out buffer effects. (used by default with
+#' `pixelTileIterator`)
+#' @param expand_grid logical (internal) whether to use `expand.grid()` on ij
+#' indices.
 #' @param ... addtional params to pass (not used).
 #' @param drop not used.
 #' @examples
@@ -135,7 +143,7 @@ NULL
 #'
 #' Buffers can be added either via [`$buffer`][dollar] or `+` and `-` operators.
 #' The + and - operators specifically modify the buffer value based on the
-#' arithmetic ops. This is similar to their usage in [terra::`Arith-methods`]
+#' arithmetic ops. This is similar to their usage in [terra::Arith-methods]
 #'
 #' @section spatial and pixel differences:
 #'
@@ -164,6 +172,17 @@ NULL
 #' plot(px)
 #' px[1:3]
 #' @returns `tileIterator`
+NULL
+
+#' @name ext
+#' @title Get and Set Spatial Extent
+#' @aliases ext<-
+#' @description
+#' Get and set a spatial extent.
+#' @param x `tileIterator`
+#' @param ... addtional params to pass (none implemented)
+#' @param value `numeric` of length 4 or `SpatExtent` defining spatial extent.
+#' @returns tileIterator if `ext<-()` and `SpatExtent` if `ext()`
 NULL
 
 #' @name tileIterator

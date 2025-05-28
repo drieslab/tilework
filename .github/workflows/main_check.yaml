@@ -52,7 +52,6 @@ jobs:
           _R_CHECK_FORCE_SUGGESTS: false
           _R_CHECK_RD_XREFS: false
         with:
-          dependencies: '"hard"' # do not use suggested dependencies
           install-pandoc: false
           extra-packages: |
             any::rcmdcheck
@@ -62,6 +61,7 @@ jobs:
             any::future.apply
             any::knitr
             github::drieslab/GiottoUtils
+          needs: check
 
       - name: Run R CMD check
         uses: r-lib/actions/check-r-package@v2

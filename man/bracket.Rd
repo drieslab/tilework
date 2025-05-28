@@ -40,6 +40,18 @@ present. Works like \code{matrix-like} indexing.}
 \item{...}{addtional params to pass (not used).}
 
 \item{drop}{not used.}
+
+\item{tile_fun}{(internal) function used to define tile bounds based on the
+iterator object and ij indices.}
+
+\item{fun}{(internal) post-processing function used to convert bounds to
+expected output. Such as \code{ext()} for \code{spatialTileIterator}}
+
+\item{zero}{logical. Whether to zero out buffer effects. (used by default with
+\code{pixelTileIterator})}
+
+\item{expand_grid}{logical (internal) whether to use \code{expand.grid()} on ij
+indices.}
 }
 \value{
 \code{list} of \code{numeric} or \code{SpatExtent}

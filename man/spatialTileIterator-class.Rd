@@ -15,6 +15,14 @@ processes. Tile \code{SpatExtent} objects can be extracted on-demand.
 \describe{
 \item{\code{extent}}{numeric. Spatial extent to tile across.}
 
+\item{\code{n}}{numeric. Number of tiles to create.}
+
+\item{\code{dims}}{numeric. Number of rows/cols in the array of tiles}
+
+\item{\code{tile_dims}}{numeric. Row/col dimensions of each tile}
+
+\item{\code{buffer}}{numeric. Tile padding/buffering}
+
 \item{\code{metadata}}{data.frame. Metadata per tile}
 }}
 

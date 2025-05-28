@@ -172,6 +172,7 @@ setMethod("length<-", signature("spatialTileIterator"), function(x, value) {
     return(initialize(x))
 })
 
+#' @rdname ext
 #' @export
 setMethod("ext", signature("spatialTileIterator"), function(x, ...) {
     if (length(x@extent) == 0L) {
@@ -180,6 +181,7 @@ setMethod("ext", signature("spatialTileIterator"), function(x, ...) {
     ext(x@extent, ...)
 })
 
+#' @rdname ext
 #' @export
 setMethod("ext<-", signature("spatialTileIterator"), function(x, value) {
     x@extent <- .ext_to_num_vec(ext(value))

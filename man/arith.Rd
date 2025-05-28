@@ -29,7 +29,7 @@ less obvious.
 
 Buffers can be added either via \code{\link[=dollar]{$buffer}} or \code{+} and \code{-} operators.
 The + and - operators specifically modify the buffer value based on the
-arithmetic ops. This is similar to their usage in
+arithmetic ops. This is similar to their usage in \link[terra:arith-generic]{terra::Arith-methods}
 }
 \section{spatial and pixel differences}{
 
