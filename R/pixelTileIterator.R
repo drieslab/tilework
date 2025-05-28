@@ -29,8 +29,9 @@
 #' tiles setup, a column called `"tile"` will be set up that simply records
 #' which tile it is.
 #'
-#' * `$` can be used to view a specific type of metadata
-#' * `$<-` can be used to set additional metadata items
+#' * `$` and `$<-` can be used to get and set specific metadata, the `"pxdims"`
+#'   which are the pixel dimensions of the image to iterate across, `"ncols"`
+#'   and `"nrows"` which are the px dims of a tile, and the `"buffer"` value.
 #' * `[[i]]` selection will pull specific metadata rows corresponding to the
 #' selected tiles.
 #' @examples
@@ -48,19 +49,17 @@
 #'
 #' # tile padding
 #' y <- x + 3
-#' plot(y, alpha = 0.3)
-#' rect(0, -100, 100, 0, border = "red")
+#' plot(y, alpha = 0.3) # red border shows the image space
 #' # this is now larger than the original space.
 #'
 #' # negative buffer
 #' z <- x - 5
 #' plot(ext(c(0, 100, -100, 0)))
-#' rect(0, -100, 100, 0, border = "red")
 #' plot(z, add = TRUE)
 #'
 #' # tile selection
 #' x[5]
-#' x[1, 2:3]
+#' x[2, 2:3]
 #'
 #' # metadata
 #' x$tile
@@ -73,23 +72,23 @@ setMethod("initialize", signature("pixelTileIterator"), function(.Object, ...) {
     dots <- list(...)
 
     # direct assignments
-    if (!is.null(dots$pxdims)) x@pxdims <- dots$pxdims
-    if (!is.null(dots$nrows)) x$nrows <- dots$nrows
-    if (!is.null(dots$ncols)) x$ncols <- dots$ncols
-    if (!is.null(dots$n)) x@n <- dots$n
-    if (!is.null(dots$tiles)) x@tiles <- dots$tiles
-    if (!is.null(dots$buffer)) x@buffer <- dots$buffer
-    if (!is.null(dots$metadata)) x@metadata <- dots$metadata
+    if (!is.null(dots$pxdims)) .Object@pxdims <- dots$pxdims
+    if (!is.null(dots$dims)) .Object@dims <- dots$dims
+    if (!is.null(dots$tile_dims)) .Object@tile_dims <- dots$tile_dims
+    if (!is.null(dots$n)) .Object@n <- dots$n
+    if (!is.null(dots$tiles)) .Object@tiles <- dots$tiles
+    if (!is.null(dots$buffer)) .Object@buffer <- dots$buffer
+    if (!is.null(dots$metadata)) .Object@metadata <- dots$metadata
 
     # initialize vals
     if (length(.Object@n) == 0L) {
         .Object@n <- 0
     }
-    if (length(.Object@ncols) == 0L) {
-        .Object@ncols <- 0
+    if (length(.Object@dims) == 0L) {
+        .Object@dims <- c(0, 0)
     }
-    if (length(.Object@nrows) == 0L) {
-        .Object@nrows <- 0
+    if (length(.Object@tile_dims) == 0L) {
+        .Object@tile_dims <- c(0, 0)
     }
 
     # return early if pxdims not provided
@@ -99,22 +98,21 @@ setMethod("initialize", signature("pixelTileIterator"), function(.Object, ...) {
     checkmate::assert_integerish(.Object@pxdims, len = 2L)
 
     # return early if ncols and nrows are not provided
-    if (.Object@nrows == 0 && .Object@ncols == 0) {
+    if (all(.Object@tile_dims == c(0, 0))) {
         return(.Object)
-    } else if (.Object@nrows == 0) {
-        .Object@nrows <- .Object@ncols
-    } else if (.Object@ncols == 0) {
-        .Object@ncols <- .Object@nrows
+    } else if (.Object@tile_dims[[1L]] == 0) {
+        .Object@tile_dims[[1L]] <- .Object@tile_dims[[2L]]
+    } else if (.Object@tile_dims[[2L]] == 0) {
+        .Object@tile_dims[[2L]] <- .Object@tile_dims[[1L]]
     }
-    checkmate::assert_integerish(.Object@ncols, len = 1L)
-    checkmate::assert_integerish(.Object@nrows, len = 1L)
+    checkmate::assert_integerish(.Object@tile_dims, len = 2L)
 
-    # generate tile array
-    .Object@tiles <- .px_tile_plan(
-        pxdims = .Object@pxdims,
-        nrows = .Object@nrows,
-        ncols = .Object@ncols
+    # set dims
+    .Object@dims <- c(
+        ceiling(.Object@pxdims[[1L]] / .Object@tile_dims[[1L]]),
+        ceiling(.Object@pxdims[[2L]] / .Object@tile_dims[[2L]])
     )
+
     # set n
     .Object@n <- length(.Object)
 
@@ -133,23 +131,22 @@ setMethod("$<-", signature("pixelTileIterator", "ANY"), function(x, name, value)
         return(initialize(x))
     }
     if (name == "ncols") {
-        x@ncols <- value
+        x@tile_dims[[2L]] <- value
         return(initialize(x))
     }
     if (name == "nrows") {
-        x@nrows <- value
+        x@tile_dims[[1L]] <- value
         return(initialize(x))
     }
-    x@metadata[[name]] <- value
-    x
+    callNextMethod()
 })
 
 #' @export
 setMethod("$", signature("pixelTileIterator"), function(x, name) {
     if (name == "pxdims") return(x@pxdims)
-    if (name == "ncols") return(x@ncols)
-    if (name == "nrows") return(x@nrows)
-    x@metadata[[name]]
+    if (name == "ncols") return(x@tile_dims[[2L]])
+    if (name == "nrows") return(x@tile_dims[[1L]])
+    callNextMethod()
 })
 
 #' @export
@@ -159,8 +156,8 @@ setMethod("show", signature("pixelTileIterator"), function(object) {
     plist <- list(
         tiles = length(object),
         pxdim = toString(object@pxdims),
-        pxrows = object@nrows,
-        pxcol = object@ncols,
+        pxrows = object@tile_dims[[1L]],
+        pxcol = object@tile_dims[[2L]],
         dim = toString(c(dim(object)[[1]], dim(object)[[2]])),
         buffer = object@buffer
     )
@@ -168,8 +165,8 @@ setMethod("show", signature("pixelTileIterator"), function(object) {
 })
 
 #' @export
-setMethod("[", signature(x = "pixelTileIterator", i = "numeric", j = "numeric", drop = "missing"), function(x, i, j) {
-    callNextMethod(x, i, j, fun = as.integer, zero = TRUE)
+setMethod("[", signature(x = "pixelTileIterator", i = "numeric", j = "numeric", drop = "missing"), function(x, i, j, ...) {
+    callNextMethod(x, i, j, tile_fun = .px_tile_bounds, fun = as.integer, zero = TRUE, ...)
 })
 
 #' @export
@@ -179,39 +176,33 @@ setMethod("+", signature("pixelTileIterator", "numeric"), function(e1, e2) {
     e1
 })
 
+#' @export
+setMethod("plot", signature("pixelTileIterator", "missing"), function(x, ...) {
+    parent_method <- getMethod("plot", signature("tileIterator", "missing"))
+    parent_method(x = x, flip = TRUE, ...)
+    rect(0, -x@pxdims[[1L]], x@pxdims[[2]], 0, border = "red")
+})
+
+
 # helpers ####
 
 #' @export
 .DollarNames.pixelTileIterator <- function(x, pattern) {
-    c(colnames(x@metadata), "ncols", "nrows", "pxdims")
+    c(colnames(x@metadata), "ncols", "nrows", "pxdims", "buffer")
 }
 
-.px_tile_plan <- function(pxdims, nrows, ncols) {
-    checkmate::assert_integerish(pxdims, len = 2L)
-    checkmate::assert_integerish(nrows, len = 1L)
-    checkmate::assert_integerish(ncols, len = 1L)
-    tilesy <- ceiling(pxdims[[1]] / nrows)
-    tilesx <- ceiling(pxdims[[2]] / ncols)
-
-    stops <- c()
-    for (i in seq_len(tilesy)) {
-        for (j in seq_len(tilesx)) {
-            stops <- c(
-                stops,
-                ncols * (j - 1L) + 1L,
-                ncols * j,
-                nrows * (i - 1L) + 1L,
-                nrows * i
-            )
-        }
-    }
-    stops <- as.integer(stops)
-    a <- array(stops, dim = c(4, tilesx, tilesy))
-    aperm(a, perm = c(3, 2, 1))
+# x: tileIterator or matrix-like
+# i: row index
+# j: col index
+.px_tile_bounds <- function(x, i, j) {
+    tile_dims <- x@tile_dims
+    checkmate::assert_integerish(i, len = 1L)
+    checkmate::assert_integerish(j, len = 1L)
+    c(
+        tile_dims[[2]] * (j - 1L) + 1L,
+        tile_dims[[2]] * j,
+        tile_dims[[1]] * (i - 1L) + 1L,
+        tile_dims[[1]] * i
+    )
 }
 
-#' @export
-setMethod("plot", signature("pixelTileIterator", "missing"), function(x, ...) {
-    callNextMethod(x = x, flip = TRUE, ...)
-    rect(0, -x@pxdims[[1L]], x@pxdims[[2]], 0, border = "red")
-})

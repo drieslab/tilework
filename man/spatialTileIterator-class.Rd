@@ -15,14 +15,6 @@ processes. Tile \code{SpatExtent} objects can be extracted on-demand.
 \describe{
 \item{\code{extent}}{numeric. Spatial extent to tile across.}
 
-\item{\code{n}}{numeric. Number of tiles to create.}
-
-\item{\code{tiles}}{array. Tile extents stored as a 3D numeric array where dim 1 is
-tiles along the x axis, dim 2 is along the y, and dim 3 is xmin, xmax,
-ymin, and ymax of the tile.}
-
-\item{\code{buffer}}{numeric. Tile padding/buffering}
-
 \item{\code{metadata}}{data.frame. Metadata per tile}
 }}
 
@@ -74,8 +66,8 @@ The \code{spatialTileIterator} object can contain metadata. By default after ext
 tiles setup, a column called \code{"tile"} will be set up that simply records
 which tile it is.
 \itemize{
-\item \code{$} can be used to view a specific type of metadata
-\item \verb{$<-} can be used to set additional metadata items
+\item \code{$} can be used to view a specific type of metadata and the buffer
+\item \verb{$<-} can be used to set additional metadata items and the buffer.
 \item \verb{[[i]]} selection will pull specific metadata rows corresponding to the
 selected tiles.
 }
@@ -98,8 +90,8 @@ plot(x)
 
 # tile padding
 y <- x + 10
-plot(y, alpha = 0.3)
-plot(ext(x), add = TRUE, border = "red")
+plot(ext(x), border = "red")
+plot(y, alpha = 0.3, add = TRUE)
 # this is now larger than the original space
 ext(y) <- ext(y) - 10
 plot(y, alpha = 0.3)

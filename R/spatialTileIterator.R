@@ -51,8 +51,8 @@
 #' tiles setup, a column called `"tile"` will be set up that simply records
 #' which tile it is.
 #'
-#' * `$` can be used to view a specific type of metadata
-#' * `$<-` can be used to set additional metadata items
+#' * `$` can be used to view a specific type of metadata and the buffer
+#' * `$<-` can be used to set additional metadata items and the buffer.
 #' * `[[i]]` selection will pull specific metadata rows corresponding to the
 #' selected tiles.
 #'
@@ -73,8 +73,8 @@
 #'
 #' # tile padding
 #' y <- x + 10
-#' plot(y, alpha = 0.3)
-#' plot(ext(x), add = TRUE, border = "red")
+#' plot(ext(x), border = "red")
+#' plot(y, alpha = 0.3, add = TRUE)
 #' # this is now larger than the original space
 #' ext(y) <- ext(y) - 10
 #' plot(y, alpha = 0.3)
@@ -109,6 +109,8 @@ setMethod("initialize", signature("spatialTileIterator"), \(.Object, ...) {
     if (length(.Object@n) == 0L) {
         .Object@n <- 0
     }
+    if (length(.Object@dims) == 0L) .Object@dims <- c(0, 0)
+    if (length(.Object@tile_dims) == 0L) .Object@tile_dims <- c(0, 0)
 
     # return early if extent not provided
     if (length(.Object@extent) == 0L) {
@@ -128,7 +130,8 @@ setMethod("initialize", signature("spatialTileIterator"), \(.Object, ...) {
     # generate tile extent array
     n_desired <- .Object@n
     e <- terra::ext(.Object@extent)
-    .Object@tiles <- .chunk_plan(e, min_chunks = n_desired)
+    .Object@dims <- .get_dim_n_chunks(n = n_desired, e = e)
+    .Object@tile_dims <- .calc_tile_dims(extent = e, array_dims = .Object@dims)
     .Object@n <- length(.Object)
 
     # initialize metadata
@@ -150,13 +153,12 @@ setMethod("show", signature("spatialTileIterator"), function(object) {
         return(invisible())
     }
 
-    d <- dim(object)
     plist <- list(
         extent = sprintf(
             "%s (xmin, xmax, ymin, ymax)",
             paste(.ext_to_num_vec(e), collapse = ", ")
         ),
-        dim = paste(dim(x), collapse = " "),
+        dim = paste(dim(object), collapse = " "),
         buffer = object@buffer
     )
     print_list(plist)
@@ -183,8 +185,8 @@ setMethod("ext<-", signature("spatialTileIterator"), function(x, value) {
 })
 
 #' @export
-setMethod("[", signature(x = "spatialTileIterator", i = "numeric", j = "numeric", drop = "missing"), function(x, i, j) {
-    callNextMethod(x, i, j, fun = ext)
+setMethod("[", signature(x = "spatialTileIterator", i = "numeric", j = "numeric", drop = "missing"), function(x, i, j, ...) {
+    callNextMethod(x, i, j, fun = ext, zero = FALSE, ...)
 })
 
 # helpers ####
@@ -201,51 +203,9 @@ setMethod("[", signature(x = "spatialTileIterator", i = "numeric", j = "numeric"
     return(c(y, x))
 }
 
-.chunk_plan <- function(extent, min_chunks = NULL, nrows = NULL, ncols = NULL) {
-    checkmate::assert_class(extent, "SpatExtent")
-    if (!is.null(nrows)) {
-        checkmate::assert_true(length(c(nrows, ncols)) == 2L)
-    } else {
-        checkmate::assert_numeric(min_chunks)
-        res <- .get_dim_n_chunks(n = min_chunks, e = extent)
-        nrows <- res[1L]
-        ncols <- res[2L]
-    }
-
-    x_stops <- seq(
-        from = terra::xmin(extent),
-        to = terra::xmax(extent),
-        length.out = ncols + 1L
-    )
-    y_stops <- seq(
-        from = terra::ymin(extent),
-        to = terra::ymax(extent),
-        length.out = nrows + 1L
-    )
-
-    # vector of extent values
-    e_vec <- c()
-    for (i in seq_len(nrows)) {
-        for (j in seq_len(ncols)) {
-            e_vec <- c(
-                e_vec,
-                x_stops[j],
-                x_stops[j + 1L],
-                y_stops[i],
-                y_stops[i + 1L]
-            )
-        }
-    }
-
-    a <- array(e_vec, dim = c(4, ncols, nrows))
-    a <- aperm(a, perm = c(3, 2, 1))
-    # reverse order of rows so tiles count from top to bottom
-    a <- a[seq(from = nrow(a), to = 1), , , drop = FALSE]
-
-    # validate array output
-    if (!length(dim(a)) == 3) {
-        stop("in .chunk_plan() output: invalid dims", call. = FALSE)
-    }
-
-    return(a)
+.calc_tile_dims <- function(extent, array_dims) {
+    checkmate::assert_integerish(array_dims)
+    e <- ext(extent)
+    er <- range(e)
+    c(er[["y"]] / array_dims[[1L]], er[["x"]] / array_dims[[2L]])
 }

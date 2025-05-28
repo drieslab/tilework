@@ -7,9 +7,8 @@
 #' tiles. They are also lightweight and self-contained to aid with
 #' parallelization.
 #' @slot n numeric. Number of tiles to create.
-#' @slot tiles array. Tile extents stored as a 3D numeric array where dim 1 is
-#' tiles along the x axis, dim 2 is along the y, and dim 3 is xmin, xmax,
-#' ymin, and ymax of the tile.
+#' @slot dims numeric. Number of rows/cols in the array of tiles
+#' @slot tile_dims numeric. Row/col dimensions of each tile
 #' @slot buffer numeric. Tile padding/buffering
 #' @slot metadata data.frame. Metadata per tile
 #' @exportClass tileIterator
@@ -21,7 +20,8 @@ setClass(
     contains = "VIRTUAL",
     slots = list(
         n = "numeric",
-        tiles = "array",
+        dims = "numeric",
+        tile_dims = "numeric",
         buffer = "numeric",
         metadata = "data.frame"
     ),
@@ -32,25 +32,13 @@ setClass(
 
 #' @rdname spatialTileIterator-class
 #' @slot extent numeric. Spatial extent to tile across.
-#' @slot n numeric. Number of tiles to create.
-#' @slot tiles array. Tile extents stored as a 3D numeric array where dim 1 is
-#' tiles along the x axis, dim 2 is along the y, and dim 3 is xmin, xmax,
-#' ymin, and ymax of the tile.
-#' @slot buffer numeric. Tile padding/buffering
 #' @slot metadata data.frame. Metadata per tile
 #' @exportClass spatialTileIterator
 setClass(
     "spatialTileIterator",
     contains = "tileIterator",
     slots = list(
-        extent = "numeric",
-        n = "numeric",
-        tiles = "array",
-        buffer = "numeric",
-        metadata = "data.frame"
-    ),
-    prototype = list(
-        buffer = 0
+        extent = "numeric"
     )
 )
 
@@ -62,15 +50,11 @@ setClass(
 #' @slot buffer numeric. Tile padding/buffering
 #' @slot metadata data.frame. Metadata per tile
 #' @slot pxdims pixel dimensions to iterate across
-#' @slot ncols number of pixel columns per tile
-#' @slot nrows number of pixel rows per tile
 #' @exportClass pixelTileIterator
 setClass(
     "pixelTileIterator",
     contains = "tileIterator",
     slots = list(
-        pxdims = "numeric",
-        ncols = "numeric",
-        nrows = "numeric"
+        pxdims = "numeric"
     )
 )

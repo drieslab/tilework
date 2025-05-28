@@ -36,8 +36,14 @@
 \item{x}{object to tile apply}
 
 \item{FUN}{function to run across tiles. The first param must be the
-\code{SpatRaster} object. If \code{.I} is included as a parameter, it can be used
-in the function as the tile number.}
+\code{SpatRaster} object. Additional special parameters can be optionally included.
+\itemize{
+\item \code{.I} can be used as the tile number.
+\item \code{.TILE} is the tileIterator output for that \code{.I}. It will include the
+bounds and attached metdata attributes.
+\item \code{.R} is the tile row number
+\item \code{.C} is the tile col number.
+}}
 
 \item{ti}{\code{tileIterator} that defines the tiles to apply on.}
 

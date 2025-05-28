@@ -16,9 +16,9 @@ parallelization.
 \describe{
 \item{\code{n}}{numeric. Number of tiles to create.}
 
-\item{\code{tiles}}{array. Tile extents stored as a 3D numeric array where dim 1 is
-tiles along the x axis, dim 2 is along the y, and dim 3 is xmin, xmax,
-ymin, and ymax of the tile.}
+\item{\code{dims}}{numeric. Number of rows/cols in the array of tiles}
+
+\item{\code{tile_dims}}{numeric. Row/col dimensions of each tile}
 
 \item{\code{buffer}}{numeric. Tile padding/buffering}
 

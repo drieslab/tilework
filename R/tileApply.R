@@ -13,8 +13,13 @@
 #'
 #' @param x object to tile apply
 #' @param FUN function to run across tiles. The first param must be the
-#' `SpatRaster` object. If `.I` is included as a parameter, it can be used
-#' in the function as the tile number.
+#' `SpatRaster` object. Additional special parameters can be optionally included.
+#'
+#' * `.I` can be used as the tile number.
+#' * `.TILE` is the tileIterator output for that `.I`. It will include the
+#' bounds and attached metdata attributes.
+#' * `.R` is the tile row number
+#' * `.C` is the tile col number.
 #' @param ti `tileIterator` that defines the tiles to apply on.
 #' @param lyr numeric. Layer number(s) to use
 #' @param log logical. Whether to log processing steps to file.
@@ -58,12 +63,9 @@ setMethod("tileApply", signature("SpatRaster", "missing", "spatialTileIterator")
     ...) {
     checkmate::assert_function(FUN)
     checkmate::assert_integerish(lyr, null.ok = TRUE)
-    f <- terra::sources(x)[[1]] # only works for single source images
-    if (length(unique(f)) > 1L) {
-        stop("[tileApply] only works for single file images", call. = FALSE)
-    }
+    f <- terra::sources(x)
     f <- unique(f)
-    if (f == "") {
+    if (any(f == "")) {
         stop(wrap_txt("[tileApply] no filepath found for image.
                       Please first write to disk."),
              call. = FALSE)
@@ -95,11 +97,15 @@ setMethod("tileApply", signature("SpatRaster", "missing", "spatialTileIterator")
             }
             terra::window(r) <- tile_ext
 
-            if (".I" %in% names(formals(FUN))) {
-                res <- FUN(r, .I = i)
-            } else {
-                res <- FUN(r)
-            }
+            # special args
+            a <- list(r)
+            nf <- names(formals(FUN))
+            if (".I" %in% nf) a$.I <- i
+            if (".TILE" %in% nf) a$.TILE <- tile_ext
+            if (".R" %in% nf) a$.R <- ij[[1L]]
+            if (".C" %in% nf) a$.C <- ij[[2L]]
+
+            res <- do.call(FUN, args = a)
 
             p(message = sprintf("[tile %d] done", i))
             return(res)
@@ -136,7 +142,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
     with_pbar({
         p <- pbar(along = ti)
 
-        lapply_flex(seq_along(ti), function(i) {
+        lapply(seq_along(ti), function(i) {
             ij <- .tile_idx_to_ij(ti, i)
             tile_id <- sprintf("[tile %d]", i)
             if (log) {
@@ -163,7 +169,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
 
             # handle extend and masking
             pad <- 2 * ti@buffer # since buffer is added on both sides
-            expected_dim <- c(ti@nrows + pad, ti@ncols + pad)
+            expected_dim <- c(ti@tile_dims[[1L]] + pad, ti@tile_dims[[2L]] + pad)
             if (nrow(r) != expected_dim[[1L]] ||
                 ncol(r) != expected_dim[[2L]]) {
                 if (extend) {
@@ -177,15 +183,19 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
                 }
             }
 
-            if (".I" %in% names(formals(FUN))) {
-                res <- FUN(r, .I = i)
-            } else {
-                res <- FUN(r)
-            }
+            # special args
+            a <- list(r)
+            nf <- names(formals(FUN))
+            if (".I" %in% nf) a$.I <- i
+            if (".TILE" %in% nf) a$.TILE <- pxb
+            if (".R" %in% nf) a$.R <- ij[[1L]]
+            if (".C" %in% nf) a$.C <- ij[[2L]]
+
+            res <- do.call(FUN, args = a)
 
             p(message = sprintf("[tile %d] done", i))
             return(res)
         },
-        ...)
+        ...) # ti, logpath, log, f, e
     })
 })

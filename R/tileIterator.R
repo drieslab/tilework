@@ -19,12 +19,17 @@ tileIterator <- function(type = c("spatial", "pixel"), ...) {
 
 #' @export
 setMethod("$<-", signature("tileIterator", "ANY"), function(x, name, value) {
+    if (name == "buffer") {
+        x@buffer <- value
+        return(initialize(x))
+    }
     x@metadata[[name]] <- value
     x
 })
 
 #' @export
 setMethod("$", signature("tileIterator"), function(x, name) {
+    if (name == "buffer") return(x@buffer)
     x@metadata[[name]]
 })
 
@@ -33,7 +38,7 @@ setMethod(
     "plot", signature(x = "tileIterator", y = "missing"),
     function(x, values = "tile", color_as_factor = FALSE, ...) {
         p <- list(...)
-        if (length(x@tiles) == 0L) {
+        if (length(x) == 0L) {
             stop("No tiles to plot.\nTry requesting tiles with `length()`")
         }
         values <- x@metadata[[values]]
@@ -51,21 +56,17 @@ setMethod(
 
 #' @export
 setMethod("nrow", signature("tileIterator"), function(x) {
-    nrow(x@tiles)
+    x@dims[[1L]]
 })
 
 #' @export
 setMethod("ncol", signature("tileIterator"), function(x) {
-    res <- ncol(x@tiles)
-    if (is.na(res)) {
-        res <- 0 # catch for when `x@tiles` is not an array
-    }
-    return(res)
+    x@dims[[2L]]
 })
 
 #' @export
 setMethod("length", signature("tileIterator"), function(x) {
-    nrow(x) * ncol(x)
+    prod(x@dims)
 })
 
 #' @export
@@ -74,41 +75,25 @@ setMethod("dim", signature("tileIterator"), function(x) {
 })
 
 #' @export
-setMethod("[", signature(x = "tileIterator", i = "numeric", j = "missing", drop = "missing"), function(x, i) {
+setMethod("[", signature(x = "tileIterator", i = "numeric", j = "missing", drop = "missing"), function(x, i, ..., drop) {
     i <- as.integer(i)
     if (any(i > length(x) | i <= 0)) stop("tileIterator: subscript out of bounds", call. = FALSE)
     ij <- .tile_idx_to_ij(x, i)
-    x[ij[[1]], ij[[2]]] # pass to numeric/numeric method
+    x[ij[[1L]], ij[[2L]], expand_grid = FALSE, ...] # pass to numeric/numeric method
 })
-
-#' @export
-setMethod(
-    "[<-",
-    signature(x = "tileIterator", i = "numeric", j = "missing", value = "numeric"),
-    function(x, i, j, ..., value) {
-        i <- as.integer(i)
-        if (any(i > length(x) | i <= 0)) stop("tileIterator: subscript out of bounds", call. = FALSE)
-        ij <- .tile_idx_to_ij(x, i)
-        x@tiles[ij[[1]], ij[[2]], ] <- .ext_to_num_vec(value)
-        x
-    }
-)
 
 #' @export
 setMethod("[", signature(x = "tileIterator", i = "numeric", j = "numeric", drop = "missing"),
-          function(x, i, j, fun = function(x) x, zero = FALSE, drop) {
-    x@tiles <- .do_tile_buffer(x@tiles, x@buffer)
-    if (zero) x@tiles <- .tile_buffer_zero(x@tiles, x@buffer)
-    mapply(function(i, j) {
-        n <- ((i - 1) * ncol(x)) + j
-        meta <- as.list(x@metadata)
-        e <- fun(x@tiles[i, j, ])
-        for (metadata in names(meta)) {
-            attr(e, metadata) <- meta[[metadata]][n]
-        }
-        e
-    }, i, j, SIMPLIFY = FALSE)
+          function(x, i, j, tile_fun = .spat_tile_bounds, fun = function(x) x, zero = FALSE, expand_grid = TRUE, drop) {
+    .extract_ij_tile(x, i, j,
+        expand_grid = expand_grid,
+        tile_fun = tile_fun,
+        fun = fun,
+        zero = zero
+    )
 })
+
+
 
 #' @export
 setMethod("[", signature(x = "tileIterator", i = "missing", j = "missing", drop = "missing"), function(x) {
@@ -134,26 +119,40 @@ setMethod("-", signature("tileIterator", "numeric"), function(e1, e2) {
 # helpers ####
 
 .DollarNames.tileIterator <- function(x, pattern) {
-    colnames(x@metadata)
+    c(colnames(x@metadata), "buffer")
 }
 
 # x the extent array
 # buffer is the value to buffer the tiles by. Can be positive or negative
 .do_tile_buffer <- function(x, buffer = 0) {
-    x[, , 1L] <- x[, , 1L] - buffer
-    x[, , 2L] <- x[, , 2L] + buffer
-    x[, , 3L] <- x[, , 3L] - buffer
-    x[, , 4L] <- x[, , 4L] + buffer
+    x[[1L]] <- x[[1L]] - buffer
+    x[[2L]] <- x[[2L]] + buffer
+    x[[3L]] <- x[[3L]] - buffer
+    x[[4L]] <- x[[4L]] + buffer
     x
 }
 
 # zero out the buffer increase
 .tile_buffer_zero <- function(x, buffer = 0) {
-    x[, , 1L] <- x[, , 1L] + buffer
-    x[, , 2L] <- x[, , 2L] + buffer
-    x[, , 3L] <- x[, , 3L] + buffer
-    x[, , 4L] <- x[, , 4L] + buffer
+    x[[1L]] <- x[[1L]] + buffer
+    x[[2L]] <- x[[2L]] + buffer
+    x[[3L]] <- x[[3L]] + buffer
+    x[[4L]] <- x[[4L]] + buffer
     x
+}
+
+.spat_tile_bounds <- function(x, i, j) {
+    tile_dims <- x@tile_dims
+    e <- ext(x)
+    offset <- c(terra::ymin(e), terra::xmin(e))
+    checkmate::assert_integerish(i, len = 1L)
+    checkmate::assert_integerish(j, len = 1L)
+    c(
+        tile_dims[[2L]] * (j - 1L) + offset[[2L]],
+        tile_dims[[2L]] * j + offset[[2L]],
+        tile_dims[[1L]] * (i - 1L) + offset[[1L]],
+        tile_dims[[1L]] * i + offset[[1L]]
+    )
 }
 
 #' @name .preview_chunk_plan
@@ -198,13 +197,42 @@ setMethod("-", signature("tileIterator", "numeric"), function(e1, e2) {
     )
 }
 
-.tile_idx_to_ij <- function(x, i) {
-    i_idx <- floor(i / ncol(x)) + 1L
-    no_resid <- i %% ncol(x) == 0L
-    i_idx[no_resid] <- i_idx[no_resid] - 1L
-    j_idx <- i %% ncol(x)
-    j_idx[j_idx == 0L] <- ncol(x)
-    list(i_idx, j_idx)
+# x: tileIterator or matrix-like
+# i: row index
+# j: col index
+# expand_grid: logical. Whether to run expand.grid on i and j input. Good for
+#   i,j inputs, but should not be used when the ij inputs are paired already.
+# tile_fun: function. Function to calculate the tile bounds from:
+#   - x
+#   - tile i, j
+#
+# fun: function. Function to run on the output bounds as post-processing
+#   (e.g. ext())
+# zero: logical. Whether to zero out buffer effects.
+.extract_ij_tile <- function(x, i, j,
+    expand_grid = TRUE,
+    tile_fun = .spat_tile_bounds,
+    fun = function(x) x,
+    zero = FALSE) {
+    if (isTRUE(expand_grid)) {
+        var_tab <- expand.grid(i, j)
+        i <- var_tab$Var1
+        j <- var_tab$Var2
+    }
+
+    .mapply(function(i, j) {
+        e <- tile_fun(x, i, j)
+        e <- .do_tile_buffer(e, x@buffer)
+        if (isTRUE(zero)) e <- .tile_buffer_zero(e, x@buffer)
+        e <- fun(e)
+        # attach metadata
+        n <- .ij_to_tile_idx(x, i, j)
+        meta <- as.list(x@metadata)
+        for (metadata in names(meta)) {
+            attr(e, metadata) <- meta[[metadata]][n]
+        }
+        e
+    }, list(i, j), MoreArgs = NULL)
 }
 
 

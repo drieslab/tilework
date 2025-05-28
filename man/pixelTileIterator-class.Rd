@@ -23,10 +23,6 @@ ymin, and ymax of the tile.}
 \item{\code{metadata}}{data.frame. Metadata per tile}
 
 \item{\code{pxdims}}{pixel dimensions to iterate across}
-
-\item{\code{ncols}}{number of pixel columns per tile}
-
-\item{\code{nrows}}{number of pixel rows per tile}
 }}
 
 \section{Getting tile pixel indices}{
@@ -56,8 +52,9 @@ The \code{pixelTileIterator} object can contain metadata. By default after exten
 tiles setup, a column called \code{"tile"} will be set up that simply records
 which tile it is.
 \itemize{
-\item \code{$} can be used to view a specific type of metadata
-\item \verb{$<-} can be used to set additional metadata items
+\item \code{$} and \verb{$<-} can be used to get and set specific metadata, the \code{"pxdims"}
+which are the pixel dimensions of the image to iterate across, \code{"ncols"}
+and \code{"nrows"} which are the px dims of a tile, and the \code{"buffer"} value.
 \item \verb{[[i]]} selection will pull specific metadata rows corresponding to the
 selected tiles.
 }
@@ -78,19 +75,17 @@ plot(x)
 
 # tile padding
 y <- x + 3
-plot(y, alpha = 0.3)
-rect(0, -100, 100, 0, border = "red")
+plot(y, alpha = 0.3) # red border shows the image space
 # this is now larger than the original space.
 
 # negative buffer
 z <- x - 5
 plot(ext(c(0, 100, -100, 0)))
-rect(0, -100, 100, 0, border = "red")
 plot(z, add = TRUE)
 
 # tile selection
 x[5]
-x[1, 2:3]
+x[2, 2:3]
 
 # metadata
 x$tile
