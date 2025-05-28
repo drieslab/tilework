@@ -77,7 +77,7 @@ for applying across affine transformed images is still under development.
 
 \examples{
 f <- system.file("ex/elev.tif", package="terra")
-r <- rast(f)
+r <- terra::rast(f)
 ti <- tileIterator()
 ext(ti) <- ext(r)
 length(ti) <- 4

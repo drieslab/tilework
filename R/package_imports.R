@@ -1,14 +1,12 @@
 # All @import tags for GiottoTile should be declared in this dummy documentation #
 
 #' @import GiottoUtils
-#' @importFrom methods new
-#' @importFrom methods show
-#' @importFrom methods initialize
-#' @importFrom methods slot slot<-
-#' @importFrom methods slotNames
-#' @importFrom methods setMethod setGeneric setClass
+#' @importFrom methods new show initialize signature
+#' @importFrom methods slot slot<- slotNames
+#' @importFrom methods setMethod getMethod callNextMethod setGeneric setClass
 #' @importMethodsFrom terra nrow ncol ext ext<- plot vect rast
 #' @importClassesFrom terra SpatExtent SpatVector SpatRaster
-#' @import utils
 #' @importFrom utils .DollarNames
+#' @importFrom graphics rect
+#' @importFrom grDevices hcl.colors
 NULL

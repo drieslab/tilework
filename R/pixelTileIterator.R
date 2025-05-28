@@ -124,6 +124,7 @@ setMethod("initialize", signature("pixelTileIterator"), function(.Object, ...) {
     .Object
 })
 
+#' @rdname dollar
 #' @export
 setMethod("$<-", signature("pixelTileIterator", "ANY"), function(x, name, value) {
     if (name == "pxdims") {
@@ -141,6 +142,7 @@ setMethod("$<-", signature("pixelTileIterator", "ANY"), function(x, name, value)
     callNextMethod()
 })
 
+#' @rdname dollar
 #' @export
 setMethod("$", signature("pixelTileIterator"), function(x, name) {
     if (name == "pxdims") return(x@pxdims)
@@ -149,6 +151,7 @@ setMethod("$", signature("pixelTileIterator"), function(x, name) {
     callNextMethod()
 })
 
+#' @rdname hidden_docs
 #' @export
 setMethod("show", signature("pixelTileIterator"), function(object) {
     cat("Object of class", class(object), "\n")
@@ -164,11 +167,13 @@ setMethod("show", signature("pixelTileIterator"), function(object) {
     GiottoUtils::print_list(plist)
 })
 
+#' @rdname bracket
 #' @export
 setMethod("[", signature(x = "pixelTileIterator", i = "numeric", j = "numeric", drop = "missing"), function(x, i, j, ...) {
     callNextMethod(x, i, j, tile_fun = .px_tile_bounds, fun = as.integer, zero = TRUE, ...)
 })
 
+#' @rdname arith
 #' @export
 setMethod("+", signature("pixelTileIterator", "numeric"), function(e1, e2) {
     checkmate::assert_integerish(e2)
@@ -176,6 +181,7 @@ setMethod("+", signature("pixelTileIterator", "numeric"), function(e1, e2) {
     e1
 })
 
+#' @rdname plot
 #' @export
 setMethod("plot", signature("pixelTileIterator", "missing"), function(x, ...) {
     parent_method <- getMethod("plot", signature("tileIterator", "missing"))

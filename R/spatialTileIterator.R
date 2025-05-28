@@ -142,6 +142,7 @@ setMethod("initialize", signature("spatialTileIterator"), \(.Object, ...) {
     return(.Object)
 })
 
+#' @rdname hidden_docs
 #' @export
 setMethod("show", signature("spatialTileIterator"), function(object) {
     cat("Object of class", class(object), "\n")
@@ -164,6 +165,7 @@ setMethod("show", signature("spatialTileIterator"), function(object) {
     print_list(plist)
 })
 
+#' @rdname dim
 #' @export
 setMethod("length<-", signature("spatialTileIterator"), function(x, value) {
     x@n <- value
@@ -184,6 +186,7 @@ setMethod("ext<-", signature("spatialTileIterator"), function(x, value) {
     return(initialize(x))
 })
 
+#' @rdname bracket
 #' @export
 setMethod("[", signature(x = "spatialTileIterator", i = "numeric", j = "numeric", drop = "missing"), function(x, i, j, ...) {
     callNextMethod(x, i, j, fun = ext, zero = FALSE, ...)
