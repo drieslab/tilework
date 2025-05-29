@@ -11,7 +11,6 @@
   FUN,
   ti,
   lyr = NULL,
-  cores = NA,
   future.seed = TRUE,
   log = FALSE,
   logpath = tempdir(),
@@ -25,7 +24,6 @@
   lyr = NULL,
   extend = TRUE,
   fill = NA,
-  cores = NA,
   future.seed = TRUE,
   log = FALSE,
   logpath = tempdir(),
@@ -48,8 +46,6 @@ bounds and attached metdata attributes.
 \item{ti}{\code{tileIterator} that defines the tiles to apply on.}
 
 \item{lyr}{numeric. Layer number(s) to use}
-
-\item{cores}{deprecated}
 
 \item{future.seed}{whether to set a seed when using \code{method = "future"}}
 
