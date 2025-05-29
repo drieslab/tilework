@@ -28,6 +28,8 @@
 NULL
 
 #' @rdname getTile
+#' @param ext `numeric` or `SpatExtent` (optional) Set an extent before extracting
+#' tiles.
 #' @export
 setMethod("getTile", signature("character", "pixelTileIterator"),
     function(x, ti, ext = NULL, ...) {

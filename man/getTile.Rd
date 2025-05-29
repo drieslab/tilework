@@ -15,6 +15,9 @@
 
 \item{ti}{\code{tileIterator}}
 
+\item{ext}{\code{numeric} or \code{SpatExtent} (optional) Set an extent before extracting
+tiles.}
+
 \item{i}{tile vector or row index if \code{j} is also provided}
 
 \item{j}{tile col index}
