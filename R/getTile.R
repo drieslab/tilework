@@ -17,21 +17,30 @@
 #' @returns `list` of tile data
 #' @examples
 #' f <- system.file("ex/elev.tif", package="terra")
-#' r <- terra::rast(f)
 #' ti <- tileIterator("pixel")
 #' ti$pxdims <- dim(r)[1:2]
 #' ti$nrows <- 10
 #' ti$ncols <- 10
 #'
-#' tile_list <- getTile(r, ti, 3, 5)
+#' tile_list <- getTile(f, ti, i = 3, j = 5)
 #' force(tile_list)
 #' plot(tile_list[[1]])
 NULL
 
 #' @rdname getTile
 #' @export
+setMethod("getTile", signature("character", "pixelTileIterator"),
+    function(x, ti, ext = NULL, ...) {
+    checkmate::assert_file_exists(x)
+    x <- .create_terra_spatraster(x)
+    if (!is.null(ext)) ext(x) <- ext
+    getTile(x, ti, ...)
+})
+
+#' @rdname getTile
+#' @export
 setMethod("getTile", signature("SpatRaster", "pixelTileIterator"),
-    function(x, ti, i = NULL, j = NULL, lyr = NULL, extend = FALSE, fill = NA) {
+    function(x, ti, i = NULL, j = NULL, lyr = NULL, extend = FALSE, fill = NA, ...) {
     checkmate::assert_integerish(i)
     checkmate::assert_integerish(j, null.ok = TRUE)
     checkmate::assert_integerish(lyr, null.ok = TRUE)

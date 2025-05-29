@@ -2,10 +2,13 @@
 % Please edit documentation in R/getTile.R
 \name{getTile}
 \alias{getTile}
+\alias{getTile,character,pixelTileIterator-method}
 \alias{getTile,SpatRaster,pixelTileIterator-method}
 \title{Get Tile}
 \usage{
-\S4method{getTile}{SpatRaster,pixelTileIterator}(x, ti, i = NULL, j = NULL, lyr = NULL, extend = FALSE, fill = NA)
+\S4method{getTile}{character,pixelTileIterator}(x, ti, ext = NULL, ...)
+
+\S4method{getTile}{SpatRaster,pixelTileIterator}(x, ti, i = NULL, j = NULL, lyr = NULL, extend = FALSE, fill = NA, ...)
 }
 \arguments{
 \item{x}{data}
@@ -31,13 +34,12 @@ Get a specific tile from the data.
 }
 \examples{
 f <- system.file("ex/elev.tif", package="terra")
-r <- terra::rast(f)
 ti <- tileIterator("pixel")
 ti$pxdims <- dim(r)[1:2]
 ti$nrows <- 10
 ti$ncols <- 10
 
-tile_list <- getTile(r, ti, 3, 5)
+tile_list <- getTile(f, ti, i = 3, j = 5)
 force(tile_list)
 plot(tile_list[[1]])
 }
