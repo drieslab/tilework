@@ -27,6 +27,8 @@
 #' plot(tile_list[[1]])
 NULL
 
+# TODO getTile methods for spatialTileIterator
+
 #' @rdname getTile
 #' @param ext `numeric` or `SpatExtent` (optional) Set an extent before extracting
 #' tiles.

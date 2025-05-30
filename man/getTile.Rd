@@ -8,7 +8,7 @@
 \usage{
 \S4method{getTile}{character,pixelTileIterator}(x, ti, ext = NULL, ...)
 
-\S4method{getTile}{SpatRaster,pixelTileIterator}(x, ti, i = NULL, j = NULL, lyr = NULL, extend = FALSE, fill = NA, ...)
+\S4method{getTile}{SpatRaster,pixelTileIterator}(x, ti, i = NULL, j, lyr = NULL, extend = FALSE, fill = NA, ...)
 }
 \arguments{
 \item{x}{data}

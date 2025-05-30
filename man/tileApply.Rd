@@ -4,6 +4,7 @@
 \alias{tileApply}
 \alias{tileApply,SpatRaster,missing,spatialTileIterator-method}
 \alias{tileApply,SpatRaster,missing,pixelTileIterator-method}
+\alias{tileApply,SpatRaster,missing,tileGroup-method}
 \title{Apply Across Spatial Tiles}
 \usage{
 \S4method{tileApply}{SpatRaster,missing,spatialTileIterator}(
@@ -27,6 +28,20 @@
   future.seed = TRUE,
   log = FALSE,
   logpath = tempdir(),
+  ...
+)
+
+\S4method{tileApply}{SpatRaster,missing,tileGroup}(
+  x,
+  FUN,
+  ti,
+  parallel_strategy = c("groups", "tiles"),
+  group_FUN = NULL,
+  lyr = NULL,
+  future.seed = TRUE,
+  log = FALSE,
+  logpath = tempdir(),
+  simplify = FALSE,
   ...
 )
 }
@@ -59,6 +74,13 @@ will be used.}
 \item{extend}{whether to \link[terra:extend]{terra::extend} data to fit expected tile dimensions}
 
 \item{fill}{numeric. Value to use use for new raster cells if \code{extend = TRUE}}
+
+\item{parallel_strategy}{character. \code{"groups"} to parallelize across groups,
+\code{"tiles"} to parallelize within groups}
+
+\item{group_FUN}{function. Optional function to apply to each group's results}
+
+\item{group_sequential}{logical. If TRUE, process groups sequentially}
 }
 \description{
 Apply a function across spatial tiles to both speed up processing and keep

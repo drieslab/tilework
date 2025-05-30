@@ -1,4 +1,8 @@
 #' @include generics.R
+#' @include tileIterator.R
+#' @include pixelTileIterator.R
+#' @include spatialTileIterator.R
+#' @include tileGroup.R
 
 #' @name tileApply
 #' @title Apply Across Spatial Tiles
@@ -124,7 +128,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
     future.seed = TRUE,
     log = FALSE,
     logpath = tempdir(),
-    ...) {
+    ...) { # TODO ensure this is only for other tileApply functionality, not future. make that a separate param list.
     checkmate::assert_function(FUN)
     checkmate::assert_integerish(lyr, null.ok = TRUE)
     checkmate::assert_logical(extend)
@@ -140,7 +144,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
     with_pbar({
         p <- pbar(along = ti)
 
-        lapply(seq_along(ti), function(i) {
+        lapply_flex(seq_along(ti), function(i) {
             ij <- .tile_idx_to_ij(ti, i)
             tile_id <- sprintf("[tile %d]", i)
             if (log) {
@@ -181,3 +185,240 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
         ...) # ti, logpath, log, f, e
     })
 })
+
+#' @rdname tileApply
+#' @param parallel_strategy character. `"groups"` to parallelize across groups,
+#'   `"tiles"` to parallelize within groups
+#' @param group_FUN function. Optional function to apply to each group's results
+#' @param group_sequential logical. If TRUE, process groups sequentially
+setMethod("tileApply", signature("SpatRaster", "missing", "tileGroup"),
+    function(x, FUN, ti,
+    parallel_strategy = c("groups", "tiles"),
+    group_FUN = NULL,
+    lyr = NULL,
+    future.seed = TRUE,
+    log = FALSE,
+    logpath = tempdir(),
+    simplify = FALSE,
+    ...) {
+    parallel_strategy <- match.arg(parallel_strategy, choices = c("groups", "tiles"))
+    checkmate::assert_function(FUN)
+    checkmate::assert_function(group_FUN, null.ok = TRUE)
+    checkmate::assert_integerish(lyr, null.ok = TRUE)
+    # validate file source
+    f <- terra::sources(x)
+    if (any(f == "")) {
+        stop(wrap_txt("[tileApply] no filepath found for image.
+                      Please first write to disk."),
+             call. = FALSE)
+    }
+    if (!is.null(lyr)) f <- f[lyr] # subset layers by source
+    e <- .ext_to_num_vec(ext(x))
+
+    switch(parallel_strategy,
+        "groups" = .tapp_par_groups(
+            tg = ti,
+            FUN = FUN,
+            group_FUN = group_FUN,
+            f = f,
+            e = e,
+            future.seed = future.seed,
+            log = log,
+            logpath = logpath,
+            simplify = simplify,
+            ...
+        ),
+        "tiles" = .tapp_seq_groups(
+            tg = ti,
+            FUN = FUN,
+            group_FUN = group_FUN,
+            f = f,
+            e = e,
+            future.seed = future.seed,
+            log = log,
+            logpath = logpath,
+            simplify = simplify,
+            ...
+        )
+    )
+})
+
+
+# helpers ####
+
+# par groups / seq tiles
+.tapp_par_groups <- function(tg, FUN, group_FUN, f, e, future.seed, log, logpath, simplify = FALSE, ...) {
+    ngroups <- length(tg)
+    with_pbar({
+        p <- pbar(steps = ngroups)
+        group_results <- lapply_flex(names(tg), function(group) {
+            # logging ---- #
+            if (log) {
+                vmsg(.v = "log", sprintf("[group %s] start", group),
+                     .log_path = logpath)
+            }
+            # logging ---- #
+            gres <- .process_seq_tile(tg, group, FUN, f, e, log, logpath, ...)
+
+            # Apply group function if provided
+            if (!is.null(group_FUN)) {
+                a <- list(gres)
+                nf <- names(formals(group_FUN))
+                if (".GROUP" %in% nf) a$.GROUP <- group
+                gres <- do.call(group_FUN, args = a)
+            }
+
+            # logging ---- #
+            if (log) {
+                vmsg(.v = "log", sprintf("[group %s] done", group),
+                     .log_path = logpath)
+            }
+            # logging ---- #
+
+            p(message = sprintf("[group %s] done", group))
+            return(gres)
+        }, future.seed = future.seed)
+
+        if (simplify) {
+            unlist(group_results, recursive = FALSE)
+        } else {
+            names(group_results) <- names(tg)
+        }
+
+        group_results
+    })
+}
+
+# seq groups / par tiles
+.tapp_seq_groups <- function(tg, FUN, group_FUN, f, e, future.seed, log, logpath, simplify = FALSE, ...) {
+    ngroups <- length(tg)
+    group_results <- vector("list", length = ngroups)
+    names(group_results) <- names(tg)
+
+    with_pbar({
+        p <- pbar(steps = ngroups)
+
+        for (group in names(tg)) {
+            # logging ---- #
+            if (log) {
+                vmsg(.v = "log", sprintf("[group %s] start", group),
+                     .log_path = logpath)
+            }
+            # logging ---- #
+
+            gres <- .process_par_tile(tg, group, FUN, f, e, log, logpath, ...)
+
+            # Apply group function if provided
+            if (!is.null(group_FUN)) {
+                a <- list(gres)
+                nf <- names(formals(group_FUN))
+                if (".GROUP" %in% nf) a$.GROUP <- group
+                gres <- do.call(group_FUN, args = a)
+            }
+            group_results[[group]] <- gres # append
+
+            # logging ---- #
+            if (log) {
+                vmsg(.v = "log", sprintf("[group %s] done", group),
+                     .log_path = logpath)
+            }
+            # logging ---- #
+
+            p(message = sprintf("[group %s] done", group))
+        }
+
+        if (simplify) {
+            unlist(group_results, recursive = FALSE)
+        }
+        return(group_results)
+    })
+}
+
+.process_par_tile <- function(tg, group, FUN, f, e, log, logpath, ...) {
+    blist <- tg[group]
+    lapply_flex(seq_along(blist), function(idx_pos) {
+        b <- blist[[idx_pos]]
+        # connect raster and add ext
+        r <- .create_terra_spatraster(f)
+        ext(r) <- e
+
+        tile_idx <- attr(b, "tile")
+        ij <- .tile_idx_to_ij(tg[], tile_idx)
+        tile_id <- sprintf("[group %s][tile %d]", group, tile_idx)
+
+        # logging ---- #
+        if (log) {
+            vmsg(.v = "log", sprintf("%s start (row %d, col %d)",
+                                     tile_id, ij[[1]], ij[[2]]),
+                 .log_path = logpath)
+        }
+        # logging ---- #
+
+        tile <- getTile(r, ti = tg[], i = tile_idx, ...)
+
+        # Prepare function arguments
+        a <- list(tile)
+        nf <- names(formals(FUN))
+        if (".I" %in% nf) a$.I <- tile_idx
+        if (".TILE" %in% nf) a$.TILE <- b
+        if (".R" %in% nf) a$.R <- ij[[1L]]
+        if (".C" %in% nf) a$.C <- ij[[2L]]
+        if (".GROUP" %in% nf) a$.GROUP <- group
+
+        # Apply function
+        results <- do.call(FUN, args = a)
+
+        # logging ---- #
+        if (log) {
+            vmsg(.v = "log", sprintf("%s done", tile_id), .log_path = logpath)
+        }
+        # logging ---- #
+        return(results)
+    }, future.seed = future.seed)
+}
+
+# group: group index (character name)
+.process_seq_tile <- function(tg, group, FUN, f, e, log, logpath, ...) {
+    # connect raster and add ext
+    r <- .create_terra_spatraster(f)
+    ext(r) <- e
+
+    blist <- tg[group]
+    results <- vector("list", length = blist)
+
+    for (idx_pos in seq_along(blist)) {
+        b <- blist[[idx_pos]]
+        tile_idx <- attr(b, "tile")
+        ij <- .tile_idx_to_ij(tg[], tile_idx)
+
+        # logging ---- #
+        tile_id <- sprintf("[group %s][tile %d]", group, tile_idx)
+        if (log) {
+            vmsg(.v = "log", sprintf("%s start (row %d, col %d)",
+                                     tile_id, ij[[1L]], ij[[2L]]),
+                 .log_path = logpath)
+        }
+        # logging ---- #
+
+        tile <- getTile(r, ti = tg[], i = tile_idx, ...)
+
+        # Prepare function arguments
+        a <- list(tile)
+        nf <- names(formals(FUN))
+        if (".I" %in% nf) a$.I <- tile_idx
+        if (".TILE" %in% nf) a$.TILE <- b
+        if (".R" %in% nf) a$.R <- ij[[1L]]
+        if (".C" %in% nf) a$.C <- ij[[2L]]
+        if (".GROUP" %in% nf) a$.GROUP <- group
+
+        # Apply function
+        results[[idx_pos]] <- do.call(FUN, args = a)
+
+        # logging ---- #
+        if (log) {
+            vmsg(.v = "log", sprintf("%s done", tile_id), .log_path = logpath)
+        }
+        # logging ---- #
+    }
+    results
+}

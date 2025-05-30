@@ -1,3 +1,6 @@
+
+setClassUnion(".index", c("numeric", "character", "logical", "integer"))
+
 #' @name tileIterator-class
 #' @title Tile Iterator
 #' @description
@@ -59,5 +62,23 @@ setClass(
     contains = "tileIterator",
     slots = list(
         pxdims = "numeric"
+    )
+)
+
+#' @name tileGroup-class
+#' @title Tile Group
+#' @description
+#' Class for organizing tiles into hierarchical groups for batch processing.
+#' Groups can represent spatial regions, processing stages, or any logical
+#' organization of tiles.
+#' @slot ti tileIterator. The underlying tile iterator
+#' @slot groups list. Named list where each element contains tile indices for that group
+#' @slot metadata data.frame. Metadata about each group
+#' @exportClass tileGroup
+setClass("tileGroup",
+    slots = list(
+        ti = "tileIterator",
+        groups = "list",
+        metadata = "data.frame"
     )
 )

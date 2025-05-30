@@ -41,5 +41,6 @@ Collate:
     'tileIterator.R'
     'pixelTileIterator.R'
     'spatialTileIterator.R'
+    'tileGroup.R'
     'tileApply.R'
     'utils.R'
