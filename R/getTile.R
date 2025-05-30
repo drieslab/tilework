@@ -42,37 +42,45 @@ setMethod("getTile", signature("character", "pixelTileIterator"),
 #' @rdname getTile
 #' @export
 setMethod("getTile", signature("SpatRaster", "pixelTileIterator"),
-    function(x, ti, i = NULL, j = NULL, lyr = NULL, extend = FALSE, fill = NA, ...) {
+    function(x, ti, i = NULL, j, lyr = NULL, extend = FALSE, fill = NA, ...) {
     checkmate::assert_integerish(i)
-    checkmate::assert_integerish(j, null.ok = TRUE)
     checkmate::assert_integerish(lyr, null.ok = TRUE)
     checkmate::assert_logical(extend)
     if (!is.null(lyr)) x <- x[[lyr]]
-    bounds_list <- ti[i, j]
+    if (missing(j)) bounds_list <- ti[i]
+    else bounds_list <- ti[i, j]
 
     lapply(bounds_list, function(b) {
-        # get px tile from x as r
-        r <- x[b[[3]]:min(nrow(x), b[[4]]), # rows (y)
-               b[[1]]:min(ncol(x), b[[2]]), # cols (x)
-               drop = FALSE]
-
-        # handle extend and masking
-        pad <- 2 * ti@buffer # since buffer is added on both sides
-        expected_dim <- c(ti@tile_dims[[1L]] + pad, ti@tile_dims[[2L]] + pad)
-        if (nrow(r) != expected_dim[[1L]] ||
-            ncol(r) != expected_dim[[2L]]) {
-            if (extend) {
-                bottom_rows <- expected_dim[[1L]] - nrow(r)
-                right_cols <- expected_dim[[2L]] - ncol(r)
-                r <- terra::extend(r,
-                    # left, right, bottom, top
-                    c(0, right_cols, bottom_rows, 0),
-                    fill = fill
-                )
-            }
-        }
-        r
+        .px_get_tile(x, ti, b, extend, fill)
     })
 })
 
+# helpers ####
 
+# Directly get a tile without the overhead
+# x: SpatRaster
+# ti: tileIterator
+# b: px bound indices
+.px_get_tile <- function(x, ti, b, extend = FALSE, fill = NA) {
+    # get px tile from x as r
+    r <- x[b[[3]]:min(nrow(x), b[[4]]), # rows (y)
+           b[[1]]:min(ncol(x), b[[2]]), # cols (x)
+           drop = FALSE]
+
+    # handle extend and masking
+    pad <- 2 * ti@buffer # since buffer is added on both sides
+    expected_dim <- c(ti@tile_dims[[1L]] + pad, ti@tile_dims[[2L]] + pad)
+    if (nrow(r) != expected_dim[[1L]] ||
+        ncol(r) != expected_dim[[2L]]) {
+        if (extend) {
+            bottom_rows <- expected_dim[[1L]] - nrow(r)
+            right_cols <- expected_dim[[2L]] - ncol(r)
+            r <- terra::extend(r,
+                # left, right, bottom, top
+                c(0, right_cols, bottom_rows, 0),
+                fill = fill
+            )
+        }
+    }
+    r
+}

@@ -1,6 +1,9 @@
 # GiottoTile
 
-A lightweight R package for efficient spatial and pixel-based tiling operations on large datasets (currently only raster). GiottoTile provides easy-to-use tile iterators that enable memory-efficient processing of spatial data through parallelizable tile-based operations.
+Open source and S4 extensible framework for efficient spatial and pixel-based tiling operations on large datasets (currently only raster).
+GiottoTile provides easy-to-use tile iterators that enable memory-efficient processing of spatial data through parallelizable tile-based operations.
+
+This package is part of the Giotto Suite ecosystem for spatial-omics analysis, although the only other Giotto Suite package it depends on is {GiottoUtils}.
 
 # Features
 
@@ -10,7 +13,7 @@ A lightweight R package for efficient spatial and pixel-based tiling operations 
 - Parallel Processing: Built-in support for parallel execution via the {future} framework
 - Flexible Buffering: Add padding around tiles to handle edge effects
 - Metadata Support: Attach custom metadata to tiles for advanced workflows
-- {terra} Integration: Seamless integration with the {terra} package for spatial data handling
+- Terra Integration: Seamless integration with the {terra} package for spatial data handling
 
 # Installation
 ```r

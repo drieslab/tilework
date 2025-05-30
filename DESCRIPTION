@@ -11,8 +11,8 @@ Authors@R: c(
 	person("Joselyn C.", "Chávez-Fuentes", email = "joselynchavezf@gmail.com",
 	     role = c("aut"), comment = c(ORCID = "0000-0002-4974-4591"))
 	)
-Description: Package for performing tile/patch-based processing and
-    analysis.
+Description: Open source and S4 extensible framework for performing 
+    tile/patch-based processing and analysis.
 License: MIT
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
