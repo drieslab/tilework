@@ -1,25 +1,25 @@
 
-test_that("spatialTileIterator can be created", {
-    spatTI <- tileIterator()
-    checkmate::expect_class(spatTI, "spatialTileIterator")
-    expect_true(inherits(spatTI, "tileIterator"))
+test_that("spatialTilePlan can be created", {
+    spatTI <- tilePlan()
+    checkmate::expect_class(spatTI, "spatialTilePlan")
+    expect_true(inherits(spatTI, "tilePlan"))
 })
 
-test_that("pixelTileIterator can be created", {
-    pixelTI <- tileIterator("pixel")
-    checkmate::expect_class(pixelTI, "pixelTileIterator")
-    expect_true(inherits(pixelTI, "tileIterator"))
+test_that("pixelTilePlan can be created", {
+    pixelTI <- tilePlan("pixel")
+    checkmate::expect_class(pixelTI, "pixelTilePlan")
+    expect_true(inherits(pixelTI, "tilePlan"))
 })
 
 test_that("ext works", {
-    x <- tileIterator()
+    x <- tilePlan()
     e <- c(0, 1000, 0, 1000)
     ext(x) <- e
     expect_identical(ext(x)[], ext(e)[])
 })
 
 test_that("pixel bound extraction works", {
-    px <- tileIterator("pixel")
+    px <- tilePlan("pixel")
     px$pxdims <- c(1000, 1000)
     px$ncols <- 100
     px$nrows <- 100
@@ -31,7 +31,7 @@ test_that("pixel bound extraction works", {
 })
 
 test_that("spat extent extraction works", {
-    spat <- tileIterator("spatial")
+    spat <- tilePlan("spatial")
     ext(spat) <- c(0, 1000, 0, 1000)
     length(spat) <- 20
 
@@ -44,8 +44,8 @@ test_that("spat extent extraction works", {
 test_that("buffer setting works", {
     b1 <- 3
     b2 <- 10
-    spat <- tileIterator("spatial")
-    pix <- tileIterator("pixel")
+    spat <- tilePlan("spatial")
+    pix <- tilePlan("pixel")
 
     spat <- spat + b1
     pix <- pix + b1
@@ -59,7 +59,7 @@ test_that("buffer setting works", {
 })
 
 test_that("buffer behaves correctly - spatial", {
-    a <- tileIterator("spatial")
+    a <- tilePlan("spatial")
     ext(a) <- c(0, 1000, 0, 1000)
     length(a) <- 20
     b <- a + 5
@@ -70,7 +70,7 @@ test_that("buffer behaves correctly - spatial", {
 })
 
 test_that("buffer behaves correctly - pixel", {
-    a <- tileIterator("pixel")
+    a <- tilePlan("pixel")
     a$pxdims <- c(1000, 1000)
     a$ncols <- 100
     a$nrows <- 100

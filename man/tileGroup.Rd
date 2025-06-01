@@ -4,27 +4,27 @@
 \alias{tileGroup}
 \title{Create a Tile Group}
 \usage{
-tileGroup(ti, groups = list())
+tileGroup(tp, groups = list())
 }
 \arguments{
-\item{ti}{A tileIterator object}
+\item{tp}{A tilePlan object}
 
 \item{groups}{Named list where each element contains tile indices for that group}
 
 \item{metadata}{Optional data.frame with group metadata}
 }
 \description{
-Organize tiles from a tileIterator into hierarchical groups for batch processing.
+Organize tiles from a tilePlan into hierarchical groups for batch processing.
 Groups can represent spatial regions, processing stages, or any logical
 organization of tiles.
 }
 \examples{
-ti <- tileIterator("spatial")
-ext(ti) <- c(0, 100, 0, 100)
-length(ti) <- 9
+tp <- tilePlan("spatial")
+ext(tp) <- c(0, 100, 0, 100)
+length(tp) <- 9
 
 # Create groups
-tg <- tileGroup(ti, groups = list(
+tg <- tileGroup(tp, groups = list(
   "top" = 1:3,
   "middle" = 4:6,
   "bottom" = 7:9

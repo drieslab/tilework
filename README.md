@@ -32,16 +32,16 @@ f <- system.file("ex/elev.tif", package = "terra")
 r <- rast(f)
 
 # Create a spatial tile iterator
-ti <- tileIterator("spatial")
-ext(ti) <- ext(r)          # Set spatial extent
-length(ti) <- 16           # Request 16 tiles (actual number may be higher)
+tp <- tilePlan("spatial")
+ext(tp) <- ext(r)          # Set spatial extent
+length(tp) <- 16           # Request 16 tiles (actual number may be higher)
 
 # Check tile layout
-plot(ti)
+plot(tp)
 
 # Apply a function across tiles
 outdir <- tempdir()
-tileApply(r, ti = ti, FUN = function(x, .I) {
+tileApply(r, tp = tp, FUN = function(x, .I) {
     writeRaster(x, file.path(outdir, sprintf("tile_%03d.tif", .I)))
 })
 ```
@@ -50,7 +50,7 @@ tileApply(r, ti = ti, FUN = function(x, .I) {
 
 ```r
 # Create a pixel-based tile iterator
-pti <- tileIterator("pixel")
+pti <- tilePlan("pixel")
 pti$pxdims <- c(500, 500)  # 500x500 pixel raster
 pti$ncols <- 100           # 100 pixel tiles
 pti$nrows <- 100           # 100 pixel tiles
@@ -60,7 +60,7 @@ dim(pti)     # Grid dimensions
 length(pti)  # Total number of tiles
 
 # Apply processing with pixel tiles
-tileApply(r, ti = pti, FUN = function(x) {
+tileApply(r, tp = pti, FUN = function(x) {
     # Process each 100x100 pixel tile
     mean(values(x), na.rm = TRUE)
 })
@@ -68,7 +68,7 @@ tileApply(r, ti = pti, FUN = function(x) {
 
 # Core Classes
 
-`tileIterator`
+`tilePlan`
 
 Virtual base class for all tile iterators with common functionality:
 
@@ -77,7 +77,7 @@ Virtual base class for all tile iterators with common functionality:
 - Metadata management with `$` accessor
 - Plotting capabilities
 
-`spatialTileIterator`
+`spatialTilePlan`
 
 For spatial extent-based tiling:
 
@@ -86,13 +86,13 @@ For spatial extent-based tiling:
 - {terra} `SpatExtent` integration
 
 ```r
-ti <- tileIterator("spatial")
-ext(ti) <- c(0, 100, 0, 100)  # xmin, xmax, ymin, ymax
-length(ti) <- 9               # Request 9 tiles
-dim(ti)                       # Returns [3, 3] - actual grid layout
+tp <- tilePlan("spatial")
+ext(tp) <- c(0, 100, 0, 100)  # xmin, xmax, ymin, ymax
+length(tp) <- 9               # Request 9 tiles
+dim(tp)                       # Returns [3, 3] - actual grid layout
 ```
 
-`pixelTileIterator`
+`pixelTilePlan`
 
 For pixel-exact tiling:
 
@@ -101,7 +101,7 @@ For pixel-exact tiling:
 - Ideal for image processing workflows
 
 ```r
-pti <- tileIterator("pixel")
+pti <- tilePlan("pixel")
 pti$pxdims <- c(1000, 1000)  # Total image dimensions
 pti$ncols <- 250             # Pixels per tile (width)
 pti$nrows <- 250             # Pixels per tile (height)
@@ -114,10 +114,10 @@ pti$nrows <- 250             # Pixels per tile (height)
 Add padding around tiles to handle edge effects:
 ```r
 # Add 10-unit buffer to all tiles
-buffered_ti <- ti + 10
+buffered_ti <- tp + 10
 
 # Remove 5-unit buffer
-reduced_ti <- ti - 5
+reduced_ti <- tp - 5
 
 # Preview buffered tiles
 plot(buffered_ti, alpha = 0.3)
@@ -129,15 +129,15 @@ Attach custom metadata to tiles:
 
 ```r
 # Add metadata
-ti$processing_priority <- sample(1:3, length(ti), replace = TRUE)
-ti$output_format <- "GTiff"
+tp$processing_priority <- sample(1:3, length(tp), replace = TRUE)
+tp$output_format <- "GTiff"
 
 # Access metadata
-ti$processing_priority
-ti[[5]]  # Metadata for tile 5
+tp$processing_priority
+tp[[5]]  # Metadata for tile 5
 
 # Metadata is preserved during tile selection
-tile_data <- ti[5]
+tile_data <- tp[5]
 attr(tile_data[[1]], "processing_priority")
 ```
 
@@ -150,7 +150,7 @@ library(future)
 plan(multisession, workers = 4)
 
 # Parallel tile processing
-results <- tileApply(r, ti = ti, 
+results <- tileApply(r, tp = tp, 
     cores = 4,
     FUN = function(x) {
         # Your processing function
@@ -164,16 +164,16 @@ Multiple ways to access tiles:
 
 ```r
 # Single tile by index
-tile_5 <- ti[5]
+tile_5 <- tp[5]
 
 # Multiple tiles
-tiles_1_to_3 <- ti[1:3]
+tiles_1_to_3 <- tp[1:3]
 
 # Grid-based selection (row, column)
-corner_tiles <- ti[1, c(1, ncol(ti))]
+corner_tiles <- tp[1, c(1, ncol(tp))]
 
 # All tiles
-all_tiles <- ti[]
+all_tiles <- tp[]
 ```
 
 # Examples
@@ -184,17 +184,17 @@ Processing Large Satellite Images
 large_raster <- rast("large_satellite_image.tif")
 
 # Create efficient tiling scheme
-ti <- tileIterator("spatial")
-ext(ti) <- ext(large_raster)
-length(ti) <- 100  # 100+ tiles for manageable processing
+tp <- tilePlan("spatial")
+ext(tp) <- ext(large_raster)
+length(tp) <- 100  # 100+ tiles for manageable processing
 
 # Add buffer for edge effects
-ti <- ti + 50  # 50-unit buffer
+tp <- tp + 50  # 50-unit buffer
 
 # Process tiles in parallel
 plan(multisession, workers = 8)
 
-results <- tileApply(large_raster, ti = ti,
+results <- tileApply(large_raster, tp = tp,
                     cores = 8,
                     FUN = function(x, .I) {
                         # Apply NDVI calculation
@@ -217,13 +217,13 @@ results <- tileApply(large_raster, ti = ti,
 image <- rast("high_res_image.tif")
 
 # Create pixel-exact tiles
-pti <- tileIterator("pixel")
+pti <- tilePlan("pixel")
 pti$pxdims <- c(nrow(image), ncol(image))
 pti$ncols <- 512    # 512x512 pixel tiles
 pti$nrows <- 512
 
 # Process each tile
-texture_metrics <- tileApply(image, ti = pti,
+texture_metrics <- tileApply(image, tp = pti,
                            FUN = function(x) {
                                # Calculate texture metrics
                                vals <- values(x)

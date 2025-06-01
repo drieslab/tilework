@@ -1,10 +1,10 @@
 #' @include package_imports.R
 #' @include classes.R
-#' @include tileIterator.R
+#' @include tilePlan.R
 
 #' @title Pixel Tile Iterator
-#' @name pixelTileIterator-class
-#' @aliases pixelTileIterator
+#' @name pixelTilePlan-class
+#' @aliases pixelTilePlan
 #' @description
 #' Utility class for defining pixel-exact tiles of images in a format that is
 #' easy to setup and manipulate using `$` and `$<-` generics.
@@ -25,7 +25,7 @@
 #' `plot()` can be used to check the layout of the tiles.
 #'
 #' @section metadata:
-#' The `pixelTileIterator` object can contain metadata. By default after extent and
+#' The `pixelTilePlan` object can contain metadata. By default after extent and
 #' tiles setup, a column called `"tile"` will be set up that simply records
 #' which tile it is.
 #'
@@ -35,7 +35,7 @@
 #' * `[[i]]` selection will pull specific metadata rows corresponding to the
 #' selected tiles.
 #' @examples
-#' x <- tileIterator("pixel")
+#' x <- tilePlan("pixel")
 #' x$pxdims <- c(100, 100) # 100 px rows x 100 px cols to iterate across
 #' x$ncols <- 20 # 20 px
 #'
@@ -68,7 +68,7 @@
 #' x[[1:3]]$fname
 NULL
 
-setMethod("initialize", signature("pixelTileIterator"), function(.Object, ...) {
+setMethod("initialize", signature("pixelTilePlan"), function(.Object, ...) {
     dots <- list(...)
 
     # direct assignments
@@ -126,7 +126,7 @@ setMethod("initialize", signature("pixelTileIterator"), function(.Object, ...) {
 
 #' @rdname dollar
 #' @export
-setMethod("$<-", signature("pixelTileIterator", "ANY"), function(x, name, value) {
+setMethod("$<-", signature("pixelTilePlan", "ANY"), function(x, name, value) {
     if (name == "pxdims") {
         x@pxdims <- value
         return(initialize(x))
@@ -144,7 +144,7 @@ setMethod("$<-", signature("pixelTileIterator", "ANY"), function(x, name, value)
 
 #' @rdname dollar
 #' @export
-setMethod("$", signature("pixelTileIterator"), function(x, name) {
+setMethod("$", signature("pixelTilePlan"), function(x, name) {
     if (name == "pxdims") return(x@pxdims)
     if (name == "ncols") return(x@tile_dims[[2L]])
     if (name == "nrows") return(x@tile_dims[[1L]])
@@ -153,7 +153,7 @@ setMethod("$", signature("pixelTileIterator"), function(x, name) {
 
 #' @rdname hidden_docs
 #' @export
-setMethod("show", signature("pixelTileIterator"), function(object) {
+setMethod("show", signature("pixelTilePlan"), function(object) {
     cat("Object of class", class(object), "\n")
 
     plist <- list(
@@ -169,13 +169,13 @@ setMethod("show", signature("pixelTileIterator"), function(object) {
 
 #' @rdname bracket
 #' @export
-setMethod("[", signature(x = "pixelTileIterator", i = "numeric", j = "numeric", drop = "missing"), function(x, i, j, ...) {
+setMethod("[", signature(x = "pixelTilePlan", i = "numeric", j = "numeric", drop = "missing"), function(x, i, j, ...) {
     callNextMethod(x, i, j, tile_fun = .px_tile_bounds, fun = as.integer, zero = TRUE, ...)
 })
 
 #' @rdname arith
 #' @export
-setMethod("+", signature("pixelTileIterator", "numeric"), function(e1, e2) {
+setMethod("+", signature("pixelTilePlan", "numeric"), function(e1, e2) {
     checkmate::assert_integerish(e2)
     e1@buffer <- e1@buffer + e2
     e1
@@ -183,8 +183,8 @@ setMethod("+", signature("pixelTileIterator", "numeric"), function(e1, e2) {
 
 #' @rdname plot
 #' @export
-setMethod("plot", signature("pixelTileIterator", "missing"), function(x, ...) {
-    parent_method <- getMethod("plot", signature("tileIterator", "missing"))
+setMethod("plot", signature("pixelTilePlan", "missing"), function(x, ...) {
+    parent_method <- getMethod("plot", signature("tilePlan", "missing"))
     parent_method(x = x, flip = TRUE, ...)
     rect(0, -x@pxdims[[1L]], x@pxdims[[2]], 0, border = "red")
 })
@@ -193,11 +193,11 @@ setMethod("plot", signature("pixelTileIterator", "missing"), function(x, ...) {
 # helpers ####
 
 #' @export
-.DollarNames.pixelTileIterator <- function(x, pattern) {
+.DollarNames.pixelTilePlan <- function(x, pattern) {
     c(colnames(x@metadata), "ncols", "nrows", "pxdims", "buffer")
 }
 
-# x: tileIterator or matrix-like
+# x: tilePlan or matrix-like
 # i: row index
 # j: col index
 .px_tile_bounds <- function(x, i, j) {

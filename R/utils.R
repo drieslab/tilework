@@ -14,7 +14,7 @@
     out
 }
 
-# x: tileIterator or matrix-like
+# x: tilePlan or matrix-like
 # i: index
 # returns: i and j as a list of row then col indices.
 .tile_idx_to_ij <- function(x, i) {
@@ -26,7 +26,7 @@
     list(i_idx, j_idx)
 }
 
-# x: tileIterator or matrix-like
+# x: tilePlan or matrix-like
 # i: row index
 # j: col index
 # returns: tile index as a numeric

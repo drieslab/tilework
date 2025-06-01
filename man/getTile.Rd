@@ -2,18 +2,18 @@
 % Please edit documentation in R/getTile.R
 \name{getTile}
 \alias{getTile}
-\alias{getTile,character,pixelTileIterator-method}
-\alias{getTile,SpatRaster,pixelTileIterator-method}
+\alias{getTile,character,pixelTilePlan-method}
+\alias{getTile,SpatRaster,pixelTilePlan-method}
 \title{Get Tile}
 \usage{
-\S4method{getTile}{character,pixelTileIterator}(x, ti, ext = NULL, ...)
+\S4method{getTile}{character,pixelTilePlan}(x, tp, ext = NULL, ...)
 
-\S4method{getTile}{SpatRaster,pixelTileIterator}(x, ti, i = NULL, j, lyr = NULL, extend = FALSE, fill = NA, ...)
+\S4method{getTile}{SpatRaster,pixelTilePlan}(x, tp, i = NULL, j, lyr = NULL, extend = FALSE, fill = NA, ...)
 }
 \arguments{
 \item{x}{data}
 
-\item{ti}{\code{tileIterator}}
+\item{tp}{\code{tilePlan}}
 
 \item{ext}{\code{numeric} or \code{SpatExtent} (optional) Set an extent before extracting
 tiles.}
@@ -37,12 +37,12 @@ Get a specific tile from the data.
 }
 \examples{
 f <- system.file("ex/elev.tif", package="terra")
-ti <- tileIterator("pixel")
-ti$pxdims <- dim(r)[1:2]
-ti$nrows <- 10
-ti$ncols <- 10
+tp <- tilePlan("pixel")
+tp$pxdims <- dim(r)[1:2]
+tp$nrows <- 10
+tp$ncols <- 10
 
-tile_list <- getTile(f, ti, i = 3, j = 5)
+tile_list <- getTile(f, tp, i = 3, j = 5)
 force(tile_list)
 plot(tile_list[[1]])
 }

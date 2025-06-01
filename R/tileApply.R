@@ -1,7 +1,7 @@
 #' @include generics.R
-#' @include tileIterator.R
-#' @include pixelTileIterator.R
-#' @include spatialTileIterator.R
+#' @include tilePlan.R
+#' @include pixelTilePlan.R
+#' @include spatialTilePlan.R
 #' @include tileGroup.R
 
 #' @name tileApply
@@ -20,11 +20,11 @@
 #' `SpatRaster` object. Additional special parameters can be optionally included.
 #'
 #' * `.I` can be used as the tile number.
-#' * `.TILE` is the tileIterator output for that `.I`. It will include the
+#' * `.TILE` is the tilePlan output for that `.I`. It will include the
 #' bounds and attached metdata attributes.
 #' * `.R` is the tile row number
 #' * `.C` is the tile col number.
-#' @param ti `tileIterator` that defines the tiles to apply on.
+#' @param tp `tilePlan` that defines the tiles to apply on.
 #' @param lyr numeric. Layer number(s) to use
 #' @param log logical. Whether to log processing steps to file.
 #' @param logpath filepath. Filepath to log to. Otherwise, a temporary file
@@ -35,14 +35,14 @@
 #' @examples
 #' f <- system.file("ex/elev.tif", package="terra")
 #' r <- terra::rast(f)
-#' ti <- tileIterator()
-#' ext(ti) <- ext(r)
-#' length(ti) <- 4
+#' tp <- tilePlan()
+#' ext(tp) <- ext(r)
+#' length(tp) <- 4
 #'
 #' outdir <- file.path(tempdir(), "testwrite")
 #' dir.create(outdir)
 #'
-#' tileApply(r, ti = ti, lyr = 1, FUN = function(x, .I) {
+#' tileApply(r, tp = tp, lyr = 1, FUN = function(x, .I) {
 #'     terra::writeRaster(x,
 #'         filename = file.path(outdir, sprintf("tile_%03d.tif", .I)))
 #' })
@@ -58,7 +58,7 @@ NULL
 
 #' @rdname tileApply
 #' @export
-setMethod("tileApply", signature("SpatRaster", "missing", "spatialTileIterator"), function(x, FUN, ti,
+setMethod("tileApply", signature("SpatRaster", "missing", "spatialTilePlan"), function(x, FUN, tp,
     lyr = NULL,
     future.seed = TRUE,
     log = FALSE,
@@ -76,10 +76,10 @@ setMethod("tileApply", signature("SpatRaster", "missing", "spatialTileIterator")
     e <- .ext_to_num_vec(ext(x))
 
     with_pbar({
-        p <- pbar(along = ti)
+        p <- pbar(along = tp)
 
-        lapply_flex(seq_along(ti), function(i) {
-            ij <- .tile_idx_to_ij(ti, i)
+        lapply_flex(seq_along(tp), function(i) {
+            ij <- .tile_idx_to_ij(tp, i)
             tile_id <- sprintf("[tile %d]", i)
             if (log) {
                 vmsg(.v = "log", sprintf("%s start (row %d, col %d)", tile_id, ij[[1]], ij[[2]]), .log_path = logpath)
@@ -88,11 +88,11 @@ setMethod("tileApply", signature("SpatRaster", "missing", "spatialTileIterator")
 
             r <- .create_terra_spatraster(f)
             ext(r) <- e
-            tile_ext <- ti[i][[1L]]
+            tile_ext <- tp[i][[1L]]
 
             if (log) {
                 vmsg(.v = "log", tile_id, "extent:", .ext_to_num_vec(tile_ext), .log_path = logpath)
-                vmsg(.v = "log", tile_id, "buffer:", ti@buffer, .log_path = logpath)
+                vmsg(.v = "log", tile_id, "buffer:", tp@buffer, .log_path = logpath)
             }
 
             if (!is.null(lyr)) {
@@ -121,7 +121,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "spatialTileIterator")
 #' @param extend whether to [terra::extend] data to fit expected tile dimensions
 #' @param fill numeric. Value to use use for new raster cells if `extend = TRUE`
 #' @export
-setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), function(x, FUN, ti,
+setMethod("tileApply", signature("SpatRaster", "missing", "pixelTilePlan"), function(x, FUN, tp,
     lyr = NULL,
     extend = TRUE,
     fill = NA,
@@ -142,10 +142,10 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
     e <- .ext_to_num_vec(ext(x))
 
     with_pbar({
-        p <- pbar(along = ti)
+        p <- pbar(along = tp)
 
-        lapply_flex(seq_along(ti), function(i) {
-            ij <- .tile_idx_to_ij(ti, i)
+        lapply_flex(seq_along(tp), function(i) {
+            ij <- .tile_idx_to_ij(tp, i)
             tile_id <- sprintf("[tile %d]", i)
             if (log) {
                 vmsg(.v = "log", sprintf("%s start (row %d, col %d)", tile_id, ij[[1]], ij[[2]]), .log_path = logpath)
@@ -154,11 +154,11 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
 
             r <- .create_terra_spatraster(f)
             ext(r) <- e
-            pxb <- ti[i][[1L]]
+            pxb <- tp[i][[1L]]
 
             if (log) {
                 vmsg(.v = "log", tile_id, "px bounds:", pxb, .log_path = logpath)
-                vmsg(.v = "log", tile_id, "buffer:", ti@buffer, .log_path = logpath)
+                vmsg(.v = "log", tile_id, "buffer:", tp@buffer, .log_path = logpath)
             }
 
             if (!is.null(lyr)) { # layer selection
@@ -166,7 +166,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
             }
             # get px tile
             r <- .px_get_tile(
-                x = r, ti = ti, b = pxb, extend = extend, fill = fill
+                x = r, tp = tp, b = pxb, extend = extend, fill = fill
             )
 
             # special args
@@ -182,7 +182,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
             p(message = sprintf("[tile %d] done", i))
             return(res)
         },
-        ...) # ti, logpath, log, f, e
+        ...) # tp, logpath, log, f, e
     })
 })
 
@@ -192,7 +192,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTileIterator"), 
 #' @param group_FUN function. Optional function to apply to each group's results
 #' @param group_sequential logical. If TRUE, process groups sequentially
 setMethod("tileApply", signature("SpatRaster", "missing", "tileGroup"),
-    function(x, FUN, ti,
+    function(x, FUN, tp,
     parallel_strategy = c("groups", "tiles"),
     group_FUN = NULL,
     lyr = NULL,
@@ -217,7 +217,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileGroup"),
 
     switch(parallel_strategy,
         "groups" = .tapp_par_groups(
-            tg = ti,
+            tg = tp,
             FUN = FUN,
             group_FUN = group_FUN,
             f = f,
@@ -229,7 +229,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileGroup"),
             ...
         ),
         "tiles" = .tapp_seq_groups(
-            tg = ti,
+            tg = tp,
             FUN = FUN,
             group_FUN = group_FUN,
             f = f,
@@ -354,7 +354,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileGroup"),
         }
         # logging ---- #
 
-        tile <- getTile(r, ti = tg[], i = tile_idx, ...)
+        tile <- getTile(r, tp = tg[], i = tile_idx, ...)
 
         # Prepare function arguments
         a <- list(tile)
@@ -400,7 +400,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileGroup"),
         }
         # logging ---- #
 
-        tile <- getTile(r, ti = tg[], i = tile_idx, ...)
+        tile <- getTile(r, tp = tg[], i = tile_idx, ...)
 
         # Prepare function arguments
         a <- list(tile)

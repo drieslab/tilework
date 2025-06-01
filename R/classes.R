@@ -1,7 +1,7 @@
 
 setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 
-#' @name tileIterator-class
+#' @name tilePlan-class
 #' @title Tile Iterator
 #' @description
 #' Virtual parent class for tile iterator objects. These objects are for demarcating
@@ -14,12 +14,12 @@ setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 #' @slot tile_dims numeric. Row/col dimensions of each tile
 #' @slot buffer numeric. Tile padding/buffering
 #' @slot metadata data.frame. Metadata per tile
-#' @exportClass tileIterator
-#' @seealso [spatialTileIterator-class] and [pixelTileIterator-class] for
+#' @exportClass tilePlan
+#' @seealso [spatialTilePlan-class] and [pixelTilePlan-class] for
 #' concrete classes dealing with spatial and pixel-exact tiling respectively.
-#' [tileIterator()] for creation of these objects.
+#' [tilePlan()] for creation of these objects.
 setClass(
-    "tileIterator",
+    "tilePlan",
     contains = "VIRTUAL",
     slots = list(
         n = "numeric",
@@ -33,33 +33,33 @@ setClass(
     )
 )
 
-#' @rdname spatialTileIterator-class
+#' @rdname spatialTilePlan-class
 #' @slot extent numeric. Spatial extent to tile across.
 #' @slot n numeric. Number of tiles to create.
 #' @slot dims numeric. Number of rows/cols in the array of tiles
 #' @slot tile_dims numeric. Row/col dimensions of each tile
 #' @slot buffer numeric. Tile padding/buffering
 #' @slot metadata data.frame. Metadata per tile
-#' @exportClass spatialTileIterator
+#' @exportClass spatialTilePlan
 setClass(
-    "spatialTileIterator",
-    contains = "tileIterator",
+    "spatialTilePlan",
+    contains = "tilePlan",
     slots = list(
         extent = "numeric"
     )
 )
 
-#' @rdname pixelTileIterator-class
+#' @rdname pixelTilePlan-class
 #' @slot pxdims pixel dimensions to iterate across
 #' @slot n numeric. Number of tiles to create.
 #' @slot dims numeric. Number of rows/cols in the array of tiles
 #' @slot tile_dims numeric. Row/col dimensions of each tile
 #' @slot buffer numeric. Tile padding/buffering
 #' @slot metadata data.frame. Metadata per tile
-#' @exportClass pixelTileIterator
+#' @exportClass pixelTilePlan
 setClass(
-    "pixelTileIterator",
-    contains = "tileIterator",
+    "pixelTilePlan",
+    contains = "tilePlan",
     slots = list(
         pxdims = "numeric"
     )
@@ -71,14 +71,21 @@ setClass(
 #' Class for organizing tiles into hierarchical groups for batch processing.
 #' Groups can represent spatial regions, processing stages, or any logical
 #' organization of tiles.
-#' @slot ti tileIterator. The underlying tile iterator
+#' @slot tp tilePlan. The underlying tile iterator
 #' @slot groups list. Named list where each element contains tile indices for that group
 #' @slot metadata data.frame. Metadata about each group
 #' @exportClass tileGroup
 setClass("tileGroup",
     slots = list(
-        ti = "tileIterator",
+        tp = "tilePlan",
         groups = "list",
         metadata = "data.frame"
     )
 )
+
+setClass("tileIterator",
+    slots = list(
+        funs = "list"
+    )
+)
+

@@ -1,22 +1,22 @@
 #' @include package_imports.R
 #' @include classes.R
-#' @include tileIterator.R
+#' @include tilePlan.R
 
-# spatialTileIterator ####
+# spatialTilePlan ####
 # * docs ####
-#' @name spatialTileIterator-class
+#' @name spatialTilePlan-class
 #' @title Spatial Tile Iterator
-#' @aliases spatialTileIterator
+#' @aliases spatialTilePlan
 #' @description
 #' Utility class that simplifies the setup of tiles across a spatial extent.
 #' Tiles are stored in a lightweight format safe to be passed to child
 #' processes. Tile `SpatExtent` objects can be extracted on-demand.
 #'
 #' @section setup and basic characteristics:
-#' A `spatialTileIterator` needs both a spatial extent to tile across and also a
+#' A `spatialTilePlan` needs both a spatial extent to tile across and also a
 #' request for a certain number of tiles.
 #'
-#' * `spatialTileIterator()` is used to create a `spatialTileIterator` instance.
+#' * `spatialTilePlan()` is used to create a `spatialTilePlan` instance.
 #' * `ext()<-` can be used to set up the spatial extent.
 #' * `ext()` is used to check extent.
 #' * `length()<-` is used to request a number of tiles.
@@ -47,7 +47,7 @@
 #' `plot()` can be used to check the layout of the tiles.
 #'
 #' @section metadata:
-#' The `spatialTileIterator` object can contain metadata. By default after extent and
+#' The `spatialTilePlan` object can contain metadata. By default after extent and
 #' tiles setup, a column called `"tile"` will be set up that simply records
 #' which tile it is.
 #'
@@ -57,7 +57,7 @@
 #' selected tiles.
 #'
 #' @examples
-#' x <- tileIterator()
+#' x <- tilePlan()
 #' force(x)
 #' ext(x) <- c(0, 100, 0, 100)
 #' length(x) <- 8 # generated tiles will be AT LEAST this value
@@ -102,7 +102,7 @@
 NULL
 
 
-setMethod("initialize", signature("spatialTileIterator"), \(.Object, ...) {
+setMethod("initialize", signature("spatialTilePlan"), \(.Object, ...) {
     .Object <- callNextMethod(.Object, ...)
 
     # initialize n tiles
@@ -119,7 +119,7 @@ setMethod("initialize", signature("spatialTileIterator"), \(.Object, ...) {
 
     # check extent validity
     if (length(.Object@extent) != 4L) {
-        stop("spatialTileIterator: invalid extent information", call. = FALSE)
+        stop("spatialTilePlan: invalid extent information", call. = FALSE)
     }
 
     # return early if n tiles = 0
@@ -144,7 +144,7 @@ setMethod("initialize", signature("spatialTileIterator"), \(.Object, ...) {
 
 #' @rdname hidden_docs
 #' @export
-setMethod("show", signature("spatialTileIterator"), function(object) {
+setMethod("show", signature("spatialTilePlan"), function(object) {
     cat("Object of class", class(object), "\n")
 
     # no extent, return early
@@ -167,30 +167,30 @@ setMethod("show", signature("spatialTileIterator"), function(object) {
 
 #' @rdname dim
 #' @export
-setMethod("length<-", signature("spatialTileIterator"), function(x, value) {
+setMethod("length<-", signature("spatialTilePlan"), function(x, value) {
     x@n <- value
     return(initialize(x))
 })
 
 #' @rdname ext
 #' @export
-setMethod("ext", signature("spatialTileIterator"), function(x, ...) {
+setMethod("ext", signature("spatialTilePlan"), function(x, ...) {
     if (length(x@extent) == 0L) {
-        stop("spatialTileIterator: No extent set", call. = FALSE)
+        stop("spatialTilePlan: No extent set", call. = FALSE)
     }
     ext(x@extent, ...)
 })
 
 #' @rdname ext
 #' @export
-setMethod("ext<-", signature("spatialTileIterator"), function(x, value) {
+setMethod("ext<-", signature("spatialTilePlan"), function(x, value) {
     x@extent <- .ext_to_num_vec(ext(value))
     return(initialize(x))
 })
 
 #' @rdname bracket
 #' @export
-setMethod("[", signature(x = "spatialTileIterator", i = "numeric", j = "numeric", drop = "missing"), function(x, i, j, ...) {
+setMethod("[", signature(x = "spatialTilePlan", i = "numeric", j = "numeric", drop = "missing"), function(x, i, j, ...) {
     callNextMethod(x, i, j, fun = ext, zero = FALSE, ...)
 })
 

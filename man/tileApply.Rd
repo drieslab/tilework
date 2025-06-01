@@ -2,15 +2,15 @@
 % Please edit documentation in R/tileApply.R
 \name{tileApply}
 \alias{tileApply}
-\alias{tileApply,SpatRaster,missing,spatialTileIterator-method}
-\alias{tileApply,SpatRaster,missing,pixelTileIterator-method}
+\alias{tileApply,SpatRaster,missing,spatialTilePlan-method}
+\alias{tileApply,SpatRaster,missing,pixelTilePlan-method}
 \alias{tileApply,SpatRaster,missing,tileGroup-method}
 \title{Apply Across Spatial Tiles}
 \usage{
-\S4method{tileApply}{SpatRaster,missing,spatialTileIterator}(
+\S4method{tileApply}{SpatRaster,missing,spatialTilePlan}(
   x,
   FUN,
-  ti,
+  tp,
   lyr = NULL,
   future.seed = TRUE,
   log = FALSE,
@@ -18,10 +18,10 @@
   ...
 )
 
-\S4method{tileApply}{SpatRaster,missing,pixelTileIterator}(
+\S4method{tileApply}{SpatRaster,missing,pixelTilePlan}(
   x,
   FUN,
-  ti,
+  tp,
   lyr = NULL,
   extend = TRUE,
   fill = NA,
@@ -34,7 +34,7 @@
 \S4method{tileApply}{SpatRaster,missing,tileGroup}(
   x,
   FUN,
-  ti,
+  tp,
   parallel_strategy = c("groups", "tiles"),
   group_FUN = NULL,
   lyr = NULL,
@@ -52,13 +52,13 @@
 \code{SpatRaster} object. Additional special parameters can be optionally included.
 \itemize{
 \item \code{.I} can be used as the tile number.
-\item \code{.TILE} is the tileIterator output for that \code{.I}. It will include the
+\item \code{.TILE} is the tilePlan output for that \code{.I}. It will include the
 bounds and attached metdata attributes.
 \item \code{.R} is the tile row number
 \item \code{.C} is the tile col number.
 }}
 
-\item{ti}{\code{tileIterator} that defines the tiles to apply on.}
+\item{tp}{\code{tilePlan} that defines the tiles to apply on.}
 
 \item{lyr}{numeric. Layer number(s) to use}
 
@@ -96,14 +96,14 @@ for applying across affine transformed images is still under development.
 \examples{
 f <- system.file("ex/elev.tif", package="terra")
 r <- terra::rast(f)
-ti <- tileIterator()
-ext(ti) <- ext(r)
-length(ti) <- 4
+tp <- tilePlan()
+ext(tp) <- ext(r)
+length(tp) <- 4
 
 outdir <- file.path(tempdir(), "testwrite")
 dir.create(outdir)
 
-tileApply(r, ti = ti, lyr = 1, FUN = function(x, .I) {
+tileApply(r, tp = tp, lyr = 1, FUN = function(x, .I) {
     terra::writeRaster(x,
         filename = file.path(outdir, sprintf("tile_\%03d.tif", .I)))
 })
