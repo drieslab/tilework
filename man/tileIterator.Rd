@@ -3,6 +3,9 @@
 \name{tileIterator}
 \alias{tileIterator}
 \title{Stateful Tile Iterator}
+\usage{
+tileIterator(tp = NULL, position = 0, bound = NULL, batch_size = 1)
+}
 \arguments{
 \item{tp}{A tilePlan object}
 
@@ -48,43 +51,66 @@ ext(tp) <- c(0, 100, 0, 100)
 length(tp) <- 16
 
 # Create a iterator that processes 3 tiles at a time
-iterator <- tileIterator(tp, batch_size = 3)
+iter <- tileIterator(tp, batch_size = 3)
 
 # Check status
-iterator$has_next
-iterator$remaining
-iterator$progress
+iter
+iter$has_next
+iter$remaining
+iter$progress
 
-# Get next batch - this modifies the iterator's internal state!
-batch1 <- iterator$next_batch()
+# Get next batch
+batch1 <- iter$next_batch()
 length(batch1)  # 3 tiles
 
 # Check updated status
-iterator$progress()  # position has advanced
+iter$progress  # position has advanced
 
 # Peek at next batch without advancing
-peek <- iterator$peek_batch()
-iterator$position()  # unchanged
+peek <- iter$peek_batch()
+peek
+iter$position  # unchanged
+
+# serialize and unserialize, preserving state
+temp <- tempfile()
+saveRDS(iter, temp)
+rm(iter)
+iter <- readRDS(temp)
+
+# Next batch of indices
+iter$next_indices()
+
+# Peek next batch of indices
+iter$peek_indices()
 
 # Process all remaining batches
-while (iterator$has_next) {
-  batch <- iterator$next_batch()
+while (iter$has_next) {
+  batch <- iter$next_batch()
   cat("Processing batch of", length(batch), "tiles\n")
 }
 
 # Reset and try different batch size
-iterator$reset()
-iterator$set_batch_size(5)
+iter$reset()
+iter$batch_size <- 5
 
 # Apply function across all batches
-iterator$reset()  # start from beginning
-results <- walkerApply(iterator, function(batch, .BATCH) {
-  list(batch_num = .BATCH, tile_count = length(batch))
-})
+while (iter$has_next) {
+  batch <- iter$next_batch()
+  cat("Processing batch of", length(batch), "tiles\n")
+}
 
-# Side-effect only processing
-iterator$reset()
-walkerWalk(iterator, function(batch, .BATCH) {
-  cat("Batch", .BATCH, ":", length(batch), "tiles\n")
-})
+# tileIterator with tileGroup
+tg <- tileGroup(tp, groups = list(
+  "g1" = c(2, 4, 6, 8, 10, 12, 14, 16),
+  "g2" = 1:16
+))
+
+tg$active <- "g1"
+iter <- tileIterator(tg, batch_size = 3)
+iter
+iter$next_batch()
+
+# iterator splitting
+siter <- iterSplit(iter, n = 2)
+siter
 }

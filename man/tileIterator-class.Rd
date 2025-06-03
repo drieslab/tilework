@@ -6,7 +6,7 @@
 \title{tileIterator}
 \description{
 A stateful iterator that progresses through tiles of an underlying \code{tilePlan}
-object upon every call to \verb{$next_batch()}
+(or \code{tileGroup} if \verb{$active} is set) object upon every call to \verb{$next_batch()}
 
 The closures that power this functionality are stored in \verb{@funs}. The stateful
 position handling is also internalized within.
@@ -17,3 +17,6 @@ position handling is also internalized within.
 \item{\code{funs}}{list of closure methods}
 }}
 
+\seealso{
+\linkS4class{tileGroupIterator}
+}

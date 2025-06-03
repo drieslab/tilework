@@ -21,12 +21,31 @@ organization of tiles.
 \examples{
 tp <- tilePlan("spatial")
 ext(tp) <- c(0, 100, 0, 100)
-length(tp) <- 9
+length(tp) <- 16
 
 # Create groups
 tg <- tileGroup(tp, groups = list(
-  "top" = 1:3,
-  "middle" = 4:6,
-  "bottom" = 7:9
+  "g1" = 1:4,           # vector indexing
+  "g2" = list(2, 1:4),  # ij indexing
+  "g3" = list(2:4, 1:2) # selection overlaps are allowed
+  # (not all tiles need to be selected)
 ))
+
+# length() returns number of groups
+length(tg)
+
+tg["g1"] # first 4
+tg["g2"] # next 4
+tg["g3"] # specific 6
+
+tg["g3", c(3, 1)] # position specific indexing
+
+# Set active group for shorthand indexing
+tg$active <- "g1"
+
+# length() is based on group length when active is set
+length(tg)
+
+tg[, 2]        # Position 2 from g1
+tg$active <- NULL  # Clear active group
 }

@@ -77,6 +77,8 @@ setClass(
 #' organization of tiles.
 #' @slot tp tilePlan. The underlying tile iterator
 #' @slot groups list. Named list where each element contains tile indices for that group
+#' @slot active character. Name of a group to set as active for `[, j]` indexing and
+#' `length()`.
 #' @slot metadata data.frame. Metadata about each group
 #' @exportClass tileGroup
 setClass("tileGroup",
@@ -84,6 +86,7 @@ setClass("tileGroup",
     slots = list(
         tp = "tilePlan",
         groups = "list",
+        active = "character",
         metadata = "data.frame"
     )
 )
@@ -92,7 +95,7 @@ setClass("tileGroup",
 #' @title tileIterator
 #' @description
 #' A stateful iterator that progresses through tiles of an underlying `tilePlan`
-#' object upon every call to `$next_batch()`
+#' (or `tileGroup` if `$active` is set) object upon every call to `$next_batch()`
 #'
 #' The closures that power this functionality are stored in `@funs`. The stateful
 #' position handling is also internalized within.
@@ -105,22 +108,3 @@ setClass("tileIterator",
         funs = "list"
     )
 )
-
-#' @name tileGroupIterator-class
-#' @title tileGroupIterator
-#' @description
-#' A stateful iterator that progresses through tiles of one of the groups of a
-#' `tileGroup` object upon every call to `$next_batch()`
-#'
-#' The closures that power this functionality are stored in `@funs`. The stateful
-#' position handling is also internalized within.
-#' @slot funs list of closure methods
-#' @seealso [tileGroupIterator-class]
-#' @exportClass tileIterator
-setClass("tileGroupIterator",
-    contains = "giottoTile",
-    slots = list(
-        funs = "list"
-    )
-)
-

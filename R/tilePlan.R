@@ -417,9 +417,9 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
     fun = function(x) x,
     zero = FALSE) {
     if (isTRUE(expand_grid)) {
-        var_tab <- expand.grid(i, j)
-        i <- var_tab$Var1
-        j <- var_tab$Var2
+        var_tab <- expand.grid(j, i) # j/i switch is intentional
+        i <- var_tab$Var2
+        j <- var_tab$Var1
     }
 
     .mapply(function(i, j) {

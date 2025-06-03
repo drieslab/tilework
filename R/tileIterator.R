@@ -82,6 +82,21 @@
 #'   batch <- iter$next_batch()
 #'   cat("Processing batch of", length(batch), "tiles\n")
 #' }
+#'
+#' # tileIterator with tileGroup
+#' tg <- tileGroup(tp, groups = list(
+#'   "g1" = c(2, 4, 6, 8, 10, 12, 14, 16),
+#'   "g2" = 1:16
+#' ))
+#'
+#' tg$active <- "g1"
+#' iter <- tileIterator(tg, batch_size = 3)
+#' iter
+#' iter$next_batch()
+#'
+#' # iterator splitting
+#' siter <- iterSplit(iter, n = 2)
+#' siter
 NULL
 
 #' @name tileTiterator
@@ -127,7 +142,12 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
         if (is.null(x)) {
             stop(prefix, "No underlying `tilePlan`. Assign one with `[]`<-\n", call. = FALSE)
         }
-        checkmate::assert_class(tp, "tilePlan")
+        if (!inherits(x, c("tilePlan", "tileGroup"))) {
+            stop("`tileplan` must be tilePlan or tileGroup, got: ", class(x))
+        }
+        if (inherits(x, "tileGroup") && !.has_active(x)) {
+            stop("tileGroup requires an active group. Set with $active <- \"group_name\"")
+        }
     }
 
     .guard_batch_size <- function(x = NULL) {
@@ -149,6 +169,17 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
         if (all(x == c(1L, 1L))) {
             warning(prefix, "`bound` is at default = c(1, 1). Set a different one with `$bound <-`", call. = FALSE)
         }
+    }
+
+    .extract_fun <- function(x, i) {
+        if (inherits(x, "tilePlan")) return(x[i])
+        if (inherits(x, "tileGroup")) {
+            if (!.has_active(x)) {
+                stop("tileIterator with tileGroup requires an active group. Set with $active <- \"group_name\"")
+            }
+            return(x[, i])
+        }
+        stop("Unsupported object type: ", class(x))
     }
 
     # public methods ----------------------------------------------------- #
@@ -189,7 +220,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
     }
 
     funs$set_tileplan <- function(x) {
-        checkmate::assert_class(x, "tilePlan")
+        .guard_tp(x = x)
         tp <<- x
         invisible(.Object)
     }
@@ -216,7 +247,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
         start_idx <- head(indices, 1L)
         end_idx <- tail(indices, 1L)
         # extract tiles
-        tiles <- tp[indices]
+        tiles <- .extract_fun(tp, indices)
 
         # Advance position if requested
         if (advance) {
@@ -348,7 +379,13 @@ setMethod("[", signature("tileIterator", "missing", "missing", "missing"), funct
     x@funs$tileplan()
 })
 
-setMethod("[<-", signature("tileIterator", "missing", "missing", value = "tilePlan"), function(x, ..., value) {
+setMethod("[<-", signature("tileIterator", "missing", "missing", value = "ANY"), function(x, ..., value) {
+    if (!inherits(value, c("tilePlan", "tileGroup"))) {
+        stop("Value must be tilePlan or tileGroup, got: ", class(value))
+    }
+    if (inherits(value, "tileGroup") && !.has_active(value)) {
+        stop("tileGroup requires an active group. Set with $active <- \"group_name\"")
+    }
     x@funs$set_tileplan(value)
     x
 })
@@ -368,7 +405,12 @@ tileIterator <- function(tp = NULL, position = 0, bound = NULL, batch_size = 1) 
     checkmate::assert_integerish(batch_size, len = 1L)
     ti <- new("tileIterator")
     if (!is.null(tp)) {
-        checkmate::assert_class(tp, "tilePlan")
+        if (!inherits(tp, c("tilePlan", "tileGroup"))) {
+            stop("tp must be tilePlan or tileGroup, got: ", class(tp))
+        }
+        if (inherits(tp, "tileGroup") && !.has_active(tp)) {
+            stop("tileGroup requires an active group. Set with $active <- \"group_name\"")
+        }
         ti$tileplan <- tp
     }
     if (!is.null(bound)) {

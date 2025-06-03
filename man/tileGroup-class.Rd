@@ -16,6 +16,9 @@ organization of tiles.
 
 \item{\code{groups}}{list. Named list where each element contains tile indices for that group}
 
+\item{\code{active}}{character. Name of a group to set as active for \verb{[, j]} indexing and
+\code{length()}.}
+
 \item{\code{metadata}}{data.frame. Metadata about each group}
 }}
 

@@ -2,11 +2,7 @@
 % Please edit documentation in R/tileIterator.R
 \name{tileTiterator}
 \alias{tileTiterator}
-\alias{tileIterator}
-\title{Create a tileIterator}
-\usage{
-tileIterator(tp = NULL, position = 0, bound = c(1, 1), batch_size = 1)
-}
+\title{Stateful Tile Iteration}
 \arguments{
 \item{tp}{\code{tilePlan}}
 

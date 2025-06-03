@@ -6,14 +6,14 @@
 \alias{getTile,SpatRaster,pixelTilePlan-method}
 \title{Get Tile}
 \usage{
-\S4method{getTile}{character,pixelTilePlan}(x, tp, ext = NULL, ...)
+\S4method{getTile}{character,pixelTilePlan}(x, tiles, ext = NULL, ...)
 
-\S4method{getTile}{SpatRaster,pixelTilePlan}(x, tp, i = NULL, j, lyr = NULL, extend = FALSE, fill = NA, ...)
+\S4method{getTile}{SpatRaster,pixelTilePlan}(x, tiles, i = NULL, j, lyr = NULL, extend = FALSE, fill = NA, ...)
 }
 \arguments{
 \item{x}{data}
 
-\item{tp}{\code{tilePlan}}
+\item{tiles}{\verb{tile*} object}
 
 \item{ext}{\code{numeric} or \code{SpatExtent} (optional) Set an extent before extracting
 tiles.}
@@ -37,12 +37,19 @@ Get a specific tile from the data.
 }
 \examples{
 f <- system.file("ex/elev.tif", package="terra")
+r <- terra::rast(f)
 tp <- tilePlan("pixel")
 tp$pxdims <- dim(r)[1:2]
 tp$nrows <- 10
 tp$ncols <- 10
 
+# get tiles from specific array grid indices.
 tile_list <- getTile(f, tp, i = 3, j = 5)
 force(tile_list)
 plot(tile_list[[1]])
+
+# get tiles via iteration
+iter <- tileIterator(tp, batch_size = 3)
+b1 <- getTile(r, iter) # get first batch of 3...
+b2 <- getTile(r, iter) # get second batch of 3...
 }
