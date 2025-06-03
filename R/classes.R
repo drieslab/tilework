@@ -1,6 +1,10 @@
 
 setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 
+#' @keywords internal
+#' @noRd
+setClass("giottoTile", contains = "VIRTUAL")
+
 #' @name tilePlan-class
 #' @title Tile Iterator
 #' @description
@@ -20,7 +24,7 @@ setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 #' [tilePlan()] for creation of these objects.
 setClass(
     "tilePlan",
-    contains = "VIRTUAL",
+    contains = c("VIRTUAL", "giottoTile"),
     slots = list(
         n = "numeric",
         dims = "numeric",
@@ -76,6 +80,7 @@ setClass(
 #' @slot metadata data.frame. Metadata about each group
 #' @exportClass tileGroup
 setClass("tileGroup",
+    contains = "giottoTile",
     slots = list(
         tp = "tilePlan",
         groups = "list",
@@ -83,7 +88,37 @@ setClass("tileGroup",
     )
 )
 
+#' @name tileIterator-class
+#' @title tileIterator
+#' @description
+#' A stateful iterator that progresses through tiles of an underlying `tilePlan`
+#' object upon every call to `$next_batch()`
+#'
+#' The closures that power this functionality are stored in `@funs`. The stateful
+#' position handling is also internalized within.
+#' @slot funs list of closure methods
+#' @seealso [tileGroupIterator-class]
+#' @exportClass tileIterator
 setClass("tileIterator",
+    contains = "giottoTile",
+    slots = list(
+        funs = "list"
+    )
+)
+
+#' @name tileGroupIterator-class
+#' @title tileGroupIterator
+#' @description
+#' A stateful iterator that progresses through tiles of one of the groups of a
+#' `tileGroup` object upon every call to `$next_batch()`
+#'
+#' The closures that power this functionality are stored in `@funs`. The stateful
+#' position handling is also internalized within.
+#' @slot funs list of closure methods
+#' @seealso [tileGroupIterator-class]
+#' @exportClass tileIterator
+setClass("tileGroupIterator",
+    contains = "giottoTile",
     slots = list(
         funs = "list"
     )

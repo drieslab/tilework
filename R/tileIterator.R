@@ -1,0 +1,449 @@
+# docs ####
+
+#' @title Stateful Tile Iterator
+#' @name tileIterator
+#' @description
+#' A stateful iterator that maintains an internal position and yields batches
+#' of tiles on demand. Uses closures for true stateful behavior without
+#' external dependencies. Useful for streaming processing, memory-constrained
+#' environments, or when you want to process tiles in smaller chunks.
+#'
+#' @section Key Features:
+#' * Maintains internal state (current position) using closures
+#' * Configurable batch size
+#' * Forward iteration with `next_batch()`
+#' * Peek ahead without advancing position
+#' * Reset to beginning
+#' * Works with any underlying tilePlan
+#' * Serializable for parallel processing
+#'
+#' @section Usage Patterns:
+#' * Stream processing large datasets
+#' * Memory-constrained batch processing
+#' * Progressive/incremental analysis
+#' * Checkpoint and resume workflows
+#' * Parallel processing with foreach
+#'
+#' @param tp A tilePlan object
+#' @param batch_size Integer. Number of tiles to return per call to next_batch()
+#' @returns A tileIterator function with attached methods
+#' @export
+#' @examples
+#' # Create a spatial tile iterator
+#' tp <- tilePlan("spatial")
+#' ext(tp) <- c(0, 100, 0, 100)
+#' length(tp) <- 16
+#'
+#' # Create a iterator that processes 3 tiles at a time
+#' iter <- tileIterator(tp, batch_size = 3)
+#'
+#' # Check status
+#' iter
+#' iter$has_next
+#' iter$remaining
+#' iter$progress
+#'
+#' # Get next batch
+#' batch1 <- iter$next_batch()
+#' length(batch1)  # 3 tiles
+#'
+#' # Check updated status
+#' iter$progress  # position has advanced
+#'
+#' # Peek at next batch without advancing
+#' peek <- iter$peek_batch()
+#' peek
+#' iter$position  # unchanged
+#'
+#' # serialize and unserialize, preserving state
+#' temp <- tempfile()
+#' saveRDS(iter, temp)
+#' rm(iter)
+#' iter <- readRDS(temp)
+#'
+#' # Next batch of indices
+#' iter$next_indices()
+#'
+#' # Peek next batch of indices
+#' iter$peek_indices()
+#'
+#' # Process all remaining batches
+#' while (iter$has_next) {
+#'   batch <- iter$next_batch()
+#'   cat("Processing batch of", length(batch), "tiles\n")
+#' }
+#'
+#' # Reset and try different batch size
+#' iter$reset()
+#' iter$batch_size <- 5
+#'
+#' # Apply function across all batches
+#' while (iter$has_next) {
+#'   batch <- iter$next_batch()
+#'   cat("Processing batch of", length(batch), "tiles\n")
+#' }
+NULL
+
+#' @name tileTiterator
+#' @title Stateful Tile Iteration
+#' @description
+#' Create a `tileIterator` instance for batch iteration across a set of tiles
+#' in a `tilePlan`.
+#' @param tp `tilePlan`
+#' @param position integer. Initial position. This should be the index right
+#'  before the first tile to process
+#' @param bound integer (default = 1,1). Range of tiles to iterate through
+#' @param batch_size integer (default = 1). Number of tiles to extract from
+#'  `tilePlan` per call to `next_batch()`
+#' @returns `tileIterator`
+NULL
+
+
+setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
+    # do not allow re-initialization after closures are setup
+    if (length(.Object@funs) > 0) {
+        checkmate::assert_list(.Object@funs, types = "function")
+        return(.Object)
+    }
+
+    tp <- NULL
+    bound <- c(1L, 1L)
+    batch_size <- 1L
+    position <- min(bound) - 1L # the last tile that was finished
+
+    # private methods ----------------------------------------------------- #
+    prefix <- "tileIterator: "
+
+    .guard_pos_bound <- function(x = NULL) {
+        x <- x %null% position
+        if (x < (bound[1L] - 1) || x > bound[2L]) {
+            stop(sprintf("%s `position` (%d) must be within `bound` (between %d and %d)\n",
+                         prefix, position, bound[1L], bound[2L]), call. = FALSE)
+        }
+    }
+
+    .guard_tp <- function(x = NULL) {
+        x <- x %null% tp
+        if (is.null(x)) {
+            stop(prefix, "No underlying `tilePlan`. Assign one with `[]`<-\n", call. = FALSE)
+        }
+        checkmate::assert_class(tp, "tilePlan")
+    }
+
+    .guard_batch_size <- function(x = NULL) {
+        x <- x %null% batch_size
+        if (x < 1L) {
+            stop(sprintf("%s `batch_size` (%d) must be at least 1\n",
+                         prefix, x), call. = FALSE)
+        }
+    }
+
+    .guard_bound <- function(x = NULL) {
+        x <- x %null% bound
+        if (length(x) != 2L) {
+            stop(prefix, "`bound` must be 2 numbers (start index, end index)\n", call. = FALSE)
+        }
+        if (x[2L] < x[1L]) {
+            stop(prefix, "`bound` end index must be equal to or greater than start index\n", call. = FALSE)
+        }
+        if (all(x == c(1L, 1L))) {
+            warning(prefix, "`bound` is at default = c(1, 1). Set a different one with `$bound <-`", call. = FALSE)
+        }
+    }
+
+    # public methods ----------------------------------------------------- #
+    funs <- list()
+
+    funs$bound <- function() {
+        bound
+    }
+
+    funs$set_bound <- function(x) {
+        .guard_bound(x)
+        bound <<- as.integer(x)
+        invisible(.Object)
+    }
+
+    funs$position <- function() {
+        position
+    }
+
+    funs$set_position <- function(x) {
+        new_pos <- as.integer(x)[1L]
+        .guard_pos_bound(new_pos)
+        position <<- new_pos
+        invisible(.Object)
+    }
+
+    funs$reset <- function() {
+        position <<- min(bound) - 1L
+        invisible(.Object)
+    }
+
+    funs$total_tiles <- function() {
+        diff(bound) + 1L
+    }
+
+    funs$tileplan <- function() {
+        tp
+    }
+
+    funs$set_tileplan <- function(x) {
+        checkmate::assert_class(x, "tilePlan")
+        tp <<- x
+        invisible(.Object)
+    }
+
+    funs$has_next <- function() {
+        .guard_pos_bound()
+        position < bound[[2L]]
+    }
+
+    funs$batch_size <- function() {
+        batch_size
+    }
+
+    funs$set_batch_size <- function(x) {
+        x <- as.integer(x)[[1L]]
+        .guard_batch_size(x)
+        batch_size <<- x
+        invisible(.Object)
+    }
+
+    funs$next_batch <- function(advance = TRUE) {
+        # get indices
+        indices <- funs$next_indices(advance = FALSE)
+        start_idx <- head(indices, 1L)
+        end_idx <- tail(indices, 1L)
+        # extract tiles
+        tiles <- tp[indices]
+
+        # Advance position if requested
+        if (advance) {
+            position <<- end_idx
+        }
+
+        # Attach batch metadata
+        attr(tiles, "batch_start") <- start_idx
+        attr(tiles, "batch_end") <- end_idx
+        attr(tiles, "batch_size") <- length(indices)
+        attr(tiles, "iterator_position") <- position
+
+        return(tiles)
+    }
+
+    funs$peek_batch <- function() {
+        funs$next_batch(advance = FALSE)
+    }
+
+    funs$next_indices <- function(advance = TRUE) {
+        .guard_tp()
+        .guard_pos_bound()
+        .guard_batch_size()
+        checkmate::assert_logical(advance, len = 1L)
+        if (!funs$has_next()) {
+            return(list()) # return empty list when no more
+        }
+
+        start_idx <- position + 1L
+        end_idx <- min(position + batch_size, bound[2L])
+        idx <- start_idx:end_idx
+
+        # Advance position if requested
+        if (advance) {
+            position <<- end_idx
+        }
+
+        idx
+    }
+
+    funs$peek_indices <- function() {
+        funs$next_indices(advance = FALSE)
+    }
+
+    funs$remaining <- function() {
+        max(0L, bound[2L] - position)
+    }
+
+    funs$progress <- function() {
+        round(100 * ((position - bound[1L] + 1L) / funs$total_tiles()), digits = 2)
+    }
+
+    funs$copy <- function() {
+        new_iter <- new("tileIterator")
+        new_iter$bound <- bound
+        new_iter$batch_size <- batch_size
+        if (!is.null(tp)) {
+            new_iter$tileplan <- tp
+        }
+        new_iter$position <- position
+        new_iter
+    }
+
+    # attach public closures
+    .Object@funs <- funs
+    # return
+    .Object
+})
+
+#' @export
+.DollarNames.tileIterator <- function(x, pattern) {
+    c(
+        # attributes
+        "position", "bound", "batch_size", "tileplan",
+        # computed properties
+        "total_tiles", "remaining", "has_next", "progress",
+        # methods
+        "next_batch()", "peek_batch()", "next_indices()", "peek_indices",
+        "reset()", "copy()"
+    )
+}
+
+setMethod("$", signature("tileIterator"), function(x, name) {
+    switch(name,
+        # get
+        "position" = x@funs$position(),
+        "bound" = x@funs$bound(),
+        "batch_size" = x@funs$batch_size(),
+        "tileplan" = x@funs$tileplan(),
+        # computed properties
+        "total_tiles" = x@funs$total_tiles(),
+        "remaining" = x@funs$remaining(),
+        "has_next" = x@funs$has_next(),
+        "progress" = x@funs$progress(),
+        # methods
+        "next_batch" = x@funs$next_batch,
+        "peek_batch" = x@funs$peek_batch,
+        "next_indices" = x@funs$next_indices,
+        "peek_indices" = x@funs$peek_indices,
+        "reset" = x@funs$reset,
+        "copy" = x@funs$copy
+    )
+})
+
+setMethod("$<-", signature("tileIterator"), function(x, name, value) {
+    switch(name,
+        "position" = x@funs$set_position(value),
+        "bound" = x@funs$set_bound(value),
+        "batch_size" = x@funs$set_batch_size(value),
+        "tileplan" = x@funs$set_tileplan(value)
+    )
+    x
+})
+
+setMethod("show", signature("tileIterator"), function(object) {
+    cat(sprintf("Object of class %s\n", class(object)))
+    plist <- list(
+        tileplan = class(object@funs$tileplan()),
+        position = object@funs$position(),
+        bound = sprintf("[%s]", toString(object@funs$bound())),
+        batch_size = object@funs$batch_size(),
+        progress = sprintf("%s%s", object@funs$progress(), "%"),
+        remaining = object@funs$remaining()
+    )
+    GiottoUtils::print_list(plist)
+})
+
+setMethod("[", signature("tileIterator", "missing", "missing", "missing"), function(x, ...) {
+    x@funs$tileplan()
+})
+
+setMethod("[<-", signature("tileIterator", "missing", "missing", value = "tilePlan"), function(x, ..., value) {
+    x@funs$set_tileplan(value)
+    x
+})
+
+setMethod("length", signature("tileIterator"), function(x) {
+    x@funs$total_tiles()
+})
+
+
+# factory ####
+
+#' @rdname tileIterator
+#' @export
+tileIterator <- function(tp = NULL, position = 0, bound = NULL, batch_size = 1) {
+    checkmate::assert_integerish(position, len = 1L)
+    checkmate::assert_integerish(bound, null.ok = TRUE, len = 2L)
+    checkmate::assert_integerish(batch_size, len = 1L)
+    ti <- new("tileIterator")
+    if (!is.null(tp)) {
+        checkmate::assert_class(tp, "tilePlan")
+        ti$tileplan <- tp
+    }
+    if (!is.null(bound)) {
+        ti$bound <- bound
+    } else if (!is.null(tp)) {
+        ti$bound <- c(1L, length(tp))
+    }
+    ti$batch_size <- batch_size
+    ti$position <- position
+    ti
+}
+
+#' @title Create multiple walkers from a single iterator
+#' @description
+#' Utility function to create multiple independent walkers for parallel processing.
+#' Each iterator will have the same underlying iterator but independent state.
+#'
+#' @param tiles tileIterator object
+#' @param n integer. Number of iterators to create
+#' @param batch_size integer (optional). Assign a batch size for each iterator.
+#'  If not provided, inherits same `batch_size` as source `tiles`.
+#' @param distribute logical (default = `TRUE`). If `TRUE`, distribute tiles
+#' evenly across iterators. Otherwise return multiple true copies.
+#' @export
+setMethod("iterSplit", signature("tileIterator"),
+    function(tiles, n, batch_size = NULL, distribute = TRUE, ...) {
+    checkmate::assert_logical(distribute, len = 1L)
+    checkmate::assert_integerish(batch_size, null.ok = TRUE, len = 1L, lower = 1L)
+    checkmate::assert_integerish(n, len = 1L, lower = 1L)
+    n <- as.integer(n)
+    iters <- vector("list", n)
+    batch_size <- batch_size %null% tiles$batch_size
+
+    if (!distribute) {
+        # each iterator gets the same settings
+        for (i in seq_len(n)) {
+            iters[[i]] <- tileIterator(
+                tp = tiles$tileplan,
+                position = tiles$position,
+                bound = tiles$bound,
+                batch_size = batch_size
+            )
+        }
+        return(iters)
+    }
+
+    # Distribute tiles evenly across walkers
+    rem <- tiles$remaining
+    tiles_per_iter <- floor(rem / n)
+    remainder <- rem %% n
+    start_pos <- tiles$position # init position index
+
+    if (n > rem) {
+        warning(wrap_txtf(
+            "More iterators (%d) than remaining tiles (%d).
+            Creating %d iterators instead.", n, rem, rem
+        ), call. = FALSE)
+        n <- rem
+    }
+
+    for (i in seq_len(n)) {
+        end_pos <- start_pos + tiles_per_iter
+        if (remainder > 0L) {
+            end_pos <- end_pos + 1L
+            remainder <- remainder - 1L
+        }
+        b <- c(start_pos + 1L, end_pos)
+
+        iters[[i]] <- tileIterator(
+            tp = tiles$tileplan,
+            position = start_pos,
+            bound = b,
+            batch_size = batch_size
+        )
+        start_pos <- end_pos
+    }
+    iters
+})
