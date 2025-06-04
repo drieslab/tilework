@@ -4,11 +4,17 @@
 \alias{getTile}
 \alias{getTile,character,pixelTilePlan-method}
 \alias{getTile,SpatRaster,pixelTilePlan-method}
+\alias{getTile,SpatRaster,tileGroup-method}
+\alias{getTile,SpatRaster,tileIterator-method}
 \title{Get Tile}
 \usage{
 \S4method{getTile}{character,pixelTilePlan}(x, tiles, ext = NULL, ...)
 
 \S4method{getTile}{SpatRaster,pixelTilePlan}(x, tiles, i = NULL, j, lyr = NULL, extend = FALSE, fill = NA, ...)
+
+\S4method{getTile}{SpatRaster,tileGroup}(x, tiles, i, j, lyr = NULL, ...)
+
+\S4method{getTile}{SpatRaster,tileIterator}(x, tiles, lyr = NULL, ...)
 }
 \arguments{
 \item{x}{data}

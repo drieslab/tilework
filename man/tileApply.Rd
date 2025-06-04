@@ -5,12 +5,13 @@
 \alias{tileApply,SpatRaster,missing,spatialTilePlan-method}
 \alias{tileApply,SpatRaster,missing,pixelTilePlan-method}
 \alias{tileApply,SpatRaster,missing,tileGroup-method}
+\alias{tileApply,SpatRaster,missing,tileIterator-method}
 \title{Apply Across Spatial Tiles}
 \usage{
 \S4method{tileApply}{SpatRaster,missing,spatialTilePlan}(
   x,
   FUN,
-  tp,
+  tiles,
   lyr = NULL,
   future.seed = TRUE,
   log = FALSE,
@@ -21,7 +22,7 @@
 \S4method{tileApply}{SpatRaster,missing,pixelTilePlan}(
   x,
   FUN,
-  tp,
+  tiles,
   lyr = NULL,
   extend = TRUE,
   fill = NA,
@@ -34,9 +35,21 @@
 \S4method{tileApply}{SpatRaster,missing,tileGroup}(
   x,
   FUN,
-  tp,
+  tiles,
   parallel_strategy = c("groups", "tiles"),
   group_FUN = NULL,
+  lyr = NULL,
+  future.seed = TRUE,
+  log = FALSE,
+  logpath = tempdir(),
+  simplify = FALSE,
+  ...
+)
+
+\S4method{tileApply}{SpatRaster,missing,tileIterator}(
+  x,
+  FUN,
+  tiles,
   lyr = NULL,
   future.seed = TRUE,
   log = FALSE,
@@ -58,7 +71,7 @@ bounds and attached metdata attributes.
 \item \code{.C} is the tile col number.
 }}
 
-\item{tp}{\code{tilePlan} that defines the tiles to apply on.}
+\item{tiles}{\verb{tile*} object that defines the tiles to apply on.}
 
 \item{lyr}{numeric. Layer number(s) to use}
 
@@ -103,7 +116,7 @@ length(tp) <- 4
 outdir <- file.path(tempdir(), "testwrite")
 dir.create(outdir)
 
-tileApply(r, tp = tp, lyr = 1, FUN = function(x, .I) {
+tileApply(r, tiles = tp, lyr = 1, FUN = function(x, .I) {
     terra::writeRaster(x,
         filename = file.path(outdir, sprintf("tile_\%03d.tif", .I)))
 })

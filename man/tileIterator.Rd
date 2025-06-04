@@ -4,12 +4,27 @@
 \alias{tileIterator}
 \title{Stateful Tile Iterator}
 \usage{
-tileIterator(tp = NULL, position = 0, bound = NULL, batch_size = 1)
+tileIterator(
+  tiles = NULL,
+  position = 0,
+  bound = NULL,
+  batch_size = 1,
+  active_group = NULL
+)
 }
 \arguments{
-\item{tp}{A tilePlan object}
+\item{tiles}{A tile* object}
+
+\item{position}{numeric. Set the starting position of the iterator. Default
+is 0.}
+
+\item{bound}{numeric, length of 2. Min and max indexing bounds through which
+to iterate. Default is \code{c(1, length(tiles)) }}
 
 \item{batch_size}{Integer. Number of tiles to return per call to next_batch()}
+
+\item{active_group}{character (optional). Only used when \code{tiles} is a \code{tileGroup}.
+Syntactic sugar for setting the active group of the \code{tileGroup} before using it.}
 }
 \value{
 A tileIterator function with attached methods
