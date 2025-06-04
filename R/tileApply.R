@@ -243,6 +243,96 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileGroup"),
     )
 })
 
+#' @rdname tileApply
+#' @export
+setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
+    function(x, FUN, tiles,
+    lyr = NULL,
+    future.seed = TRUE,
+    log = FALSE,
+    logpath = tempdir(),
+    simplify = FALSE,
+    ...) {
+    checkmate::assert_function(FUN)
+    checkmate::assert_integerish(lyr, null.ok = TRUE)
+
+    # validate file source
+    f <- terra::sources(x)
+    if (any(f == "")) {
+        stop(wrap_txt("[tileApply] no filepath found for image.
+                  Please first write to disk."),
+             call. = FALSE)
+    }
+    e <- .ext_to_num_vec(ext(x))
+    if (!is.null(lyr)) {
+        f <- f[lyr] # layer selection on sources
+    }
+
+    # Get number of workers from future plan
+    n_workers <- future::nbrOfWorkers()
+
+    # Split iterator across workers - each gets independent ranges
+    worker_iters <- iterSplit(tiles, n = n_workers, distribute = TRUE)
+    nsteps <- sum(ceiling(lengths(worker_iters) / iter$batch_size))
+
+    with_pbar({
+        p <- pbar(steps = nsteps) # progress is batch based
+        results_list <- lapply_flex(seq_along(worker_iters), function(worker_idx) {
+            iter <- worker_iters[[worker_idx]]
+            worker_id <- sprintf("[worker %d]", worker_idx)
+
+            # logging ---- #
+            if (log) {
+                vmsg(.v = "log", sprintf("%s start - %d tiles", worker_id, iter$remaining),
+                     .log_path = logpath)
+            }
+            # logging ---- #
+
+            # Connect to raster
+            r <- .create_terra_spatraster(f)
+            ext(r) <- e
+
+            # collect results within worker
+            res <- list()
+            bid <- 0L
+            while (iter$has_next) {
+                pos <- iter$position
+                bid <- bid + 1L
+                batch <- getTile(r, iter, ...) # pulls next batch and advances iter
+                batch_size <- length(batch)
+                pos <- c(pos, iter$position)
+
+                # logging ---- #
+                if (log) {
+                    vmsg(.v = "log", sprintf("<worker %s> start batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                }
+                # logging ---- #
+
+                # special args
+                a <- list(batch)
+                nf <- names(formals(FUN))
+                if (".POSITION" %in% nf) a$.POSITION <- pos # start, end
+                if (".BATCH" %in% nf) a$.BATCH <- bid
+
+                # apply function
+                res[[bid]] <- do.call(FUN, args = a)
+
+                # logging ---- #
+                if (log) {
+                    vmsg(.v = "log", sprintf("<worker %s> end batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                }
+                # logging ---- #
+                # Update progress bar
+                p()
+            }
+            return(res)
+        }, future.seed = future.seed)
+
+        # flatten results from workers into single list
+        all_results <- unlist(results_list, recursive = FALSE)
+        return(all_results)
+    })
+})
 
 # helpers ####
 
