@@ -10,6 +10,27 @@
 #' @param object object
 NULL
 
+#' @title Get Centroid
+#' @name centroids
+#' @description
+#' Get the centroids of the tiles. For spatialTilePlan, these will be returned
+#' as `SpatVector` centroids. For non-spatial plans like pixelTileGrid, this
+#' will be returne as a `matrix`.
+#' @param x `tilePlan`
+#' @param offset numeric of length 2. x and y values to offset by. Default is
+#' c(0, 0).
+#' @param fun (internal) post-processing function used to convert centroids to
+#' expected output. Such as `vect()` for `spatialTilePlan`
+#' @param zero logical. Whether to zero out buffer effects. (used by default with
+#' `pixelTilePlan`)
+#' @param ... additional params to pass.
+#' @examples
+#' x <- tilePlan()
+#' ext(x) <- c(0, 100, 0, 100)
+#' length(x) <- 9
+#' centroids(x)
+NULL
+
 #' @title Get and Set Iterator Metadata and Params
 #' @name dollar
 #' @description
@@ -132,6 +153,12 @@ NULL
 #' @seealso [dollar]
 #' @returns `data.frame`
 NULL
+
+#' @rdname centroids
+#' @export
+setMethod("centroids", signature("tilePlan"), function(x, fun = function(x) x, offset = c(0, 0), zero = FALSE, ...) {
+    .ij_centroid(x, fun = fun, offset = offset, zero = zero, ...)
+})
 
 #' @name arith
 #' @title Tile Buffers
@@ -437,4 +464,19 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
     }, list(i, j), MoreArgs = NULL)
 }
 
+.ij_centroid <- function(x, fun = function(x) x, offset = c(0, 0), zero = FALSE) {
+    d <- dim(x)[1:2]
+    ij <- expand.grid(1:d[[2L]], 1:d[[1L]])
+    i <- ij$Var2
+    j <- ij$Var1
+    tile_dims <- x@tile_dims
+    res <- c(
+        tile_dims[[2L]] * (j - 0.5) + offset[[2L]],
+        tile_dims[[1L]] * (i - 0.5) + offset[[1L]]
+    )
+    if (zero) res <- res + x@buffer
+    res <- matrix(res, ncol = 2, byrow = FALSE)
+    res <- fun(res)
+    res
+}
 

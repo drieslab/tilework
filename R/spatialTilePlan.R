@@ -194,6 +194,18 @@ setMethod("[", signature(x = "spatialTilePlan", i = "numeric", j = "numeric", dr
     callNextMethod(x, i, j, fun = ext, zero = FALSE, ...)
 })
 
+#' @rdname centroids
+#' @export
+setMethod("centroids", signature("spatialTilePlan"),
+    function(x, zero = FALSE, ...) {
+    a <- GiottoUtils::get_args_list(...)
+    a$fun <- vect
+    e <- ext(x)
+    a$offset <- c(terra::ymin(e), terra::xmin(e))
+    do.call(callNextMethod, a)
+})
+
+
 # helpers ####
 
 .get_dim_n_chunks <- function(n, e) {

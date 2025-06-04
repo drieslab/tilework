@@ -189,6 +189,14 @@ setMethod("plot", signature("pixelTilePlan", "missing"), function(x, ...) {
     rect(0, -x@pxdims[[1L]], x@pxdims[[2]], 0, border = "red")
 })
 
+#' @rdname centroids
+#' @export
+setMethod("centroids", signature("pixelTilePlan"), function(x, fun = function(x) x, zero = TRUE, ...) {
+    a <- GiottoUtils::get_args_list(...)
+    a$offset = c(0, 0)
+    do.call(callNextMethod, a)
+})
+
 
 # helpers ####
 
@@ -211,4 +219,3 @@ setMethod("plot", signature("pixelTilePlan", "missing"), function(x, ...) {
         tile_dims[[1]] * i
     )
 }
-

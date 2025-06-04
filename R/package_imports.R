@@ -4,7 +4,7 @@
 #' @importFrom methods new show initialize signature
 #' @importFrom methods slot slot<- slotNames
 #' @importFrom methods setMethod getMethod callNextMethod setGeneric setClass
-#' @importMethodsFrom terra nrow ncol ext ext<- plot vect rast
+#' @importMethodsFrom terra nrow ncol ext ext<- plot vect rast centroids
 #' @importClassesFrom terra SpatExtent SpatVector SpatRaster
 #' @importFrom utils .DollarNames
 #' @importFrom graphics rect
