@@ -14,7 +14,7 @@
 
 \S4method{getTile}{SpatRaster,tileGroup}(x, tiles, i, j, lyr = NULL, ...)
 
-\S4method{getTile}{SpatRaster,tileIterator}(x, tiles, lyr = NULL, ...)
+\S4method{getTile}{SpatRaster,tileIterator}(x, tiles, lyr = NULL, advance = TRUE, ...)
 }
 \arguments{
 \item{x}{data}
@@ -34,6 +34,8 @@ tiles.}
 expected tile dimensions}
 
 \item{fill}{numeric. if \code{extend = TRUE}, what value to fill with}
+
+\item{advance}{logical (default = TRUE). Whether to advance the iterator.}
 }
 \value{
 \code{list} of tile data
