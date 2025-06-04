@@ -24,8 +24,14 @@
 #' * Checkpoint and resume workflows
 #' * Parallel processing with foreach
 #'
-#' @param tp A tilePlan object
+#' @param tiles A tile* object
 #' @param batch_size Integer. Number of tiles to return per call to next_batch()
+#' @param bound numeric, length of 2. Min and max indexing bounds through which
+#' to iterate. Default is `c(1, length(tiles)) `
+#' @param position numeric. Set the starting position of the iterator. Default
+#' is 0.
+#' @param active_group character (optional). Only used when `tiles` is a `tileGroup`.
+#' Syntactic sugar for setting the active group of the `tileGroup` before using it.
 #' @returns A tileIterator function with attached methods
 #' @export
 #' @examples
@@ -399,29 +405,35 @@ setMethod("length", signature("tileIterator"), function(x) {
 
 #' @rdname tileIterator
 #' @export
-tileIterator <- function(tp = NULL, position = 0, bound = NULL, batch_size = 1) {
+tileIterator <- function(tiles = NULL, position = 0, bound = NULL, batch_size = 1, active_group = NULL) {
     checkmate::assert_integerish(position, len = 1L)
     checkmate::assert_integerish(bound, null.ok = TRUE, len = 2L)
     checkmate::assert_integerish(batch_size, len = 1L)
+    checkmate::assert_character(active_group, null.ok = TRUE)
     ti <- new("tileIterator")
-    if (!is.null(tp)) {
-        if (!inherits(tp, c("tilePlan", "tileGroup"))) {
-            stop("tp must be tilePlan or tileGroup, got: ", class(tp))
+    if (!is.null(tiles)) {
+        if (inherits(tiles, "tileGroup") && !is.null(active_group)) {
+            tiles$active <- active_group
         }
-        if (inherits(tp, "tileGroup") && !.has_active(tp)) {
+        if (!inherits(tiles, c("tilePlan", "tileGroup"))) {
+            stop("`tiles` must be tilePlan or tileGroup, got: ", class(tiles))
+        }
+        if (inherits(tiles, "tileGroup") && !.has_active(tiles)) {
             stop("tileGroup requires an active group. Set with $active <- \"group_name\"")
         }
-        ti$tileplan <- tp
+        ti$tileplan <- tiles
     }
     if (!is.null(bound)) {
         ti$bound <- bound
-    } else if (!is.null(tp)) {
-        ti$bound <- c(1L, length(tp))
+    } else if (!is.null(tiles)) {
+        ti$bound <- c(1L, length(tiles))
     }
     ti$batch_size <- batch_size
     ti$position <- position
     ti
 }
+
+# iterSplit ####
 
 #' @title Create multiple walkers from a single iterator
 #' @description
@@ -448,7 +460,7 @@ setMethod("iterSplit", signature("tileIterator"),
         # each iterator gets the same settings
         for (i in seq_len(n)) {
             iters[[i]] <- tileIterator(
-                tp = tiles$tileplan,
+                tiles = tiles$tileplan,
                 position = tiles$position,
                 bound = tiles$bound,
                 batch_size = batch_size
@@ -480,7 +492,7 @@ setMethod("iterSplit", signature("tileIterator"),
         b <- c(start_pos + 1L, end_pos)
 
         iters[[i]] <- tileIterator(
-            tp = tiles$tileplan,
+            tiles = tiles$tileplan,
             position = start_pos,
             bound = b,
             batch_size = batch_size
