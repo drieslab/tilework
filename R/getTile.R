@@ -77,7 +77,7 @@ setMethod("getTile", signature("SpatRaster", "tileGroup"),
         }
         i <- tiles@active
     }
-    g <- x@groups[[i]]
+    g <- tiles@groups[[i]]
     if (!.is_ij_group(g)) {
         # g is vector index
         getTile(x, tiles[], i = g[j])
