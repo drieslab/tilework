@@ -247,6 +247,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileGroup"),
 #' @export
 setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
     function(x, FUN, tiles,
+    setup_FUN = NULL,
     lyr = NULL,
     future.seed = TRUE,
     log = FALSE,
@@ -292,6 +293,16 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
                 r <- r[[lyr]] # layer selection
             }
 
+            # worker setup steps (if needed)
+            worker_state <- NULL
+            if (!is.null(setup_FUN)) {
+                ws_a <- list()
+                nf_ws <- names(formals(setup_FUN))
+                if (".W" %in% nf_ws) ws_a$.W <- worker_idx
+                if (".X" %in% nf_ws) ws_a$.X <- r
+                worker_state <- do.call(setup_FUN, ws_a)
+            }
+
             # collect results within worker
             res <- list()
             bid <- 0L
@@ -325,6 +336,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
                 if (".TILE" %in% nf) a$.TILE <- tilemeta
                 if (".POSITION" %in% nf) a$.POSITION <- c(start_pos, end_pos)
                 if (".BATCH" %in% nf) a$.BATCH <- bid
+                if (".WORKER_STATE" %in% nf) a$.WORKER_STATE <- worker_state
 
                 # apply function
                 res[[bid]] <- do.call(FUN, args = a)

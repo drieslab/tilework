@@ -50,6 +50,7 @@
   x,
   FUN,
   tiles,
+  setup_FUN = NULL,
   lyr = NULL,
   future.seed = TRUE,
   log = FALSE,
