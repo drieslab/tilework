@@ -14,6 +14,7 @@
 #' @param extend logical (default = FALSE) whether to extend tile data to reach
 #' expected tile dimensions
 #' @param fill numeric. if `extend = TRUE`, what value to fill with
+#' @param advance logical (default = TRUE). Whether to advance the iterator.
 #' @returns `list` of tile data
 #' @examples
 #' f <- system.file("ex/elev.tif", package="terra")
@@ -91,13 +92,13 @@ setMethod("getTile", signature("SpatRaster", "tileGroup"),
 #' @rdname getTile
 #' @export
 setMethod("getTile", signature("SpatRaster", "tileIterator"),
-    function(x, tiles, lyr = NULL, ...) {
+    function(x, tiles, lyr = NULL, advance = TRUE, ...) {
     checkmate::assert_integerish(lyr, null.ok = TRUE)
     if (!is.null(lyr)) x <- x[[lyr]]
     if (inherits(tiles[], "tileGroup")) {
-        return(getTile(x, tiles[], j = tiles$next_indices(), ...))
+        return(getTile(x, tiles[], j = tiles$next_indices(advance = advance), ...))
     }
-    getTile(x, tiles[], i = tiles$next_indices(), ...)
+    getTile(x, tiles[], i = tiles$next_indices(advance = advance), ...)
 })
 
 # helpers ####
