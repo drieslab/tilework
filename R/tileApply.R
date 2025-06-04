@@ -264,16 +264,13 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
              call. = FALSE)
     }
     e <- .ext_to_num_vec(ext(x))
-    if (!is.null(lyr)) {
-        f <- f[lyr] # layer selection on sources
-    }
 
     # Get number of workers from future plan
     n_workers <- future::nbrOfWorkers()
 
     # Split iterator across workers - each gets independent ranges
     worker_iters <- iterSplit(tiles, n = n_workers, distribute = TRUE)
-    nsteps <- sum(ceiling(lengths(worker_iters) / iter$batch_size))
+    nsteps <- sum(ceiling(lengths(worker_iters) / tiles$batch_size))
 
     with_pbar({
         p <- pbar(steps = nsteps) # progress is batch based
@@ -291,16 +288,27 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
             # Connect to raster
             r <- .create_terra_spatraster(f)
             ext(r) <- e
+            if (!is.null(lyr)) {
+                r <- r[[lyr]] # layer selection
+            }
 
             # collect results within worker
             res <- list()
             bid <- 0L
             while (iter$has_next) {
-                pos <- iter$position
+                start_pos <- iter$position + 1L
                 bid <- bid + 1L
+                tilemeta <- iter$peek_batch() # get meta for this batch
                 batch <- getTile(r, iter, ...) # pulls next batch and advances iter
                 batch_size <- length(batch)
-                pos <- c(pos, iter$position)
+                end_pos <- iter$position
+                idx <- vapply(FUN.VALUE = integer(1L), tilemeta, attr, "tile")
+                .tiles <- iter
+                while(!inherits(.tiles, "tilePlan")) {
+                    # get tilePLan
+                    .tiles <- .tiles[]
+                }
+                ij <- .tile_idx_to_ij(.tiles, idx)
 
                 # logging ---- #
                 if (log) {
@@ -311,7 +319,11 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
                 # special args
                 a <- list(batch)
                 nf <- names(formals(FUN))
-                if (".POSITION" %in% nf) a$.POSITION <- pos # start, end
+                if (".I" %in% nf) a$.I <- idx
+                if (".R" %in% nf) a$.R <- ij[[1L]]
+                if (".C" %in% nf) a$.C <- ij[[2L]]
+                if (".TILE" %in% nf) a$.TILE <- tilemeta
+                if (".POSITION" %in% nf) a$.POSITION <- c(start_pos, end_pos)
                 if (".BATCH" %in% nf) a$.BATCH <- bid
 
                 # apply function
