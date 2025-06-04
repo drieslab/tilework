@@ -56,19 +56,48 @@ setMethod("getTile", signature("SpatRaster", "pixelTilePlan"),
     checkmate::assert_integerish(lyr, null.ok = TRUE)
     checkmate::assert_logical(extend)
     if (!is.null(lyr)) x <- x[[lyr]]
-    if (missing(j)) bounds_list <- tiles[i]
-    else bounds_list <- tiles[i, j]
+    if (missing(j)) bounds_list <- tiles[i, ...]
+    else bounds_list <- tiles[i, j, ...]
 
     lapply(bounds_list, function(b) {
         .px_get_tile(x, tiles, b, extend, fill)
     })
 })
 
+#' @rdname getTile
+#' @export
+setMethod("getTile", signature("SpatRaster", "tileGroup"),
+    function(x, tiles, i, j, lyr = NULL, ...) {
+    checkmate::assert_integerish(j)
+    checkmate::assert_integerish(lyr, null.ok = TRUE)
+    if (!is.null(lyr)) x <- x[[lyr]]
+    if (missing(i)) {
+        if (!.has_active(tiles)) {
+            stop("getTile: tileGroup `i` may only be omitted when an active group is set.\n", call. = FALSE)
+        }
+        i <- tiles@active
+    }
+    g <- x@groups[[i]]
+    if (!.is_ij_group(g)) {
+        # g is vector index
+        getTile(x, tiles[], i = g[j])
+    } else {
+        # expand to ij pairlist then get indices of interest
+        ij <- .g_index(g, j)
+        getTile(x, tiles[], i = ij[[1L]], j = ij[[2L]], expand_grid = FALSE)
+    }
+})
+
+#' @rdname getTile
+#' @export
 setMethod("getTile", signature("SpatRaster", "tileIterator"),
     function(x, tiles, lyr = NULL, ...) {
     checkmate::assert_integerish(lyr, null.ok = TRUE)
     if (!is.null(lyr)) x <- x[[lyr]]
-    getTile(x, tiles = tiles[], i = tiles$next_indices(), ...)
+    if (inherits(tiles[], "tileGroup")) {
+        return(getTile(x, tiles[], j = tiles$next_indices(), ...))
+    }
+    getTile(x, tiles[], i = tiles$next_indices(), ...)
 })
 
 # helpers ####
