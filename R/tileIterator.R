@@ -453,7 +453,7 @@ setMethod("iterSplit", signature("tileIterator"),
     checkmate::assert_integerish(batch_size, null.ok = TRUE, len = 1L, lower = 1L)
     checkmate::assert_integerish(n, len = 1L, lower = 1L)
     n <- as.integer(n)
-    iters <- vector("list", n)
+    iters <- list()
     batch_size <- batch_size %null% tiles$batch_size
 
     if (!distribute) {
@@ -469,7 +469,7 @@ setMethod("iterSplit", signature("tileIterator"),
         return(iters)
     }
 
-    # Distribute tiles evenly across walkers
+    # Distribute tiles evenly across workers
     rem <- tiles$remaining
     tiles_per_iter <- floor(rem / n)
     remainder <- rem %% n
