@@ -10,7 +10,7 @@
 #' @param object object
 NULL
 
-#' @title Get Centroid
+#' @title Get Tile Centroids
 #' @name centroids
 #' @description
 #' Get the centroids of the tiles. For spatialTilePlan, these will be returned

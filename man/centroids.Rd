@@ -6,7 +6,7 @@
 \alias{centroids,tilePlan-method}
 \alias{centroids,pixelTilePlan-method}
 \alias{centroids,spatialTilePlan-method}
-\title{Get Centroid}
+\title{Get Tile Centroids}
 \usage{
 \S4method{centroids}{tilePlan}(x, fun = function(x) x, offset = c(0, 0), zero = FALSE, ...)
 
