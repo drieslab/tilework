@@ -21,7 +21,7 @@ NULL
 #' c(0, 0).
 #' @param fun (internal) post-processing function used to convert centroids to
 #' expected output. Such as `vect()` for `spatialTilePlan`
-#' @param zero logical. Whether to zero out buffer effects. (used by default with
+#' @param zero logical. Whether to zero out padding effects. (used by default with
 #' `pixelTilePlan`)
 #' @param ... additional params to pass.
 #' @examples
@@ -35,7 +35,7 @@ NULL
 #' @name dollar
 #' @description
 #' Get and set iterator tile metadata. Some params can also be modified with
-#' this operator, for example the `$buffer` value or `$pxdims`, `$ncols`, or
+#' this operator, for example the `$pad` value or `$pxdims`, `$ncols`, or
 #' `$nrows` for `pixelTilePlan`.
 #'
 #' `$tile` is a default created piece of metadata.
@@ -113,7 +113,7 @@ NULL
 #' iterator object and ij indices.
 #' @param fun (internal) post-processing function used to convert bounds to
 #' expected output. Such as `ext()` for `spatialTilePlan`
-#' @param zero logical. Whether to zero out buffer effects. (used by default with
+#' @param zero logical. Whether to zero out padding effects. (used by default with
 #' `pixelTilePlan`)
 #' @param expand_grid logical (internal) whether to use `expand.grid()` on ij
 #' indices.
@@ -161,24 +161,24 @@ setMethod("centroids", signature("tilePlan"), function(x, fun = function(x) x, o
 })
 
 #' @name arith
-#' @title Tile Buffers
+#' @title Tile Pads
 #' @description
-#' Tile buffers or padding extend the bounds of the tile beyond the region that
+#' Tile padding extends the bounds of the tile beyond the region that
 #' they are initially planned for by an equal amount on all 4 sides. This can
 #' help with things like spatial contiguity, so that artificial borders are
 #' less obvious.
 #'
-#' Buffers can be added either via [`$buffer`][dollar] or `+` and `-` operators.
-#' The + and - operators specifically modify the buffer value based on the
+#' Padding can be added either via [`$pad`][dollar] or `+` and `-` operators.
+#' The + and - operators specifically modify the padding value based on the
 #' arithmetic ops. This is similar to their usage in [terra::Arith-methods]
 #'
 #' @section spatial and pixel differences:
 #'
-#' * Buffers for spatial iterators are added without any further changes.
-#' * Buffers for pixel iterators are automatically zeroed out against the top
+#' * Padding for spatial tile plans is added without any further changes.
+#' * Padding for pixel tile plans are automatically zeroed out against the top
 #' left
 #' @param e1 `tilePlan`
-#' @param e2 `numeric` to add to buffer
+#' @param e2 `numeric` to add to padding value
 #' @examples
 #' spat <- tilePlan("spatial")
 #' ext(spat) <- c(0, 1000, 0, 1000)
@@ -238,8 +238,8 @@ tilePlan <- function(type = c("spatial", "pixel"), ...) {
 #' @rdname dollar
 #' @export
 setMethod("$<-", signature("tilePlan", "ANY"), function(x, name, value) {
-    if (name == "buffer") {
-        x@buffer <- value
+    if (name == "pad") {
+        x@pad <- value
         return(initialize(x))
     }
     x@metadata[[name]] <- value
@@ -249,7 +249,7 @@ setMethod("$<-", signature("tilePlan", "ANY"), function(x, name, value) {
 #' @rdname dollar
 #' @export
 setMethod("$", signature("tilePlan"), function(x, name) {
-    if (name == "buffer") return(x@buffer)
+    if (name == "pad") return(x@pad)
     x@metadata[[name]]
 })
 
@@ -267,7 +267,7 @@ setMethod(
         p$values <- values
         p$extent_list <- x[]
 
-        if (x@buffer > 0) {
+        if (x@pad > 0) {
             p$alpha  <- p$alpha %null% 0.3
         }
 
@@ -335,7 +335,7 @@ setMethod("[[", signature("tilePlan", i = "numeric", j = "missing"), function(x,
 #' @rdname arith
 #' @export
 setMethod("+", signature("tilePlan", "numeric"), function(e1, e2) {
-    e1@buffer <- e1@buffer + e2
+    e1@pad <- e1@pad + e2
     e1
 })
 
@@ -348,25 +348,25 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
 # helpers ####
 
 .DollarNames.tilePlan <- function(x, pattern) {
-    c(colnames(x@metadata), "buffer")
+    c(colnames(x@metadata), "pad")
 }
 
-# x the extent array
-# buffer is the value to buffer the tiles by. Can be positive or negative
-.do_tile_buffer <- function(x, buffer = 0) {
-    x[[1L]] <- x[[1L]] - buffer
-    x[[2L]] <- x[[2L]] + buffer
-    x[[3L]] <- x[[3L]] - buffer
-    x[[4L]] <- x[[4L]] + buffer
+# x: the extent array
+# pad: is the value to pad the tiles by. Can be positive or negative
+.do_tile_pad <- function(x, pad = 0) {
+    x[[1L]] <- x[[1L]] - pad
+    x[[2L]] <- x[[2L]] + pad
+    x[[3L]] <- x[[3L]] - pad
+    x[[4L]] <- x[[4L]] + pad
     x
 }
 
-# zero out the buffer increase
-.tile_buffer_zero <- function(x, buffer = 0) {
-    x[[1L]] <- x[[1L]] + buffer
-    x[[2L]] <- x[[2L]] + buffer
-    x[[3L]] <- x[[3L]] + buffer
-    x[[4L]] <- x[[4L]] + buffer
+# zero out the pad increase
+.tile_pad_zero <- function(x, pad = 0) {
+    x[[1L]] <- x[[1L]] + pad
+    x[[2L]] <- x[[2L]] + pad
+    x[[3L]] <- x[[3L]] + pad
+    x[[4L]] <- x[[4L]] + pad
     x
 }
 
@@ -437,7 +437,7 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
 #
 # fun: function. Function to run on the output bounds as post-processing
 #   (e.g. ext())
-# zero: logical. Whether to zero out buffer effects.
+# zero: logical. Whether to zero out padding effects.
 .extract_ij_tile <- function(x, i, j,
     expand_grid = TRUE,
     tile_fun = .spat_tile_bounds,
@@ -451,8 +451,8 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
 
     .mapply(function(i, j) {
         e <- tile_fun(x, i, j)
-        e <- .do_tile_buffer(e, x@buffer)
-        if (isTRUE(zero)) e <- .tile_buffer_zero(e, x@buffer)
+        e <- .do_tile_pad(e, x@pad)
+        if (isTRUE(zero)) e <- .tile_pad_zero(e, x@pad)
         e <- fun(e)
         # attach metadata
         n <- .ij_to_tile_idx(x, i, j)
@@ -474,7 +474,7 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
         tile_dims[[2L]] * (j - 0.5) + offset[[2L]],
         tile_dims[[1L]] * (i - 0.5) + offset[[1L]]
     )
-    if (zero) res <- res + x@buffer
+    if (zero) res <- res + x@pad
     res <- matrix(res, ncol = 2, byrow = FALSE)
     res <- fun(res)
     res

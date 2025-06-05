@@ -16,7 +16,7 @@ setClass("giottoTile", contains = "VIRTUAL")
 #' @slot n numeric. Number of tiles to create.
 #' @slot dims numeric. Number of rows/cols in the array of tiles
 #' @slot tile_dims numeric. Row/col dimensions of each tile
-#' @slot buffer numeric. Tile padding/buffering
+#' @slot pad numeric. Tile padding
 #' @slot metadata data.frame. Metadata per tile
 #' @exportClass tilePlan
 #' @seealso [spatialTilePlan-class] and [pixelTilePlan-class] for
@@ -29,11 +29,11 @@ setClass(
         n = "numeric",
         dims = "numeric",
         tile_dims = "numeric",
-        buffer = "numeric",
+        pad = "numeric",
         metadata = "data.frame"
     ),
     prototype = list(
-        buffer = 0
+        pad = 0
     )
 )
 
@@ -42,7 +42,7 @@ setClass(
 #' @slot n numeric. Number of tiles to create.
 #' @slot dims numeric. Number of rows/cols in the array of tiles
 #' @slot tile_dims numeric. Row/col dimensions of each tile
-#' @slot buffer numeric. Tile padding/buffering
+#' @slot pad numeric. Tile padding
 #' @slot metadata data.frame. Metadata per tile
 #' @exportClass spatialTilePlan
 setClass(
@@ -58,7 +58,7 @@ setClass(
 #' @slot n numeric. Number of tiles to create.
 #' @slot dims numeric. Number of rows/cols in the array of tiles
 #' @slot tile_dims numeric. Row/col dimensions of each tile
-#' @slot buffer numeric. Tile padding/buffering
+#' @slot pad numeric. Tile padding
 #' @slot metadata data.frame. Metadata per tile
 #' @exportClass pixelTilePlan
 setClass(
@@ -100,7 +100,7 @@ setClass("tileGroup",
 #' The closures that power this functionality are stored in `@funs`. The stateful
 #' position handling is also internalized within.
 #' @slot funs list of closure methods
-#' @seealso [tileGroupIterator-class]
+#' @seealso [tileIterator]
 #' @exportClass tileIterator
 setClass("tileIterator",
     contains = "giottoTile",

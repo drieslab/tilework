@@ -2,15 +2,18 @@
 % Please edit documentation in R/getTile.R
 \name{getTile}
 \alias{getTile}
-\alias{getTile,character,pixelTilePlan-method}
+\alias{getTile,character,tilePlan-method}
 \alias{getTile,SpatRaster,pixelTilePlan-method}
+\alias{getTile,SpatRaster,spatialTilePlan-method}
 \alias{getTile,SpatRaster,tileGroup-method}
 \alias{getTile,SpatRaster,tileIterator-method}
 \title{Get Tile}
 \usage{
-\S4method{getTile}{character,pixelTilePlan}(x, tiles, ext = NULL, ...)
+\S4method{getTile}{character,tilePlan}(x, tiles, ext = NULL, ...)
 
 \S4method{getTile}{SpatRaster,pixelTilePlan}(x, tiles, i = NULL, j, lyr = NULL, extend = FALSE, fill = NA, ...)
+
+\S4method{getTile}{SpatRaster,spatialTilePlan}(x, tiles, i = NULL, j, lyr = NULL, ...)
 
 \S4method{getTile}{SpatRaster,tileGroup}(x, tiles, i, j, lyr = NULL, ...)
 

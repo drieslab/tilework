@@ -7,7 +7,7 @@
 \alias{+,pixelTilePlan,numeric-method}
 \alias{+,tileGroup,numeric-method}
 \alias{-,tileGroup,numeric-method}
-\title{Tile Buffers}
+\title{Tile Pads}
 \usage{
 \S4method{+}{tilePlan,numeric}(e1, e2)
 
@@ -22,26 +22,26 @@
 \arguments{
 \item{e1}{\code{tilePlan}}
 
-\item{e2}{\code{numeric} to add to buffer}
+\item{e2}{\code{numeric} to add to padding value}
 }
 \value{
 \code{tilePlan}
 }
 \description{
-Tile buffers or padding extend the bounds of the tile beyond the region that
+Tile padding extends the bounds of the tile beyond the region that
 they are initially planned for by an equal amount on all 4 sides. This can
 help with things like spatial contiguity, so that artificial borders are
 less obvious.
 
-Buffers can be added either via \code{\link[=dollar]{$buffer}} or \code{+} and \code{-} operators.
-The + and - operators specifically modify the buffer value based on the
+Padding can be added either via \code{\link[=dollar]{$pad}} or \code{+} and \code{-} operators.
+The + and - operators specifically modify the padding value based on the
 arithmetic ops. This is similar to their usage in \link[terra:arith-generic]{terra::Arith-methods}
 }
 \section{spatial and pixel differences}{
 
 \itemize{
-\item Buffers for spatial iterators are added without any further changes.
-\item Buffers for pixel iterators are automatically zeroed out against the top
+\item Padding for spatial tile plans is added without any further changes.
+\item Padding for pixel tile plans are automatically zeroed out against the top
 left
 }
 }

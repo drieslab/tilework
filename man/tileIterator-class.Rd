@@ -18,5 +18,5 @@ position handling is also internalized within.
 }}
 
 \seealso{
-\linkS4class{tileGroupIterator}
+\link{tileIterator}
 }

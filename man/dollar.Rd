@@ -35,7 +35,7 @@ function.
 }
 \description{
 Get and set iterator tile metadata. Some params can also be modified with
-this operator, for example the \verb{$buffer} value or \verb{$pxdims}, \verb{$ncols}, or
+this operator, for example the \verb{$pad} value or \verb{$pxdims}, \verb{$ncols}, or
 \verb{$nrows} for \code{pixelTilePlan}.
 
 \verb{$tile} is a default created piece of metadata.

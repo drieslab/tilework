@@ -59,7 +59,7 @@ iterator object and ij indices.}
 \item{fun}{(internal) post-processing function used to convert bounds to
 expected output. Such as \code{ext()} for \code{spatialTilePlan}}
 
-\item{zero}{logical. Whether to zero out buffer effects. (used by default with
+\item{zero}{logical. Whether to zero out padding effects. (used by default with
 \code{pixelTilePlan})}
 
 \item{expand_grid}{logical (internal) whether to use \code{expand.grid()} on ij

@@ -41,7 +41,7 @@ test_that("spat extent extraction works", {
     expect_length(spat[2, 1:3], 3)
 })
 
-test_that("buffer setting works", {
+test_that("pad setting works", {
     b1 <- 3
     b2 <- 10
     spat <- tilePlan("spatial")
@@ -49,16 +49,16 @@ test_that("buffer setting works", {
 
     spat <- spat + b1
     pix <- pix + b1
-    expect_equal(spat@buffer, b1)
-    expect_equal(pix@buffer, b1)
+    expect_equal(spat@pad, b1)
+    expect_equal(pix@pad, b1)
 
-    spat$buffer <- b2
-    pix$buffer <- b2
-    expect_equal(spat$buffer, b2)
-    expect_equal(pix$buffer, b2)
+    spat$pad <- b2
+    pix$pad <- b2
+    expect_equal(spat$pad, b2)
+    expect_equal(pix$pad, b2)
 })
 
-test_that("buffer behaves correctly - spatial", {
+test_that("pad behaves correctly - spatial", {
     a <- tilePlan("spatial")
     ext(a) <- c(0, 1000, 0, 1000)
     length(a) <- 20
@@ -69,7 +69,7 @@ test_that("buffer behaves correctly - spatial", {
     expect_equal(e1[[1]][] + c(-5, 5, -5, 5), e2[[1]][])
 })
 
-test_that("buffer behaves correctly - pixel", {
+test_that("pad behaves correctly - pixel", {
     a <- tilePlan("pixel")
     a$pxdims <- c(1000, 1000)
     a$ncols <- 100

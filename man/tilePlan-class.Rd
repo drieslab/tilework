@@ -20,7 +20,7 @@ parallelization.
 
 \item{\code{tile_dims}}{numeric. Row/col dimensions of each tile}
 
-\item{\code{buffer}}{numeric. Tile padding/buffering}
+\item{\code{pad}}{numeric. Tile padding}
 
 \item{\code{metadata}}{data.frame. Metadata per tile}
 }}

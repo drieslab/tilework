@@ -21,7 +21,7 @@ processes. Tile \code{SpatExtent} objects can be extracted on-demand.
 
 \item{\code{tile_dims}}{numeric. Row/col dimensions of each tile}
 
-\item{\code{buffer}}{numeric. Tile padding/buffering}
+\item{\code{pad}}{numeric. Tile padding}
 
 \item{\code{metadata}}{data.frame. Metadata per tile}
 }}
@@ -58,9 +58,9 @@ See metadata section below.
 
 \code{+}/\code{-} can be used to add or subtract padding to each of the tiles. Note
 that this value does not affect the setting or retrieval of extent info via
-\code{ext()} and \verb{ext()<-}. Each bound will be expanded by the buffer value.
-To avoid having to use \code{terra::extend()} when buffered tiles exceed raster
-extent, you can decrease the extent by the same size as the buffer.
+\code{ext()} and \verb{ext()<-}. Each bound will be expanded by the padding value.
+To avoid having to use \code{terra::extend()} when padded tiles exceed raster
+extent, you can decrease the extent by the same size as the padding.
 }
 
 \section{previewing tiles}{
@@ -74,8 +74,8 @@ The \code{spatialTilePlan} object can contain metadata. By default after extent 
 tiles setup, a column called \code{"tile"} will be set up that simply records
 which tile it is.
 \itemize{
-\item \code{$} can be used to view a specific type of metadata and the buffer
-\item \verb{$<-} can be used to set additional metadata items and the buffer.
+\item \code{$} can be used to view a specific type of metadata and the padding value
+\item \verb{$<-} can be used to set additional metadata items and the padding value
 \item \verb{[[i]]} selection will pull specific metadata rows corresponding to the
 selected tiles.
 }
@@ -106,7 +106,7 @@ plot(y, alpha = 0.3)
 plot(ext(x), add = TRUE, border = "red")
 # now this does not exceed the image
 
-# negative buffer
+# negative padding
 z <- x - 5
 plot(ext(x), border = "red")
 plot(z, add = TRUE)

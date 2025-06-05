@@ -41,7 +41,7 @@ NULL
 #' @param ext `numeric` or `SpatExtent` (optional) Set an extent before extracting
 #' tiles.
 #' @export
-setMethod("getTile", signature("character", "pixelTilePlan"),
+setMethod("getTile", signature("character", "tilePlan"),
     function(x, tiles, ext = NULL, ...) {
     checkmate::assert_file_exists(x)
     x <- .create_terra_spatraster(x)
@@ -62,6 +62,21 @@ setMethod("getTile", signature("SpatRaster", "pixelTilePlan"),
 
     lapply(bounds_list, function(b) {
         .px_get_tile(x, tiles, b, extend, fill)
+    })
+})
+
+#' @rdname getTile
+#' @export
+setMethod("getTile", signature("SpatRaster", "spatialTilePlan"),
+    function(x, tiles, i = NULL, j, lyr = NULL, ...) {
+    checkmate::assert_integerish(i)
+    checkmate::assert_integerish(lyr, null.ok = TRUE)
+    if (!is.null(lyr)) x <- x[[lyr]]
+    if (missing(j)) bounds_list <- tiles[i, ...]
+    else bounds_list <- tiles[i, j, ...]
+
+    lapply(bounds_list, function(b) {
+        .spat_get_tile(x, b)
     })
 })
 
@@ -105,7 +120,7 @@ setMethod("getTile", signature("SpatRaster", "tileIterator"),
 
 # Directly get a tile without the overhead
 # x: SpatRaster
-# tiles: tile* object
+# tiles: tile* object (needed since it has the padding info needed for expected dims)
 # b: px bound indices
 .px_get_tile <- function(x, tiles, b, extend = FALSE, fill = NA) {
     # get px tile from x as r
@@ -114,7 +129,7 @@ setMethod("getTile", signature("SpatRaster", "tileIterator"),
            drop = FALSE]
 
     # handle extend and masking
-    pad <- 2 * tiles@buffer # since buffer is added on both sides
+    pad <- 2 * tiles@pad # since padding is added on both sides
     expected_dim <- c(tiles@tile_dims[[1L]] + pad, tiles@tile_dims[[2L]] + pad)
     if (nrow(r) != expected_dim[[1L]] ||
         ncol(r) != expected_dim[[2L]]) {
@@ -129,4 +144,9 @@ setMethod("getTile", signature("SpatRaster", "tileIterator"),
         }
     }
     r
+}
+
+.spat_get_tile <- function(x, b) {
+    terra::window(x) <- b
+    x
 }

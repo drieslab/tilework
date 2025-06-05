@@ -23,7 +23,7 @@ expected output. Such as \code{vect()} for \code{spatialTilePlan}}
 \item{offset}{numeric of length 2. x and y values to offset by. Default is
 c(0, 0).}
 
-\item{zero}{logical. Whether to zero out buffer effects. (used by default with
+\item{zero}{logical. Whether to zero out padding effects. (used by default with
 \code{pixelTilePlan})}
 
 \item{...}{additional params to pass.}

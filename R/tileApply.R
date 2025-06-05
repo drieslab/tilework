@@ -4,59 +4,289 @@
 #' @include spatialTilePlan.R
 #' @include tileGroup.R
 
+# docs ####
+
+# TODO dual input (y) methods
+# TODO pad_y so x has full y context
+
 #' @name tileApply
-#' @title Apply Across Spatial Tiles
+#' @title Apply Functions Across Spatial Tiles
 #' @description
-#' Apply a function across spatial tiles to both speed up processing and keep
-#' memory usage reasonable for large operations. This function also hooks into
-#' the \{future\} parallelization framework.
+#' Apply a function across spatial tiles to speed up processing and manage
+#' memory usage for large data operations. This function dispatches to
+#' different processing methods based on the tile type.
 #'
-#' @section SpatRaster:
-#' This function currently only works for single source SpatRasters. Support
-#' for applying across affine transformed images is still under development.
+#' @section Tile Processing Methods:
+#' - **Basic tiling**: See [tileApply-plan] for `spatialTilePlan` and `pixelTilePlan`
+#' - **Group processing**: See [tileApply-group] for `tileGroup` hierarchical processing
+#' - **Iterator processing**: See [tileApply-iterator] for `tileIterator` streaming/batch processing
 #'
-#' @param x object to tile apply
-#' @param FUN function to run across tiles. The first param must be the
-#' `SpatRaster` object. Additional special parameters can be optionally included.
+#' @param x input data 1
+#' @param y input data 2 (optional)
+#' @param tiles tile object (`tilePlan`, `tileGroup`, or `tileIterator`)
+#' @param FUN function to apply across tiles
+#' @param pad_y numeric. Additional padding applied to `y` tiling so `x` has full
+#' spatial context of `y`
+#' @param ... additional arguments passed to specific methods
 #'
-#' * `.I` can be used as the tile number.
-#' * `.TILE` is the tilePlan output for that `.I`. It will include the
-#' bounds and attached metdata attributes.
-#' * `.R` is the tile row number
-#' * `.C` is the tile col number.
-#' @param tiles `tile*` object that defines the tiles to apply on.
-#' @param lyr numeric. Layer number(s) to use
-#' @param log logical. Whether to log processing steps to file.
-#' @param logpath filepath. Filepath to log to. Otherwise, a temporary file
-#' will be used.
-#' @inheritParams GiottoUtils::lapply_flex
-#' @param \dots additonal params to pass to [future.apply::future_lapply()]
-#' @seealso [GiottoUtils::lapply_flex()] for the function passing to future.
+#' @seealso [tileApply-plan], [tileApply-group], [tileApply-iterator]
 #' @examples
-#' f <- system.file("ex/elev.tif", package="terra")
-#' r <- terra::rast(f)
-#' tp <- tilePlan()
-#' ext(tp) <- ext(r)
-#' length(tp) <- 4
-#'
-#' outdir <- file.path(tempdir(), "testwrite")
-#' dir.create(outdir)
-#'
-#' tileApply(r, tiles = tp, lyr = 1, FUN = function(x, .I) {
-#'     terra::writeRaster(x,
-#'         filename = file.path(outdir, sprintf("tile_%03d.tif", .I)))
-#' })
-#' list.files(outdir)
-#'
-#' r1 <- terra::rast(file.path(outdir, "tile_001.tif"))
-#' plot(r1)
-#'
-#' # remove
-#' rm(r1)
-#' unlink(outdir, recursive = TRUE, force = TRUE)
+#' # See specific help pages for detailed examples:
+#' # ?`tileApply-plan`     # Basic spatial/pixel tiling
+#' # ?`tileApply-group`    # Hierarchical tile groups
+#' # ?`tileApply-iterator` # Streaming batch processing
 NULL
 
-#' @rdname tileApply
+#' @name tileApply-plan
+#' @title Basic Tile Processing
+#' @description
+#' Apply functions across `tilePlan`-inheriting objects.
+#'
+#' @section Special Function Parameters:
+#' Your `FUN` can optionally include these special parameters:
+#' - `.I` - tile number (integer)
+#' - `.TILE` - tile bounds/metadata
+#' - `.R` - tile row number
+#' - `.C` - tile column number
+#'
+#' @param x input data 1
+#' @param y input data 2 (optional)
+#' @param tiles `tilePlan` inheriting object (`spatialTilePlan` or `pixelTilePlan`)
+#' @param FUN function to apply to each tile
+#' @param pad_y numeric. Additional padding applied to `y` tiling so `x` has full
+#' spatial context of `y`
+#' @param lyr numeric. Layer number(s) to use (optional)
+#' @param future.seed logical. Enable reproducible random seeds
+#' @param log logical. Whether to log processing steps
+#' @param logpath character. Log file path (if log = `TRUE`)
+#' @param extend logical. For `pixelTilePlan`, extend tiles to expected dimensions
+#' @param fill numeric. Fill value when extending tiles
+#' @param ... additional arguments passed to future.apply
+#'
+#' @seealso [tileApply], [tilePlan()], [spatialTilePlan-class], [pixelTilePlan-class]
+#'
+#' @examples
+#' f <- system.file("ex/elev.tif", package = "terra")
+#' r <- terra::rast(f)
+#'
+#' # Spatial tiling example
+#' tp_spatial <- tilePlan("spatial")
+#' ext(tp_spatial) <- ext(r)
+#' length(tp_spatial) <- 4
+#'
+#' # Apply function with tile metadata
+#' results <- tileApply(r, tiles = tp_spatial, FUN = function(tile, .I, .R, .C) {
+#'   list(
+#'     tile_id = .I,
+#'     position = paste0("row_", .R, "_col_", .C),
+#'     mean_value = terra::global(tile, "mean", na.rm = TRUE)[[1]]
+#'   )
+#' })
+#' force(results)
+#'
+#' # Pixel tiling example
+#' tp_pixel <- tilePlan("pixel")
+#' tp_pixel$pxdims <- dim(r)[1:2]
+#' tp_pixel$nrows <- 50
+#' tp_pixel$ncols <- 50
+#'
+#' # Save tiles to disk
+#' outdir <- file.path(tempdir(), "tiles")
+#' dir.create(outdir, showWarnings = FALSE)
+#'
+#' tileApply(r, tiles = tp_pixel, FUN = function(tile, .I) {
+#'   filename <- file.path(outdir, sprintf("tile_%03d.tif", .I))
+#'   terra::writeRaster(tile, filename, overwrite = TRUE)
+#'   return(filename)
+#' })
+#'
+#' list.files(outdir)
+#' unlink(outdir, recursive = TRUE)
+NULL
+
+#' @name tileApply-group
+#' @title Hierarchical Tile Group Processing
+#' @description
+#' Apply functions across tileGroup objects with control over parallelization
+#' strategy. Useful when tiles are organized into logical groups that need
+#' different processing or aggregation.
+#'
+#' @section Parallelization Strategies:
+#' - `"groups"` - Process groups in parallel, tiles within groups sequentially
+#' - `"tiles"` - Process groups sequentially, tiles within groups in parallel
+#'
+#' @section Special Function Parameters:
+#' Your `FUN` can optionally include these special parameters:
+#' - `.I` - tile number (integer)
+#' - `.TILE` - tile bounds/metadata
+#' - `.R` - tile row number
+#' - `.C` - tile column number
+#' - `.GROUP` - current group name (character)
+#'
+#' @param x input data 1
+#' @param y input data 2 (optional)
+#' @param tiles `tileGroup` object
+#' @param FUN function to apply to each tile
+#' @param pad_y numeric. Additional padding applied to `y` tiling so `x` has full
+#' spatial context of `y`
+#' @param parallel_strategy character. "groups" or "tiles"
+#' @param group_FUN function. Optional function to apply to each group's results
+#' @param lyr numeric. Layer number(s) to use (optional)
+#' @param future.seed logical. Enable reproducible random seeds
+#' @param log logical. Whether to log processing steps
+#' @param logpath character. Log file path (if log = `TRUE`)
+#' @param simplify logical. Whether to flatten group results into single list
+#' @param ... additional arguments passed to future.apply
+#'
+#' @seealso [tileApply], [tileGroup()], [tileGroup-class]
+#'
+#' @examples
+#' f <- system.file("ex/elev.tif", package = "terra")
+#' r <- terra::rast(f)
+#'
+#' # Create tile plan
+#' tp <- tilePlan("spatial")
+#' ext(tp) <- ext(r)
+#' length(tp) <- 16
+#'
+#' # Organize into groups (e.g., by geographic region)
+#' tg <- tileGroup(tp, groups = list(
+#'   "north" = 1:8,      # northern tiles
+#'   "south" = 9:16,     # southern tiles
+#'   "corners" = c(1, 4, 13, 16)  # corner tiles
+#' ))
+#'
+#' # Process groups in parallel, with group-level aggregation
+#' results <- tileApply(r, tiles = tg,
+#'   parallel_strategy = "groups",
+#'   FUN = function(tile, .I, .GROUP) {
+#'     # Process individual tile
+#'     list(
+#'       tile_id = .I,
+#'       group = .GROUP,
+#'       stats = terra::global(tile, c("mean", "sd"), na.rm = TRUE)
+#'     )
+#'   },
+#'   group_FUN = function(group_results, .GROUP) {
+#'     # Aggregate results within each group
+#'     means <- sapply(group_results, function(x) x$stats$mean)
+#'     list(
+#'       group = .GROUP,
+#'       n_tiles = length(group_results),
+#'       group_mean = mean(means),
+#'       group_range = range(means)
+#'     )
+#'   }
+#' )
+#'
+#' # Results organized by group
+#' str(results)
+NULL
+
+#' @name tileApply-iterator
+#' @title Streaming Tile Processing with Iterators
+#' @description
+#' Apply functions using tileIterator objects for memory-constrained batch
+#' processing. Ideal for very large datasets or when you need fine control
+#' over processing workflow.
+#'
+#' @section Worker Distribution:
+#' The iterator automatically splits tiles across available workers, with each
+#' worker processing its assigned tiles in batches.
+#'
+#' @section Special Function Parameters:
+#' Your `FUN` can optionally include these special parameters:
+#' - `.I` - tile number (integer)
+#' - `.TILE` - tile bounds/metadata
+#' - `.R` - tile row number
+#' - `.C` - tile column number
+#' - `.POSITION` - batch position range (start, end)
+#' - `.BATCH` - batch number within worker
+#' - `.WORKER_STATE` - the output of `setup_FUN`
+#'
+#' Your `setup_FUN` can optionally include these special parameters:
+#' - `.W` - worker number
+#' - `.X` - the input `x` object.
+#'
+#' @param x input data 1
+#' @param y input data 2 (optional)
+#' @param tiles `tileIterator` object
+#' @param FUN function to apply to each batch of tiles
+#' @param setup_FUN function. Optional per-worker initialization function. Output
+#' is accessible within `FUN` as `.WORKER_STATE`
+#' @param pad_y numeric. Additional padding applied to `y` tiling so `x` has full
+#' spatial context of `y`
+#' @param lyr numeric. Layer number(s) to use (optional)
+#' @param future.seed logical. Enable reproducible random seeds
+#' @param log logical. Whether to log processing steps
+#' @param logpath character. Log file path (if log = `TRUE`)
+#' @param simplify logical. Whether to flatten results
+#' @param ... additional arguments
+#'
+#' @seealso [tileApply], [tileIterator()], [tileIterator-class]
+#'
+#' @examples
+#' f <- system.file("ex/elev.tif", package = "terra")
+#' r <- terra::rast(f)
+#'
+#' # Create pixel tile plan
+#' tp <- tilePlan("pixel")
+#' tp$pxdims <- dim(r)[1:2]
+#' tp$nrows <- 30
+#' tp$ncols <- 30
+#'
+#' # Create iterator for batch processing
+#' iter <- tileIterator(tp, batch_size = 5)
+#'
+#' # Process with worker initialization
+#' results <- tileApply(r, tiles = iter,
+#'   setup_FUN = function(.W, .X) {
+#'     # Initialize per-worker state
+#'     list(
+#'       worker_id = .W,
+#'       start_time = Sys.time(),
+#'       raster_info = list(nrow = nrow(.X), ncol = ncol(.X))
+#'     )
+#'   },
+#'   FUN = function(batch, .BATCH, .POSITION, .WORKER_STATE) {
+#'     # Process batch of tiles
+#'     batch_stats <- lapply(batch, function(tile) {
+#'       terra::global(tile, "mean", na.rm = TRUE)[[1]]
+#'     })
+#'
+#'     list(
+#'       worker = .WORKER_STATE$worker_id,
+#'       batch_num = .BATCH,
+#'       tiles_processed = .POSITION,
+#'       batch_mean = mean(unlist(batch_stats))
+#'     )
+#'   }
+#' )
+#'
+#' # Check results structure
+#' str(results)
+#'
+#' # Example: Streaming processing for memory management
+#' large_iter <- tileIterator(tp, batch_size = 3)
+#' processed_count <- 0
+#'
+#' while (large_iter$has_next) {
+#'   batch <- getTile(r, large_iter)
+#'
+#'   # Process batch
+#'   batch_results <- lapply(batch, function(tile) {
+#'     # Your processing here
+#'     terra::global(tile, "mean")
+#'   })
+#'
+#'   processed_count <- processed_count + length(batch)
+#'   cat("Processed", processed_count, "of", length(tp), "tiles\n")
+#' }
+NULL
+
+# methods ####
+
+#' @rdname tileApply-plan
 #' @export
 setMethod("tileApply", signature("SpatRaster", "missing", "spatialTilePlan"), function(x, FUN, tiles,
     lyr = NULL,
@@ -92,7 +322,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "spatialTilePlan"), fu
 
             if (log) {
                 vmsg(.v = "log", tile_id, "extent:", .ext_to_num_vec(tile_ext), .log_path = logpath)
-                vmsg(.v = "log", tile_id, "buffer:", tiles@buffer, .log_path = logpath)
+                vmsg(.v = "log", tile_id, "pad:", tiles@pad, .log_path = logpath)
             }
 
             if (!is.null(lyr)) {
@@ -117,7 +347,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "spatialTilePlan"), fu
     })
 })
 
-#' @rdname tileApply
+#' @rdname tileApply-plan
 #' @param extend whether to [terra::extend] data to fit expected tile dimensions
 #' @param fill numeric. Value to use use for new raster cells if `extend = TRUE`
 #' @export
@@ -158,7 +388,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTilePlan"), func
 
             if (log) {
                 vmsg(.v = "log", tile_id, "px bounds:", pxb, .log_path = logpath)
-                vmsg(.v = "log", tile_id, "buffer:", tiles@buffer, .log_path = logpath)
+                vmsg(.v = "log", tile_id, "pad:", tiles@pad, .log_path = logpath)
             }
 
             if (!is.null(lyr)) { # layer selection
@@ -186,7 +416,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTilePlan"), func
     })
 })
 
-#' @rdname tileApply
+#' @rdname tileApply-group
 #' @param parallel_strategy character. `"groups"` to parallelize across groups,
 #'   `"tiles"` to parallelize within groups
 #' @param group_FUN function. Optional function to apply to each group's results
@@ -243,7 +473,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileGroup"),
     )
 })
 
-#' @rdname tileApply
+#' @rdname tileApply-iterator
 #' @export
 setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
     function(x, FUN, tiles,
@@ -468,10 +698,10 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
         }
         # logging ---- #
 
-        tile <- getTile(r, tiles = tg[], i = tile_idx, ...)
+        tile <- getTile(r, tiles = tg[], i = tile_idx, ...) # returns as list
 
         # Prepare function arguments
-        a <- list(tile)
+        a <- list(tile[[1L]])
         nf <- names(formals(FUN))
         if (".I" %in% nf) a$.I <- tile_idx
         if (".TILE" %in% nf) a$.TILE <- b
@@ -498,7 +728,7 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
     ext(r) <- e
 
     blist <- tg[group]
-    results <- vector("list", length = blist)
+    results <- vector("list", length = length(blist))
 
     for (idx_pos in seq_along(blist)) {
         b <- blist[[idx_pos]]
@@ -514,10 +744,10 @@ setMethod("tileApply", signature("SpatRaster", "missing", "tileIterator"),
         }
         # logging ---- #
 
-        tile <- getTile(r, tiles = tg[], i = tile_idx, ...)
+        tile <- getTile(r, tiles = tg[], i = tile_idx, ...) # returns as list
 
         # Prepare function arguments
-        a <- list(tile)
+        a <- list(tile[[1L]])
         nf <- names(formals(FUN))
         if (".I" %in% nf) a$.I <- tile_idx
         if (".TILE" %in% nf) a$.TILE <- b

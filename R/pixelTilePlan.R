@@ -18,7 +18,7 @@
 #'
 #' @section padding:
 #' `+`/`-` can be used to add or subtract padding to each of the tiles.
-#' Each bound will be expanded by the buffer value. Buffer values may only be
+#' Each bound will be expanded by the pad value. Pad values may only be
 #' integer values.
 #'
 #' @section previewing tiles:
@@ -31,7 +31,7 @@
 #'
 #' * `$` and `$<-` can be used to get and set specific metadata, the `"pxdims"`
 #'   which are the pixel dimensions of the image to iterate across, `"ncols"`
-#'   and `"nrows"` which are the px dims of a tile, and the `"buffer"` value.
+#'   and `"nrows"` which are the px dims of a tile, and the `"pad"` value.
 #' * `[[i]]` selection will pull specific metadata rows corresponding to the
 #' selected tiles.
 #' @examples
@@ -52,7 +52,7 @@
 #' plot(y, alpha = 0.3) # red border shows the image space
 #' # this is now larger than the original space.
 #'
-#' # negative buffer
+#' # negative padding
 #' z <- x - 5
 #' plot(ext(c(0, 100, -100, 0)))
 #' plot(z, add = TRUE)
@@ -77,7 +77,7 @@ setMethod("initialize", signature("pixelTilePlan"), function(.Object, ...) {
     if (!is.null(dots$tile_dims)) .Object@tile_dims <- dots$tile_dims
     if (!is.null(dots$n)) .Object@n <- dots$n
     if (!is.null(dots$tiles)) .Object@tiles <- dots$tiles
-    if (!is.null(dots$buffer)) .Object@buffer <- dots$buffer
+    if (!is.null(dots$pad)) .Object@pad <- dots$pad
     if (!is.null(dots$metadata)) .Object@metadata <- dots$metadata
 
     # initialize vals
@@ -162,7 +162,7 @@ setMethod("show", signature("pixelTilePlan"), function(object) {
         pxrows = object@tile_dims[[1L]],
         pxcol = object@tile_dims[[2L]],
         dim = toString(c(dim(object)[[1]], dim(object)[[2]])),
-        buffer = object@buffer
+        pad = object@pad
     )
     GiottoUtils::print_list(plist)
 })
@@ -177,7 +177,7 @@ setMethod("[", signature(x = "pixelTilePlan", i = "numeric", j = "numeric", drop
 #' @export
 setMethod("+", signature("pixelTilePlan", "numeric"), function(e1, e2) {
     checkmate::assert_integerish(e2)
-    e1@buffer <- e1@buffer + e2
+    e1@pad <- e1@pad + e2
     e1
 })
 
@@ -202,7 +202,7 @@ setMethod("centroids", signature("pixelTilePlan"), function(x, fun = function(x)
 
 #' @export
 .DollarNames.pixelTilePlan <- function(x, pattern) {
-    c(colnames(x@metadata), "ncols", "nrows", "pxdims", "buffer")
+    c(colnames(x@metadata), "ncols", "nrows", "pxdims", "pad")
 }
 
 # x: tilePlan or matrix-like

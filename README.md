@@ -13,7 +13,7 @@ For another approach to spatially tiled computation, see: [chopin](https://githu
 - Memory Efficient: Process tilewise or batchwise without loading entire datasets into memory
 - Stateful Iteration: Iterator patterns for streaming and batch processing
 - Parallel Processing: Built-in support for parallel execution via the {future} framework
-- Flexible Buffering: Add padding around tiles to handle edge effects
+- Flexible Padding: Add padding around tiles to handle edge effects
 - Metadata Support: Attach custom metadata to tiles for advanced workflows
 - Terra Integration: Seamless integration with the {terra} package for spatial data handling
 
@@ -84,7 +84,7 @@ tileApply(r, tp = px, FUN = function(x) {
 Virtual base class for all tile iterators with common functionality:
 
 - Tile indexing with `[i]` and `[i,j]` notation
-- Buffering with `+` and `-` operators
+- Padding with `+` and `-` operators
 - Metadata management with `$` accessor
 - Plotting capabilities
 
@@ -230,18 +230,18 @@ tileApply(r, tiles = tg,
 
 # Advanced Features
 
-## Tile Buffering
+## Tile Padding
 
 Add padding around tiles to handle edge effects:
 ```r
-# Add 10-unit buffer to all tiles
-buffered_ti <- tp + 10
+# Add 10-unit padding to all tiles
+padded_ti <- tp + 10
 
-# Remove 5-unit buffer
+# Remove 5-unit padding
 reduced_ti <- tp - 5
 
-# Preview buffered tiles
-plot(buffered_ti, alpha = 0.3)
+# Preview padded tiles
+plot(padded_ti, alpha = 0.3)
 ```
 
 ## Metadata Management
@@ -315,7 +315,7 @@ all_tiles <- tp[]
 # Best Practices
 
 1. Memory Management: Use appropriate tile sizes to balance memory usage and processing efficiency
-2. Buffer Planning: Consider buffer requirements for spatial operations to avoid edge effects
+2. Pad Planning: Consider padding requirements for spatial operations to avoid edge effects
 3. Parallel Strategy: Choose between parallelizing across groups vs. within groups based on your workflow
 4. Metadata Usage: Leverage metadata for complex processing logic and file organization
 5. Iterator Patterns: Use stateful iterators for streaming large datasets that don't fit in memory
@@ -333,8 +333,8 @@ tp <- tilePlan("spatial")
 ext(tp) <- ext(large_raster)
 length(tp) <- 100  # 100+ tiles for manageable processing
 
-# Add buffer for edge effects
-tp <- tp + 50  # 50-unit buffer
+# Add padding for edge effects
+tp <- tp + 50  # 50-unit padding
 
 # Process tiles in parallel
 plan(multisession, workers = 8)

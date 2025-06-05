@@ -164,7 +164,7 @@ setMethod("lengths", signature("tileGroup"), function(x, use.names = TRUE) {
     l
 })
 
-# Arithmetic operations - apply buffer to underlying iterator
+# Arithmetic operations - apply padding to underlying iterator
 #' @rdname arith
 #' @export
 setMethod("+", signature("tileGroup", "numeric"), function(e1, e2) {

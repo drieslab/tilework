@@ -2,134 +2,41 @@
 % Please edit documentation in R/tileApply.R
 \name{tileApply}
 \alias{tileApply}
-\alias{tileApply,SpatRaster,missing,spatialTilePlan-method}
-\alias{tileApply,SpatRaster,missing,pixelTilePlan-method}
-\alias{tileApply,SpatRaster,missing,tileGroup-method}
-\alias{tileApply,SpatRaster,missing,tileIterator-method}
-\title{Apply Across Spatial Tiles}
-\usage{
-\S4method{tileApply}{SpatRaster,missing,spatialTilePlan}(
-  x,
-  FUN,
-  tiles,
-  lyr = NULL,
-  future.seed = TRUE,
-  log = FALSE,
-  logpath = tempdir(),
-  ...
-)
-
-\S4method{tileApply}{SpatRaster,missing,pixelTilePlan}(
-  x,
-  FUN,
-  tiles,
-  lyr = NULL,
-  extend = TRUE,
-  fill = NA,
-  future.seed = TRUE,
-  log = FALSE,
-  logpath = tempdir(),
-  ...
-)
-
-\S4method{tileApply}{SpatRaster,missing,tileGroup}(
-  x,
-  FUN,
-  tiles,
-  parallel_strategy = c("groups", "tiles"),
-  group_FUN = NULL,
-  lyr = NULL,
-  future.seed = TRUE,
-  log = FALSE,
-  logpath = tempdir(),
-  simplify = FALSE,
-  ...
-)
-
-\S4method{tileApply}{SpatRaster,missing,tileIterator}(
-  x,
-  FUN,
-  tiles,
-  setup_FUN = NULL,
-  lyr = NULL,
-  future.seed = TRUE,
-  log = FALSE,
-  logpath = tempdir(),
-  simplify = FALSE,
-  ...
-)
-}
+\title{Apply Functions Across Spatial Tiles}
 \arguments{
-\item{x}{object to tile apply}
+\item{x}{input data 1}
 
-\item{FUN}{function to run across tiles. The first param must be the
-\code{SpatRaster} object. Additional special parameters can be optionally included.
-\itemize{
-\item \code{.I} can be used as the tile number.
-\item \code{.TILE} is the tilePlan output for that \code{.I}. It will include the
-bounds and attached metdata attributes.
-\item \code{.R} is the tile row number
-\item \code{.C} is the tile col number.
-}}
+\item{y}{input data 2 (optional)}
 
-\item{tiles}{\verb{tile*} object that defines the tiles to apply on.}
+\item{tiles}{tile object (\code{tilePlan}, \code{tileGroup}, or \code{tileIterator})}
 
-\item{lyr}{numeric. Layer number(s) to use}
+\item{FUN}{function to apply across tiles}
 
-\item{future.seed}{whether to set a seed when using \code{method = "future"}}
+\item{pad_y}{numeric. Additional padding applied to \code{y} tiling so \code{x} has full
+spatial context of \code{y}}
 
-\item{log}{logical. Whether to log processing steps to file.}
-
-\item{logpath}{filepath. Filepath to log to. Otherwise, a temporary file
-will be used.}
-
-\item{\dots}{additonal params to pass to \code{\link[future.apply:future_lapply]{future.apply::future_lapply()}}}
-
-\item{extend}{whether to \link[terra:extend]{terra::extend} data to fit expected tile dimensions}
-
-\item{fill}{numeric. Value to use use for new raster cells if \code{extend = TRUE}}
-
-\item{parallel_strategy}{character. \code{"groups"} to parallelize across groups,
-\code{"tiles"} to parallelize within groups}
-
-\item{group_FUN}{function. Optional function to apply to each group's results}
-
-\item{group_sequential}{logical. If TRUE, process groups sequentially}
+\item{...}{additional arguments passed to specific methods}
 }
 \description{
-Apply a function across spatial tiles to both speed up processing and keep
-memory usage reasonable for large operations. This function also hooks into
-the \{future\} parallelization framework.
+Apply a function across spatial tiles to speed up processing and manage
+memory usage for large data operations. This function dispatches to
+different processing methods based on the tile type.
 }
-\section{SpatRaster}{
+\section{Tile Processing Methods}{
 
-This function currently only works for single source SpatRasters. Support
-for applying across affine transformed images is still under development.
+\itemize{
+\item \strong{Basic tiling}: See \link{tileApply-plan} for \code{spatialTilePlan} and \code{pixelTilePlan}
+\item \strong{Group processing}: See \link{tileApply-group} for \code{tileGroup} hierarchical processing
+\item \strong{Iterator processing}: See \link{tileApply-iterator} for \code{tileIterator} streaming/batch processing
+}
 }
 
 \examples{
-f <- system.file("ex/elev.tif", package="terra")
-r <- terra::rast(f)
-tp <- tilePlan()
-ext(tp) <- ext(r)
-length(tp) <- 4
-
-outdir <- file.path(tempdir(), "testwrite")
-dir.create(outdir)
-
-tileApply(r, tiles = tp, lyr = 1, FUN = function(x, .I) {
-    terra::writeRaster(x,
-        filename = file.path(outdir, sprintf("tile_\%03d.tif", .I)))
-})
-list.files(outdir)
-
-r1 <- terra::rast(file.path(outdir, "tile_001.tif"))
-plot(r1)
-
-# remove
-rm(r1)
-unlink(outdir, recursive = TRUE, force = TRUE)
+# See specific help pages for detailed examples:
+# ?`tileApply-plan`     # Basic spatial/pixel tiling
+# ?`tileApply-group`    # Hierarchical tile groups
+# ?`tileApply-iterator` # Streaming batch processing
 }
 \seealso{
-\code{\link[GiottoUtils:lapply_flex]{GiottoUtils::lapply_flex()}} for the function passing to future.
+\link{tileApply-plan}, \link{tileApply-group}, \link{tileApply-iterator}
 }

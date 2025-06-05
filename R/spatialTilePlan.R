@@ -38,10 +38,10 @@
 #' @section padding:
 #' `+`/`-` can be used to add or subtract padding to each of the tiles. Note
 #' that this value does not affect the setting or retrieval of extent info via
-#' `ext()` and `ext()<-`. Each bound will be expanded by the buffer value.
+#' `ext()` and `ext()<-`. Each bound will be expanded by the padding value.
 
-#' To avoid having to use `terra::extend()` when buffered tiles exceed raster
-#' extent, you can decrease the extent by the same size as the buffer.
+#' To avoid having to use `terra::extend()` when padded tiles exceed raster
+#' extent, you can decrease the extent by the same size as the padding.
 #'
 #' @section previewing tiles:
 #' `plot()` can be used to check the layout of the tiles.
@@ -51,8 +51,8 @@
 #' tiles setup, a column called `"tile"` will be set up that simply records
 #' which tile it is.
 #'
-#' * `$` can be used to view a specific type of metadata and the buffer
-#' * `$<-` can be used to set additional metadata items and the buffer.
+#' * `$` can be used to view a specific type of metadata and the padding value
+#' * `$<-` can be used to set additional metadata items and the padding value
 #' * `[[i]]` selection will pull specific metadata rows corresponding to the
 #' selected tiles.
 #'
@@ -81,7 +81,7 @@
 #' plot(ext(x), add = TRUE, border = "red")
 #' # now this does not exceed the image
 #'
-#' # negative buffer
+#' # negative padding
 #' z <- x - 5
 #' plot(ext(x), border = "red")
 #' plot(z, add = TRUE)
@@ -160,7 +160,7 @@ setMethod("show", signature("spatialTilePlan"), function(object) {
             paste(.ext_to_num_vec(e), collapse = ", ")
         ),
         dim = paste(dim(object), collapse = " "),
-        buffer = object@buffer
+        pad = object@pad
     )
     print_list(plist)
 })

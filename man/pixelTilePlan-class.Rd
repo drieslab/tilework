@@ -20,7 +20,7 @@ easy to setup and manipulate using \code{$} and \verb{$<-} generics.
 
 \item{\code{tile_dims}}{numeric. Row/col dimensions of each tile}
 
-\item{\code{buffer}}{numeric. Tile padding/buffering}
+\item{\code{pad}}{numeric. Tile padding}
 
 \item{\code{metadata}}{data.frame. Metadata per tile}
 }}
@@ -37,7 +37,7 @@ have metadata attached via \code{attr()}. See metadata section below.
 \section{padding}{
 
 \code{+}/\code{-} can be used to add or subtract padding to each of the tiles.
-Each bound will be expanded by the buffer value. Buffer values may only be
+Each bound will be expanded by the pad value. Pad values may only be
 integer values.
 }
 
@@ -54,7 +54,7 @@ which tile it is.
 \itemize{
 \item \code{$} and \verb{$<-} can be used to get and set specific metadata, the \code{"pxdims"}
 which are the pixel dimensions of the image to iterate across, \code{"ncols"}
-and \code{"nrows"} which are the px dims of a tile, and the \code{"buffer"} value.
+and \code{"nrows"} which are the px dims of a tile, and the \code{"pad"} value.
 \item \verb{[[i]]} selection will pull specific metadata rows corresponding to the
 selected tiles.
 }
@@ -78,7 +78,7 @@ y <- x + 3
 plot(y, alpha = 0.3) # red border shows the image space
 # this is now larger than the original space.
 
-# negative buffer
+# negative padding
 z <- x - 5
 plot(ext(c(0, 100, -100, 0)))
 plot(z, add = TRUE)
