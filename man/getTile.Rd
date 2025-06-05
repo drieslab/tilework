@@ -44,7 +44,12 @@ expected tile dimensions}
 \code{list} of tile data
 }
 \description{
-Get a specific tile from the data.
+Get specific tile(s) from the data based on a \verb{tile*} object. Indexing via
+\code{i} and \code{j} params is used to select the tile(s) to get, in a manner similar
+to \code{[} extraction of bounds from \verb{tile*} objects.
+
+This generic handles data/\verb{tile*} object interactions. For simple selection
+of data based on a set of bounds, see the low-level generic \code{\link[=getBoundedData]{getBoundedData()}}.
 }
 \examples{
 f <- system.file("ex/elev.tif", package="terra")
@@ -63,4 +68,7 @@ plot(tile_list[[1]])
 iter <- tileIterator(tp, batch_size = 3)
 b1 <- getTile(r, iter) # get first batch of 3...
 b2 <- getTile(r, iter) # get second batch of 3...
+}
+\seealso{
+\code{\link[=getBoundedData]{getBoundedData()}}
 }

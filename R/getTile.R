@@ -5,7 +5,12 @@
 #' @name getTile
 #' @title Get Tile
 #' @description
-#' Get a specific tile from the data.
+#' Get specific tile(s) from the data based on a `tile*` object. Indexing via
+#' `i` and `j` params is used to select the tile(s) to get, in a manner similar
+#' to `[` extraction of bounds from `tile*` objects.
+#'
+#' This generic handles data/`tile*` object interactions. For simple selection
+#' of data based on a set of bounds, see the low-level generic [getBoundedData()].
 #' @param x data
 #' @param tiles `tile*` object
 #' @param i tile vector or row index if `j` is also provided
@@ -16,6 +21,7 @@
 #' @param fill numeric. if `extend = TRUE`, what value to fill with
 #' @param advance logical (default = TRUE). Whether to advance the iterator.
 #' @returns `list` of tile data
+#' @seealso [getBoundedData()]
 #' @examples
 #' f <- system.file("ex/elev.tif", package="terra")
 #' r <- terra::rast(f)
@@ -35,7 +41,7 @@
 #' b2 <- getTile(r, iter) # get second batch of 3...
 NULL
 
-# TODO getTile methods for spatialTilePlan
+
 
 #' @rdname getTile
 #' @param ext `numeric` or `SpatExtent` (optional) Set an extent before extracting
@@ -61,7 +67,7 @@ setMethod("getTile", signature("SpatRaster", "pixelTilePlan"),
     else bounds_list <- tiles[i, j, ...]
 
     lapply(bounds_list, function(b) {
-        .px_get_tile(x, tiles, b, extend, fill)
+        getBoundedData(x, b, tiles = tiles, extend = extend, fill = fill)
     })
 })
 
@@ -76,7 +82,7 @@ setMethod("getTile", signature("SpatRaster", "spatialTilePlan"),
     else bounds_list <- tiles[i, j, ...]
 
     lapply(bounds_list, function(b) {
-        .spat_get_tile(x, b)
+        getBoundedData(x, b)
     })
 })
 
@@ -115,38 +121,3 @@ setMethod("getTile", signature("SpatRaster", "tileIterator"),
     }
     getTile(x, tiles[], i = tiles$next_indices(advance = advance), ...)
 })
-
-# helpers ####
-
-# Directly get a tile without the overhead
-# x: SpatRaster
-# tiles: tile* object (needed since it has the padding info needed for expected dims)
-# b: px bound indices
-.px_get_tile <- function(x, tiles, b, extend = FALSE, fill = NA) {
-    # get px tile from x as r
-    r <- x[b[[3]]:min(nrow(x), b[[4]]), # rows (y)
-           b[[1]]:min(ncol(x), b[[2]]), # cols (x)
-           drop = FALSE]
-
-    # handle extend and masking
-    pad <- 2 * tiles@pad # since padding is added on both sides
-    expected_dim <- c(tiles@tile_dims[[1L]] + pad, tiles@tile_dims[[2L]] + pad)
-    if (nrow(r) != expected_dim[[1L]] ||
-        ncol(r) != expected_dim[[2L]]) {
-        if (extend) {
-            bottom_rows <- expected_dim[[1L]] - nrow(r)
-            right_cols <- expected_dim[[2L]] - ncol(r)
-            r <- terra::extend(r,
-                # left, right, bottom, top
-                c(0, right_cols, bottom_rows, 0),
-                fill = fill
-            )
-        }
-    }
-    r
-}
-
-.spat_get_tile <- function(x, b) {
-    terra::window(x) <- b
-    x
-}

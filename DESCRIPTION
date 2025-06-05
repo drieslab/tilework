@@ -36,6 +36,7 @@ BugReports: https://github.com/drieslab/GiottoTile/issues
 Collate: 
     'classes.R'
     'generics.R'
+    'getBoundedData.R'
     'getTile.R'
     'package_imports.R'
     'tilePlan.R'

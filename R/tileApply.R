@@ -395,8 +395,8 @@ setMethod("tileApply", signature("SpatRaster", "missing", "pixelTilePlan"), func
                 r <- r[[lyr]]
             }
             # get px tile
-            r <- .px_get_tile(
-                x = r, tiles = tiles, b = pxb, extend = extend, fill = fill
+            r <- getBoundedData(
+                x = r, bound = pxb, tiles = tiles, extend = extend, fill = fill
             )
 
             # special args
