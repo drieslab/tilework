@@ -11,7 +11,7 @@
 \alias{length,tilePlan-method}
 \alias{dim,tilePlan-method}
 \alias{length<-,spatialTilePlan-method}
-\title{Tile Iterator Array Characteristics}
+\title{Tile Plan Array Characteristics}
 \usage{
 \S4method{nrow}{tilePlan}(x)
 
@@ -29,7 +29,7 @@
 \item{value}{number of tiles to request}
 }
 \value{
-numeric or iterator object when using \verb{length<-()}
+numeric or \code{spatialTilePlan} object when using \verb{length<-()}
 }
 \description{
 Get dimension characteristics of the \code{tilePlan} tiling plan. These

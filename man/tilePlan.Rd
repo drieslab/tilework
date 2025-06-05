@@ -2,17 +2,17 @@
 % Please edit documentation in R/tilePlan.R
 \name{tilePlan}
 \alias{tilePlan}
-\title{Create a Tile Iterator}
+\title{Create a Tiling Plan}
 \usage{
 tilePlan(type = c("spatial", "pixel"), ...)
 }
 \arguments{
-\item{type}{character. One of "spatial", "pixel". Type of iterator to create.}
+\item{type}{character. One of \code{"spatial"}, \code{"pixel"}. Type of plan to create.}
 
 \item{...}{additional params to pass to \code{new()} call.}
 }
 \description{
-Create a Tile Iterator
+Create a Tiling Plan
 }
 \examples{
 tilePlan("spatial")

@@ -2,7 +2,7 @@
 #' @include classes.R
 #' @include tilePlan.R
 
-#' @title Pixel Tile Iterator
+#' @title Pixel Tile Plan
 #' @name pixelTilePlan-class
 #' @aliases pixelTilePlan
 #' @description

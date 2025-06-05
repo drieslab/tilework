@@ -12,7 +12,7 @@ organization of tiles.
 \section{Slots}{
 
 \describe{
-\item{\code{tp}}{tilePlan. The underlying tile iterator}
+\item{\code{tp}}{\code{tilePlan.} The underlying \code{tilePlan}-inheriting object}
 
 \item{\code{groups}}{list. Named list where each element contains tile indices for that group}
 

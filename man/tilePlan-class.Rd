@@ -3,13 +3,15 @@
 \docType{class}
 \name{tilePlan-class}
 \alias{tilePlan-class}
-\title{Tile Iterator}
+\title{Tile Plan}
 \description{
-Virtual parent class for tile iterator objects. These objects are for demarcating
-tiles/patches of data to be operated over. Objects are intended for easy
-traversal either across either rows or columns of tiles or as a vector of
-tiles. They are also lightweight and self-contained to aid with
-parallelization.
+Virtual parent class for tile planning objects. These objects are for planning
+tiles/patches of data to be operated over. Objects are indexable across
+rows/columns of tiles and as a vector of tiles (similarly to a matrix).
+
+\code{[} indexing returns a set of bounds information for selection of the
+data. Tiles and bounds information are generated in a lazy fashion based on
+plan parameters, avoiding overhead with large amounts of tiles.
 }
 \section{Slots}{
 

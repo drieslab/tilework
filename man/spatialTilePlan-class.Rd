@@ -4,7 +4,7 @@
 \name{spatialTilePlan-class}
 \alias{spatialTilePlan-class}
 \alias{spatialTilePlan}
-\title{Spatial Tile Iterator}
+\title{Spatial Tile Plan}
 \description{
 Utility class that simplifies the setup of tiles across a spatial extent.
 Tiles are stored in a lightweight format safe to be passed to child

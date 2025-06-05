@@ -6,13 +6,15 @@ setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 setClass("giottoTile", contains = "VIRTUAL")
 
 #' @name tilePlan-class
-#' @title Tile Iterator
+#' @title Tile Plan
 #' @description
-#' Virtual parent class for tile iterator objects. These objects are for demarcating
-#' tiles/patches of data to be operated over. Objects are intended for easy
-#' traversal either across either rows or columns of tiles or as a vector of
-#' tiles. They are also lightweight and self-contained to aid with
-#' parallelization.
+#' Virtual parent class for tile planning objects. These objects are for planning
+#' tiles/patches of data to be operated over. Objects are indexable across
+#' rows/columns of tiles and as a vector of tiles (similarly to a matrix).
+#'
+#' `[` indexing returns a set of bounds information for selection of the
+#' data. Tiles and bounds information are generated in a lazy fashion based on
+#' plan parameters, avoiding overhead with large amounts of tiles.
 #' @slot n numeric. Number of tiles to create.
 #' @slot dims numeric. Number of rows/cols in the array of tiles
 #' @slot tile_dims numeric. Row/col dimensions of each tile
@@ -75,7 +77,7 @@ setClass(
 #' Class for organizing tiles into hierarchical groups for batch processing.
 #' Groups can represent spatial regions, processing stages, or any logical
 #' organization of tiles.
-#' @slot tp tilePlan. The underlying tile iterator
+#' @slot tp `tilePlan.` The underlying `tilePlan`-inheriting object
 #' @slot groups list. Named list where each element contains tile indices for that group
 #' @slot active character. Name of a group to set as active for `[, j]` indexing and
 #' `length()`.

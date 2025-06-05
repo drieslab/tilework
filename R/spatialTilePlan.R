@@ -5,7 +5,7 @@
 # spatialTilePlan ####
 # * docs ####
 #' @name spatialTilePlan-class
-#' @title Spatial Tile Iterator
+#' @title Spatial Tile Plan
 #' @aliases spatialTilePlan
 #' @description
 #' Utility class that simplifies the setup of tiles across a spatial extent.

@@ -4,7 +4,7 @@
 \name{pixelTilePlan-class}
 \alias{pixelTilePlan-class}
 \alias{pixelTilePlan}
-\title{Pixel Tile Iterator}
+\title{Pixel Tile Plan}
 \description{
 Utility class for defining pixel-exact tiles of images in a format that is
 easy to setup and manipulate using \code{$} and \verb{$<-} generics.

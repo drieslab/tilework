@@ -8,7 +8,7 @@
 \alias{$,pixelTilePlan-method}
 \alias{$<-,tileGroup-method}
 \alias{$,tileGroup-method}
-\title{Get and Set Iterator Metadata and Params}
+\title{Get and Set Tile Metadata and Params}
 \usage{
 \S4method{$}{tilePlan}(x, name) <- value
 
@@ -30,11 +30,11 @@
 \item{value}{value to set}
 }
 \value{
-metadata value when using getter or iterator object when using the setter
+metadata value when using getter or \verb{tile*} object when using the setter
 function.
 }
 \description{
-Get and set iterator tile metadata. Some params can also be modified with
+Get and set tile metadata. Some params can also be modified with
 this operator, for example the \verb{$pad} value or \verb{$pxdims}, \verb{$ncols}, or
 \verb{$nrows} for \code{pixelTilePlan}.
 

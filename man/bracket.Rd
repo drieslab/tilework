@@ -12,7 +12,7 @@
 \alias{[,tileGroup,missing,.index,missing-method}
 \alias{[,tileGroup,.index,missing,missing-method}
 \alias{[,tileGroup,.index,numeric,missing-method}
-\title{Extract Bounds from Iterator}
+\title{Extract Bounds from Tile Object}
 \usage{
 \S4method{[}{tilePlan,numeric,missing,missing}(x, i, j, ..., drop = TRUE)
 
@@ -42,7 +42,7 @@
 \S4method{[}{tileGroup,.index,numeric,missing}(x, i, j, ..., drop = TRUE)
 }
 \arguments{
-\item{x}{\code{tilePlan}}
+\item{x}{\verb{tile*} object}
 
 \item{i}{numeric vector index if \code{j} is not given. Row index if \code{j} is also
 present. Works like \code{matrix-like} indexing.}
@@ -66,10 +66,10 @@ expected output. Such as \code{ext()} for \code{spatialTilePlan}}
 indices.}
 }
 \value{
-\code{list} of \code{numeric} or \code{SpatExtent}
+\code{list} of \code{numeric} or \code{SpatExtent} depending on underlying \code{tilePlan}
 }
 \description{
-Get a set of tile bounds from \code{tilePlan}. Values are always returned as
+Get a set of tile bounds from a \verb{tile*} object. Values are always returned as
 a \code{list}, even when length one to reduce surprises with \code{lapply()} usage.
 }
 \examples{

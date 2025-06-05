@@ -4,7 +4,7 @@
 \alias{plot}
 \alias{plot,tilePlan,missing-method}
 \alias{plot,pixelTilePlan,missing-method}
-\title{PLot a \code{tilePlan}}
+\title{Plot a \code{tilePlan}}
 \usage{
 \S4method{plot}{tilePlan,missing}(x, values = "tile", color_as_factor = FALSE, ...)
 
@@ -24,7 +24,8 @@ to a factor to plot as categorical.}
 \item{y}{not used.}
 }
 \description{
-Plot and preview the iteration scheme.
+Plot and preview the tile plan. This is likely to be very slow if there are
+a lot of tiles (in the neighborhood of >10,000)
 }
 \examples{
 x <- tilePlan()

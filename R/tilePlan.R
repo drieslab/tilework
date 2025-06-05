@@ -31,10 +31,10 @@ NULL
 #' centroids(x)
 NULL
 
-#' @title Get and Set Iterator Metadata and Params
+#' @title Get and Set Tile Metadata and Params
 #' @name dollar
 #' @description
-#' Get and set iterator tile metadata. Some params can also be modified with
+#' Get and set tile metadata. Some params can also be modified with
 #' this operator, for example the `$pad` value or `$pxdims`, `$ncols`, or
 #' `$nrows` for `pixelTilePlan`.
 #'
@@ -51,14 +51,15 @@ NULL
 #' tile_ext <- x[5][[1]]
 #' attr(tile_ext, "test")
 #' @returns
-#' metadata value when using getter or iterator object when using the setter
+#' metadata value when using getter or `tile*` object when using the setter
 #' function.
 NULL
 
 #' @name plot
-#' @title PLot a `tilePlan`
+#' @title Plot a `tilePlan`
 #' @description
-#' Plot and preview the iteration scheme.
+#' Plot and preview the tile plan. This is likely to be very slow if there are
+#' a lot of tiles (in the neighborhood of >10,000)
 #' @param x `tilePlan` to plot
 #' @param y not used.
 #' @param values character. Metadata item to color tiles as. Default is `"tile"`
@@ -77,7 +78,7 @@ NULL
 NULL
 
 #' @name dim
-#' @title Tile Iterator Array Characteristics
+#' @title Tile Plan Array Characteristics
 #' @aliases nrow ncol length length<-
 #' @description
 #' Get dimension characteristics of the `tilePlan` tiling plan. These
@@ -97,15 +98,15 @@ NULL
 #' dim(x)
 #' nrow(x)
 #' ncol(x)
-#' @returns numeric or iterator object when using `length<-()`
+#' @returns numeric or `spatialTilePlan` object when using `length<-()`
 NULL
 
 #' @name bracket
-#' @title Extract Bounds from Iterator
+#' @title Extract Bounds from Tile Object
 #' @description
-#' Get a set of tile bounds from `tilePlan`. Values are always returned as
+#' Get a set of tile bounds from a `tile*` object. Values are always returned as
 #' a `list`, even when length one to reduce surprises with `lapply()` usage.
-#' @param x `tilePlan`
+#' @param x `tile*` object
 #' @param i numeric vector index if `j` is not given. Row index if `j` is also
 #' present. Works like `matrix-like` indexing.
 #' @param j numeric. Column index
@@ -134,7 +135,7 @@ NULL
 #' px[1]
 #' px[2, 2:3]
 #' px[]
-#' @returns `list` of `numeric` or `SpatExtent`
+#' @returns `list` of `numeric` or `SpatExtent` depending on underlying `tilePlan`
 NULL
 
 #' @name double_bracket
@@ -213,8 +214,8 @@ NULL
 NULL
 
 #' @name tilePlan
-#' @title Create a Tile Iterator
-#' @param type character. One of "spatial", "pixel". Type of iterator to create.
+#' @title Create a Tiling Plan
+#' @param type character. One of `"spatial"`, `"pixel"`. Type of plan to create.
 #' @param ... additional params to pass to `new()` call.
 #' @examples
 #' tilePlan("spatial")
@@ -230,8 +231,8 @@ NULL
 tilePlan <- function(type = c("spatial", "pixel"), ...) {
     type <- match.arg(type, choices = c("spatial", "pixel"))
     switch(type,
-           "spatial" = new("spatialTilePlan", ...),
-           "pixel" = new("pixelTilePlan", ...)
+        "spatial" = new("spatialTilePlan", ...),
+        "pixel" = new("pixelTilePlan", ...)
     )
 }
 
