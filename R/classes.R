@@ -1,9 +1,31 @@
 
 setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 
-#' @keywords internal
-#' @noRd
+#' @name giottoTile-class
+#' @title Virtual Class `giottoTile`
+#' @description
+#' The `giottoTile` class ia s a class contaiend by all actual classes in the
+#' \pkg{GiottoTile} package. It is a "virtual" class.
+#' @exportClass giottoTile
 setClass("giottoTile", contains = "VIRTUAL")
+
+#' @name token-class
+#' @title `token` Class
+#' @description
+#' Utility class for flagging a piece of data as being ready for processing.
+#' This is internal machinery that is mainly useful for forcing S4 dispatch to
+#' progress in the expected order and should not be interacted with by end
+#' users.
+#'
+#' This class and related methods are exported so developers are able to write
+#' extending methods for `tileApply()` where this utility class is used.
+#' @slot data ANY. The wrapped data object.
+#' @exportClass token
+setClass("token",
+    slots = list(
+        data = "ANY"
+    )
+)
 
 #' @name tilePlan-class
 #' @title Tile Plan
@@ -29,7 +51,7 @@ setClass(
     contains = c("VIRTUAL", "giottoTile"),
     slots = list(
         n = "numeric",
-        dims = "numeric",
+        dims = "integer",
         tile_dims = "numeric",
         pad = "numeric",
         metadata = "data.frame"
@@ -79,8 +101,8 @@ setClass(
 #' organization of tiles.
 #' @slot tp `tilePlan.` The underlying `tilePlan`-inheriting object
 #' @slot groups list. Named list where each element contains tile indices for that group
-#' @slot active character. Name of a group to set as active for `[, j]` indexing and
-#' `length()`.
+#' @slot active character. Name of a group to set as active for `[i]` shorthand
+#' indexing and `length()`.
 #' @slot metadata data.frame. Metadata about each group
 #' @exportClass tileGroup
 setClass("tileGroup",

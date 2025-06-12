@@ -1,10 +1,31 @@
-# handle reading as SpatRaster
-.create_terra_spatraster <- function(image_path) {
-    raster_object <- try(terra::rast(x = image_path, noflip = TRUE))
-    if (inherits(raster_object, "try-error")) {
-        stop(raster_object, " can not be read by terra::rast() \n")
+
+.terra_read <- function(x, prefer = NULL, vect_params = list(), rast_params = list()) {
+    rast_params$noflip <- rast_params$noflip %null% TRUE # expect no CRS
+    vect_params$proxy <- vect_params$proxy %null% TRUE # read as SpatVectorProxy
+
+    # if expected type
+    if (!is.null(prefer)) {
+        prefer <- match.arg(prefer, c("vector", "raster"))
+        return(switch(prefer,
+            "raster" = .terra_read_raster(x, rast_params),
+            "vector" = .terra_read_vector(x, vect_params)
+        ))
     }
-    return(raster_object)
+
+    # fallback: try with handling
+    try_rast <- try(.terra_read_raster(x, rast_params), silent = TRUE)
+    if (!inherits(try_rast, "try-error")) return(try_rast)
+    try_vect <- try(.terra_read_vector(x, vect_params), silent = TRUE)
+    if (!inherits(try_vect, "try-error")) return(try_vect)
+    stop("[fileConnect] File not readable by {terra}\n", call. = FALSE)
+}
+
+.terra_read_raster <- function(x, rast_params = list()) {
+    do.call(terra::rast, c(list(x), rast_params))
+}
+
+.terra_read_vector <- function(x, vect_params = list()) {
+    do.call(terra::vect, c(list(x), vect_params))
 }
 
 # convert SpatExtent to unnamed numeric vector

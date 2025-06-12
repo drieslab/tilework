@@ -291,7 +291,7 @@ setMethod("ncol", signature("tilePlan"), function(x) {
 #' @rdname dim
 #' @export
 setMethod("length", signature("tilePlan"), function(x) {
-    prod(x@dims)
+    as.integer(prod(x@dims))
 })
 
 #' @rdname dim
@@ -304,7 +304,8 @@ setMethod("dim", signature("tilePlan"), function(x) {
 #' @export
 setMethod("[", signature(x = "tilePlan", i = "numeric", j = "missing", drop = "missing"), function(x, i, ..., drop) {
     i <- as.integer(i)
-    if (any(i > length(x) | i <= 0)) stop("tilePlan: subscript out of bounds", call. = FALSE)
+    if (any(is.na(i))) stop("[tilePlan] i index may not be NA", call. = FALSE)
+    if (any(i > length(x) | i <= 0)) stop("[tilePlan] subscript out of bounds", call. = FALSE)
     ij <- .tile_idx_to_ij(x, i)
     x[ij[[1L]], ij[[2L]], expand_grid = FALSE, ...] # pass to numeric/numeric method
 })
@@ -322,6 +323,9 @@ setMethod("[", signature(x = "tilePlan", i = "numeric", j = "numeric", drop = "m
 })
 
 #' @rdname bracket
+#' @usage
+#' ## S4 method for signature 'tilePlan,missing,missing,missing'
+#' x[]
 #' @export
 setMethod("[", signature(x = "tilePlan", i = "missing", j = "missing", drop = "missing"), function(x, i, j) {
     x[seq_len(length(x))] # pass to numeric/missing method
@@ -444,6 +448,9 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
     tile_fun = .spat_tile_bounds,
     fun = function(x) x,
     zero = FALSE) {
+    if (any(is.na(i))) stop("[tilePlan] i index may not be NA", call. = FALSE)
+    if (any(is.na(j))) stop("[tilePlan] j index may not be NA", call. = FALSE)
+
     if (isTRUE(expand_grid)) {
         var_tab <- expand.grid(j, i) # j/i switch is intentional
         i <- var_tab$Var2

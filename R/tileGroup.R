@@ -24,11 +24,13 @@
 #' # length() returns number of groups
 #' length(tg)
 #'
-#' tg["g1"] # first 4
-#' tg["g2"] # next 4
-#' tg["g3"] # specific 6
+#' # Get group bounds:
+#' tg[, "g1"] # first 4
+#' tg[, "g2"] # next 4
+#' tg[, "g3"] # specific 6
+#' # not recommended for large groups
 #'
-#' tg["g3", c(3, 1)] # position specific indexing
+#' tg[c(3, 1), "g3"] # get nth item in group
 #'
 #' # Set active group for shorthand indexing
 #' tg$active <- "g1"
@@ -36,8 +38,15 @@
 #' # length() is based on group length when active is set
 #' length(tg)
 #'
-#' tg[, 2]        # Position 2 from g1
-#' tg$active <- NULL  # Clear active group
+#' tg[2]        # Position 2 from g1
+#'
+#' # iterator can be created when active group is set
+#' iter <- tileIterator(tg, batch_size = 2)
+#' iter$next_batch()
+#' iter$next_batch()
+#' iter$next_batch() # no more items
+#'
+#' tg$active <- NULL  # Clear active group by setting NULL
 NULL
 
 #' @rdname tileGroup
@@ -104,17 +113,19 @@ setMethod("[", signature("tileGroup", "missing", "missing", "missing"), function
 
 #' @rdname bracket
 #' @export
-setMethod("[", signature("tileGroup", "missing", ".index", "missing"), function(x, j, ...) {
+setMethod("[", signature("tileGroup", ".index", "missing", "missing"), function(x, i, ...) {
     if (!.has_active(x)) {
-        stop("tileGroup: j only indexing can only be used with `$active` group set.\n", call. = FALSE)
+        stop("tileGroup: i only indexing can only be used with `$active` group set.\n", call. = FALSE)
     }
-    x[x@active, j]
+    x[i, x@active]
 })
 
 #' @rdname bracket
 #' @export
-setMethod("[", signature("tileGroup", ".index", "missing", "missing"), function(x, i, ...) {
-    grp_idx <- x@groups[[i]]
+setMethod("[", signature("tileGroup", "missing", ".index", "missing"), function(x, j, ...) {
+    if (length(j) > 1L) stop("[tileGroup] only one j can be used at a time", call. = FALSE)
+    grp_idx <- x@groups[[j]]
+    if (is.null(grp_idx)) stop("[tileGroup] j = ", j, " does not exist", call. = FALSE)
     if (.is_ij_group(grp_idx)) {
         x@tp[i = grp_idx[[1L]], j = grp_idx[[2L]]]
     } else {
@@ -124,14 +135,18 @@ setMethod("[", signature("tileGroup", ".index", "missing", "missing"), function(
 
 #' @rdname bracket
 #' @export
-setMethod("[", signature("tileGroup", ".index", "numeric", "missing"), function(x, i, j, ...) {
-    g <- x@groups[[i]] # select group of interest
+setMethod("[", signature("tileGroup", "numeric", ".index", "missing"), function(x, i, j, ...) {
+    if (length(j) > 1L) stop("[tileGroup] only one j can be used at a time", call. = FALSE)
+    g <- x@groups[[j]] # select group of interest
+    if (is.null(g)) stop("[tileGroup] j = ", j, " does not exist", call. = FALSE)
     if (!.is_ij_group(g)) {
         # rely on default indexing for vector
-        return(x@tp[x@groups[[i]][j]])
+        if (any(length(g) < i | i < 0)) stop("[tileGroup] subscript out of bounds", call. = FALSE)
+        idx <- g[i]
+        return(x@tp[idx])
     }
     # for ij, expand indices to pairlist then pull indices of interest
-    ij <- .g_index(g, j)
+    ij <- .g_index(g, i)
     x@tp[i = ij[[1L]], j = ij[[2L]], expand_grid = FALSE]
 })
 
@@ -215,7 +230,7 @@ setMethod("-", signature("tileGroup", "numeric"), function(e1, e2) {
     total_tiles <- n_rows * n_cols
 
     if (any(pos > total_tiles) || any(pos < 1)) {
-        stop("Position ", max(pos), " exceeds group size ", total_tiles)
+        stop("[tileGroup] i = ", max(pos), " exceeds group size of ", total_tiles, call. = FALSE)
     }
 
     # Convert linear position to ij coordinates within the group

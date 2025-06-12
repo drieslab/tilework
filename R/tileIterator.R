@@ -197,7 +197,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
             if (!.has_active(x)) {
                 stop("tileIterator with tileGroup requires an active group. Set with $active <- \"group_name\"")
             }
-            return(x[, i])
+            return(x[i])
         }
         stop("Unsupported object type: ", class(x))
     }
@@ -396,10 +396,14 @@ setMethod("show", signature("tileIterator"), function(object) {
     GiottoUtils::print_list(plist)
 })
 
+#' @rdname bracket
+#' @export
 setMethod("[", signature("tileIterator", "missing", "missing", "missing"), function(x, ...) {
     x@funs$tiles()
 })
 
+#' @rdname bracket
+#' @export
 setMethod("[<-", signature("tileIterator", "missing", "missing", value = "ANY"), function(x, ..., value) {
     if (!inherits(value, c("tilePlan", "tileGroup"))) {
         stop("Value must be tilePlan or tileGroup, got: ", class(value))
@@ -411,6 +415,8 @@ setMethod("[<-", signature("tileIterator", "missing", "missing", value = "ANY"),
     x
 })
 
+#' @rdname dim
+#' @export
 setMethod("length", signature("tileIterator"), function(x) {
     x@funs$total_tiles()
 })

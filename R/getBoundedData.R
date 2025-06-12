@@ -19,6 +19,18 @@
 #' - `numeric` of length 4 (xmin, xmax, ymin, ymax)
 #' - `SpatExtent`
 #'
+#' @section `SpatRaster` snapping:
+#'
+#' `getBoundedData()` is implemented for `SpatRaster`, `SpatExtent` using
+#' [terra::window()]. This uses terra's default snapping behavior (equivalent to
+#' `snap = "near"` in [terra::crop()]), with no way to set another strategy.
+#'
+#' **For more precise boundary control:**
+#' - Use pixel-based indexing via the `SpatRaster`, `numeric` method
+#' - Use `pixelTilePlan()` for exact pixel-level tiling
+#' - Add padding with `tiles + pad_value` to ensure spatial context
+#' - Use [terra::crop()] directly if you need `snap = "out"` or `snap = "in"`
+#'
 #' @param x data
 #' @param bound bounds to filter with
 #' @param extend logical (default = `FALSE`) whether to extend tile data to reach
@@ -77,16 +89,7 @@ setMethod("getBoundedData", signature("SpatRaster", "SpatExtent"),
 
 #' @rdname getBoundedData
 #' @export
-setMethod("getBoundedData", signature("SpatVector", "SpatExtent"),
-    function(x, bound, centroids = TRUE) {
-    .x <- x
-    if (centroids) .x <- centroids(x)
-    rels <- terra::relate(bound, .x,
-        relation = "intersects",
-        pairs = TRUE,
-        na.rm = TRUE
-    )[, "id.y"]
-    x[rels]
+setMethod("getBoundedData", signature("SpatVectorProxy", "SpatExtent"),
+    function(x, bound) {
+    terra::query(x, extent = bound)
 })
-
-

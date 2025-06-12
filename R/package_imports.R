@@ -5,7 +5,7 @@
 #' @importFrom methods slot slot<- slotNames
 #' @importFrom methods setMethod getMethod callNextMethod setGeneric setClass
 #' @importMethodsFrom terra nrow ncol ext ext<- plot vect rast centroids
-#' @importClassesFrom terra SpatExtent SpatVector SpatRaster
+#' @importClassesFrom terra SpatExtent SpatVector SpatRaster SpatVectorProxy
 #' @importFrom utils .DollarNames
 #' @importFrom graphics rect
 #' @importFrom grDevices hcl.colors

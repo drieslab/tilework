@@ -82,13 +82,13 @@ setMethod("initialize", signature("pixelTilePlan"), function(.Object, ...) {
 
     # initialize vals
     if (length(.Object@n) == 0L) {
-        .Object@n <- 0
+        .Object@n <- 0L
     }
     if (length(.Object@dims) == 0L) {
-        .Object@dims <- c(0, 0)
+        .Object@dims <- c(0L, 0L)
     }
     if (length(.Object@tile_dims) == 0L) {
-        .Object@tile_dims <- c(0, 0)
+        .Object@tile_dims <- c(0L, 0L)
     }
 
     # return early if pxdims not provided
@@ -108,10 +108,10 @@ setMethod("initialize", signature("pixelTilePlan"), function(.Object, ...) {
     checkmate::assert_integerish(.Object@tile_dims, len = 2L)
 
     # set dims
-    .Object@dims <- c(
+    .Object@dims <- as.integer(c(
         ceiling(.Object@pxdims[[1L]] / .Object@tile_dims[[1L]]),
         ceiling(.Object@pxdims[[2L]] / .Object@tile_dims[[2L]])
-    )
+    ))
 
     # set n
     .Object@n <- length(.Object)

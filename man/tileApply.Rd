@@ -2,25 +2,42 @@
 % Please edit documentation in R/tileApply.R
 \name{tileApply}
 \alias{tileApply}
+\alias{tileApply,ANY,missing,ANY-method}
+\alias{tileApply,ANY,ANY,ANY-method}
+\alias{tileApply,token,ANY,ANY-method}
 \title{Apply Functions Across Spatial Tiles}
+\usage{
+\S4method{tileApply}{ANY,missing,ANY}(x, tiles, verbose = NULL, ...)
+
+\S4method{tileApply}{ANY,ANY,ANY}(x, y, tiles, verbose = NULL, ...)
+
+\S4method{tileApply}{token,ANY,ANY}(x, y, tiles, verbose = NULL, ...)
+}
 \arguments{
 \item{x}{input data 1}
 
-\item{y}{input data 2 (optional)}
+\item{tiles}{tile* object (\code{tilePlan}, \code{tileGroup}, or \code{tileIterator})}
 
-\item{tiles}{tile object (\code{tilePlan}, \code{tileGroup}, or \code{tileIterator})}
+\item{...}{additional arguments passed to specific methods}
+
+\item{y}{input data 2 (optional)}
 
 \item{FUN}{function to apply across tiles}
 
 \item{pad_y}{numeric. Additional padding applied to \code{y} tiling so \code{x} has full
 spatial context of \code{y}}
-
-\item{...}{additional arguments passed to specific methods}
 }
 \description{
 Apply a function across spatial tiles to speed up processing and manage
 memory usage for large data operations. This function dispatches to
 different processing methods based on the tile type.
+
+\code{character} inputs to \code{x} and \code{y} are assumed to be \{terra\} readable.
+\code{SpatRaster} and \code{SpatVector} must first be written to file. If provided,
+they are traced to their filepaths with \code{\link[terra:sources]{terra::sources()}} and then processed
+via their filepaths for memory efficiency.
+
+For other data types, see \link{extending_giottotile}
 }
 \section{Tile Processing Methods}{
 
@@ -40,3 +57,4 @@ different processing methods based on the tile type.
 \seealso{
 \link{tileApply-plan}, \link{tileApply-group}, \link{tileApply-iterator}
 }
+\keyword{internal}

@@ -4,14 +4,14 @@
 \alias{getBoundedData}
 \alias{getBoundedData,SpatRaster,numeric-method}
 \alias{getBoundedData,SpatRaster,SpatExtent-method}
-\alias{getBoundedData,SpatVector,SpatExtent-method}
+\alias{getBoundedData,SpatVectorProxy,SpatExtent-method}
 \title{Get Data Within Bounds}
 \usage{
 \S4method{getBoundedData}{SpatRaster,numeric}(x, bound, tiles, extend = FALSE, fill = NA)
 
 \S4method{getBoundedData}{SpatRaster,SpatExtent}(x, bound)
 
-\S4method{getBoundedData}{SpatVector,SpatExtent}(x, bound, centroids = TRUE)
+\S4method{getBoundedData}{SpatVectorProxy,SpatExtent}(x, bound)
 }
 \arguments{
 \item{x}{data}
@@ -42,6 +42,22 @@ patterns are:
 \itemize{
 \item \code{numeric} of length 4 (xmin, xmax, ymin, ymax)
 \item \code{SpatExtent}
+}
+}
+
+\section{\code{SpatRaster} snapping}{
+
+
+\code{getBoundedData()} is implemented for \code{SpatRaster}, \code{SpatExtent} using
+\code{\link[terra:window]{terra::window()}}. This uses terra's default snapping behavior (equivalent to
+\code{snap = "near"} in \code{\link[terra:crop]{terra::crop()}}), with no way to set another strategy.
+
+\strong{For more precise boundary control:}
+\itemize{
+\item Use pixel-based indexing via the \code{SpatRaster}, \code{numeric} method
+\item Use \code{pixelTilePlan()} for exact pixel-level tiling
+\item Add padding with \code{tiles + pad_value} to ensure spatial context
+\item Use \code{\link[terra:crop]{terra::crop()}} directly if you need \code{snap = "out"} or \code{snap = "in"}
 }
 }
 

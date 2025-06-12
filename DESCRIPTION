@@ -44,5 +44,8 @@ Collate:
     'spatialTilePlan.R'
     'tileGroup.R'
     'tileApply.R'
+    'tileApply_tileGroup.R'
+    'tileApply_tileIterator.R'
+    'tileApply_tilePlan.R'
     'tileIterator.R'
     'utils.R'

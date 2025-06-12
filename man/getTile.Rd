@@ -2,43 +2,70 @@
 % Please edit documentation in R/getTile.R
 \name{getTile}
 \alias{getTile}
+\alias{getTile,token,tilePlan-method}
+\alias{getTile,ANY,tilePlan-method}
 \alias{getTile,character,tilePlan-method}
 \alias{getTile,SpatRaster,pixelTilePlan-method}
 \alias{getTile,SpatRaster,spatialTilePlan-method}
-\alias{getTile,SpatRaster,tileGroup-method}
-\alias{getTile,SpatRaster,tileIterator-method}
+\alias{getTile,ANY,tileGroup-method}
+\alias{getTile,ANY,tileIterator-method}
 \title{Get Tile}
 \usage{
-\S4method{getTile}{character,tilePlan}(x, tiles, ext = NULL, ...)
+\S4method{getTile}{token,tilePlan}(x, tiles, ...)
 
-\S4method{getTile}{SpatRaster,pixelTilePlan}(x, tiles, i = NULL, j, lyr = NULL, extend = FALSE, fill = NA, ...)
+\S4method{getTile}{ANY,tilePlan}(x, tiles, i = NULL, j, pad = NULL, get_params = list(), ...)
 
-\S4method{getTile}{SpatRaster,spatialTilePlan}(x, tiles, i = NULL, j, lyr = NULL, ...)
+\S4method{getTile}{character,tilePlan}(x, tiles, prefer = NULL, ext = NULL, ...)
 
-\S4method{getTile}{SpatRaster,tileGroup}(x, tiles, i, j, lyr = NULL, ...)
+\S4method{getTile}{SpatRaster,pixelTilePlan}(
+  x,
+  tiles,
+  lyr = NULL,
+  extend = FALSE,
+  fill = NA,
+  get_params = list(),
+  ...
+)
 
-\S4method{getTile}{SpatRaster,tileIterator}(x, tiles, lyr = NULL, advance = TRUE, ...)
+\S4method{getTile}{SpatRaster,spatialTilePlan}(x, tiles, lyr = NULL, ...)
+
+\S4method{getTile}{ANY,tileGroup}(x, tiles, i, j, ...)
+
+\S4method{getTile}{ANY,tileIterator}(x, tiles, advance = TRUE, ...)
 }
 \arguments{
 \item{x}{data}
 
 \item{tiles}{\verb{tile*} object}
 
-\item{ext}{\code{numeric} or \code{SpatExtent} (optional) Set an extent before extracting
-tiles.}
+\item{\dots}{additional params to pass to \code{\link[=bracket]{[}} \code{tilePlan} indexing}
 
-\item{i}{tile vector or row index if \code{j} is also provided}
+\item{i}{\strong{ANY except tileIterator} tile vector index or row index if \code{j} is also provided}
 
-\item{j}{tile col index}
+\item{j}{\strong{ANY except tileIterator} tile col index}
 
-\item{lyr}{if provided, which layers/channels to include}
+\item{pad}{(optional) additional padding to apply before tile retrieval.
+Useful for temporarily increasing padding without affecting \verb{tile*} object.}
 
-\item{extend}{logical (default = FALSE) whether to extend tile data to reach
-expected tile dimensions}
+\item{get_params}{list of named params to pass to underlying \code{\link[=getBoundedData]{getBoundedData()}}
+call.}
 
-\item{fill}{numeric. if \code{extend = TRUE}, what value to fill with}
+\item{prefer}{\strong{\code{character} filepath only} character. Hint for file reading
+(\code{"raster"} or \code{"vector"}). If provided, skips automatic type detection.}
 
-\item{advance}{logical (default = TRUE). Whether to advance the iterator.}
+\item{ext}{\strong{\code{SpatRaster} or raster filepath (\code{character}) only} \code{numeric}
+or \code{SpatExtent} (optional) Set an extent before extracting tiles from raster.}
+
+\item{lyr}{\strong{\code{SpatRaster} only} if provided, which layers/channels to include}
+
+\item{extend}{\strong{\code{pixelTilePlan} only} logical (default = FALSE). Whether to
+extend tile data to reach expected tile dimensions}
+
+\item{fill}{\strong{\code{pixelTilePlan} only} numeric. if \code{extend = TRUE}, what value to
+fill with}
+
+\item{advance}{\strong{\code{tileIterator} only} logical (default = TRUE). Whether to
+advance the iterator.}
 }
 \value{
 \code{list} of tile data
@@ -48,8 +75,17 @@ Get specific tile(s) from the data based on a \verb{tile*} object. Indexing via
 \code{i} and \code{j} params is used to select the tile(s) to get, in a manner similar
 to \code{[} extraction of bounds from \verb{tile*} objects.
 
+\strong{All params are usable with any method except when otherwise stated.}
+
 This generic handles data/\verb{tile*} object interactions. For simple selection
 of data based on a set of bounds, see the low-level generic \code{\link[=getBoundedData]{getBoundedData()}}.
+
+The \code{character} method only works for filetypes readable by \{terra\}.
+
+New \code{x} data types should automatically work with this generic as long as a
+\code{getBoundedData()} method is created for it. A specific \code{getTile()} method
+is only needed if additional params/operations should be performed before
+the tile selection, (for example layer selection with raster data).
 }
 \examples{
 f <- system.file("ex/elev.tif", package="terra")

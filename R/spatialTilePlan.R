@@ -107,9 +107,9 @@ setMethod("initialize", signature("spatialTilePlan"), \(.Object, ...) {
 
     # initialize n tiles
     if (length(.Object@n) == 0L) {
-        .Object@n <- 0
+        .Object@n <- 0L
     }
-    if (length(.Object@dims) == 0L) .Object@dims <- c(0, 0)
+    if (length(.Object@dims) == 0L) .Object@dims <- c(0L, 0L)
     if (length(.Object@tile_dims) == 0L) .Object@tile_dims <- c(0, 0)
 
     # return early if extent not provided
@@ -130,7 +130,7 @@ setMethod("initialize", signature("spatialTilePlan"), \(.Object, ...) {
     # generate tile extent array
     n_desired <- .Object@n
     e <- terra::ext(.Object@extent)
-    .Object@dims <- .get_dim_n_chunks(n = n_desired, e = e)
+    .Object@dims <- as.integer(.get_dim_n_chunks(n = n_desired, e = e))
     .Object@tile_dims <- .calc_tile_dims(extent = e, array_dims = .Object@dims)
     .Object@n <- length(.Object)
 

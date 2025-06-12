@@ -34,11 +34,13 @@ tg <- tileGroup(tp, groups = list(
 # length() returns number of groups
 length(tg)
 
-tg["g1"] # first 4
-tg["g2"] # next 4
-tg["g3"] # specific 6
+# Get group bounds:
+tg[, "g1"] # first 4
+tg[, "g2"] # next 4
+tg[, "g3"] # specific 6
+# not recommended for large groups
 
-tg["g3", c(3, 1)] # position specific indexing
+tg[c(3, 1), "g3"] # get nth item in group
 
 # Set active group for shorthand indexing
 tg$active <- "g1"
@@ -46,6 +48,13 @@ tg$active <- "g1"
 # length() is based on group length when active is set
 length(tg)
 
-tg[, 2]        # Position 2 from g1
-tg$active <- NULL  # Clear active group
+tg[2]        # Position 2 from g1
+
+# iterator can be created when active group is set
+iter <- tileIterator(tg, batch_size = 2)
+iter$next_batch()
+iter$next_batch()
+iter$next_batch() # no more items
+
+tg$active <- NULL  # Clear active group by setting NULL
 }
