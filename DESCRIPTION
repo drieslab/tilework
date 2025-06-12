@@ -21,6 +21,7 @@ Depends:
     R (>= 4.4.0)
 Imports:
     checkmate,
+    future,
     GiottoUtils (>= 0.2.5),
     methods,
     terra (>= 1.8-21),
