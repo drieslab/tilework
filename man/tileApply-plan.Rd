@@ -90,11 +90,11 @@ length(tp_spatial) <- 4
 
 # Apply function with tile metadata
 results <- tileApply(r, tiles = tp_spatial, FUN = function(tile, .I, .R, .C) {
-  list(
-    tile_id = .I,
-    position = paste0("row_", .R, "_col_", .C),
-    mean_value = terra::global(tile, "mean", na.rm = TRUE)[[1]]
-  )
+    list(
+        tile_id = .I,
+        position = paste0("row_", .R, "_col_", .C),
+        mean_value = terra::global(tile, "mean", na.rm = TRUE)[[1]]
+    )
 })
 force(results)
 
@@ -109,9 +109,9 @@ outdir <- file.path(tempdir(), "tiles")
 dir.create(outdir, showWarnings = FALSE)
 
 tileApply(r, tiles = tp_pixel, FUN = function(tile, .I) {
-  filename <- file.path(outdir, sprintf("tile_\%03d.tif", .I))
-  terra::writeRaster(tile, filename, overwrite = TRUE)
-  return(filename)
+    filename <- file.path(outdir, sprintf("tile_\%03d.tif", .I))
+    terra::writeRaster(tile, filename, overwrite = TRUE)
+    return(filename)
 })
 
 list.files(outdir)

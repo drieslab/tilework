@@ -145,9 +145,15 @@ setMethod("$<-", signature("pixelTilePlan", "ANY"), function(x, name, value) {
 #' @rdname dollar
 #' @export
 setMethod("$", signature("pixelTilePlan"), function(x, name) {
-    if (name == "pxdims") return(x@pxdims)
-    if (name == "ncols") return(x@tile_dims[[2L]])
-    if (name == "nrows") return(x@tile_dims[[1L]])
+    if (name == "pxdims") {
+        return(x@pxdims)
+    }
+    if (name == "ncols") {
+        return(x@tile_dims[[2L]])
+    }
+    if (name == "nrows") {
+        return(x@tile_dims[[1L]])
+    }
     callNextMethod()
 })
 
@@ -193,7 +199,7 @@ setMethod("plot", signature("pixelTilePlan", "missing"), function(x, ...) {
 #' @export
 setMethod("centroids", signature("pixelTilePlan"), function(x, fun = function(x) x, zero = TRUE, ...) {
     a <- GiottoUtils::get_args_list(...)
-    a$offset = c(0, 0)
+    a$offset <- c(0, 0)
     do.call(callNextMethod, a)
 })
 

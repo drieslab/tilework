@@ -62,7 +62,7 @@ patterns are:
 }
 
 \examples{
-f <- system.file("ex/elev.tif", package="terra")
+f <- system.file("ex/elev.tif", package = "terra")
 r <- terra::rast(f)
 
 pixel_selection <- getBoundedData(r, c(10, 50, 30, 40))

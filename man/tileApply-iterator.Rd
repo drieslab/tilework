@@ -132,28 +132,29 @@ tp$ncols <- 30
 iter <- tileIterator(tp, batch_size = 5)
 
 # Process with worker initialization
-results <- tileApply(r, tiles = iter,
-  setup_FUN = function(.W, .X) {
-    # Initialize per-worker state
-    list(
-      worker_id = .W,
-      start_time = Sys.time(),
-      raster_info = list(nrow = nrow(.X), ncol = ncol(.X))
-    )
-  },
-  FUN = function(batch, .BATCH, .POSITION, .SETUP_OUT) {
-    # Process batch of tiles
-    batch_stats <- lapply(batch, function(tile) {
-      terra::global(tile, "mean", na.rm = TRUE)[[1]]
-    })
+results <- tileApply(r,
+    tiles = iter,
+    setup_FUN = function(.W, .X) {
+        # Initialize per-worker state
+        list(
+            worker_id = .W,
+            start_time = Sys.time(),
+            raster_info = list(nrow = nrow(.X), ncol = ncol(.X))
+        )
+    },
+    FUN = function(batch, .BATCH, .POSITION, .SETUP_OUT) {
+        # Process batch of tiles
+        batch_stats <- lapply(batch, function(tile) {
+            terra::global(tile, "mean", na.rm = TRUE)[[1]]
+        })
 
-    list(
-      worker = .SETUP_OUT$worker_id,
-      batch_num = .BATCH,
-      tiles_processed = .POSITION,
-      batch_mean = mean(unlist(batch_stats))
-    )
-  }
+        list(
+            worker = .SETUP_OUT$worker_id,
+            batch_num = .BATCH,
+            tiles_processed = .POSITION,
+            batch_mean = mean(unlist(batch_stats))
+        )
+    }
 )
 
 # Check results structure
@@ -164,16 +165,16 @@ large_iter <- tileIterator(tp, batch_size = 3)
 processed_count <- 0
 
 while (large_iter$has_next) {
-  batch <- getTile(r, large_iter)
+    batch <- getTile(r, large_iter)
 
-  # Process batch
-  batch_results <- lapply(batch, function(tile) {
-    # Your processing here
-    terra::global(tile, "mean")
-  })
+    # Process batch
+    batch_results <- lapply(batch, function(tile) {
+        # Your processing here
+        terra::global(tile, "mean")
+    })
 
-  processed_count <- processed_count + length(batch)
-  cat("Processed", processed_count, "of", length(tp), "tiles\n")
+    processed_count <- processed_count + length(batch)
+    cat("Processed", processed_count, "of", length(tp), "tiles\n")
 }
 }
 \seealso{

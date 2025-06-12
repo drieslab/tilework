@@ -43,7 +43,6 @@ setMethod("getBoundedData", signature("MockData", "SpatExtent"), function(x, bou
 
 # Test extensibility with mock data ####
 describe("tileApply extensibility", {
-
     test_that("tileApply works with custom data types", {
         # Create mock data
         test_matrix <- matrix(runif(100), nrow = 10, ncol = 10)
@@ -80,14 +79,16 @@ describe("tileApply extensibility", {
         length(tp) <- 2
 
         # This should work through the redispatch mechanism
-        results <- tileApply(mock_data1, mock_data2, tiles = tp,
+        results <- tileApply(mock_data1, mock_data2,
+            tiles = tp,
             FUN = function(md1, md2) {
                 list(
                     sum1 = sum(md1@data),
                     sum2 = sum(md2@data),
                     correlation = cor(md1@data, md2@data)
                 )
-        })
+            }
+        )
 
         expect_length(results, 2)
         expect_true(all(sapply(results$sum1, is.numeric)))

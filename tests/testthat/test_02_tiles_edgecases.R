@@ -1,6 +1,5 @@
 # Test extreme values and boundary conditions ####
 describe("Boundary conditions", {
-
     test_that("handles very small extents", {
         tp <- tilePlan("spatial")
 
@@ -77,7 +76,7 @@ describe("Boundary conditions", {
         tp$ncols <- 10
 
         # Should handle ceiling division correctly
-        expect_equal(dim(tp), c(ceiling(99/10), ceiling(101/10)))
+        expect_equal(dim(tp), c(ceiling(99 / 10), ceiling(101 / 10)))
         expect_equal(dim(tp), c(10, 11))
 
         # All tiles should be accessible
@@ -104,7 +103,6 @@ describe("Boundary conditions", {
 
 # Test numerical precision and edge cases ####
 describe("Numerical precision", {
-
     test_that("handles floating point precision in extents", {
         tp <- tilePlan("spatial")
 
@@ -116,7 +114,7 @@ describe("Numerical precision", {
         expect_length(tiles, length(tp))
 
         # All tiles should have valid bounds
-        for(tile in tiles) {
+        for (tile in tiles) {
             bounds <- as.vector(tile)
             expect_true(bounds[2] > bounds[1]) # xmax > xmin
             expect_true(bounds[4] > bounds[3]) # ymax > ymin
@@ -136,14 +134,13 @@ describe("Numerical precision", {
 
         # Check that some tiles have negative coordinates
         all_bounds <- do.call(rbind, lapply(tiles, as.vector))
-        expect_true(any(all_bounds[,1] < 0)) # Some xmin < 0
-        expect_true(any(all_bounds[,3] < 0)) # Some ymin < 0
+        expect_true(any(all_bounds[, 1] < 0)) # Some xmin < 0
+        expect_true(any(all_bounds[, 3] < 0)) # Some ymin < 0
     })
 })
 
 # Test metadata edge cases ####
 describe("Metadata edge cases", {
-
     test_that("handles large metadata objects", {
         tp <- tilePlan("spatial")
         ext(tp) <- c(0, 100, 0, 100)
@@ -184,7 +181,6 @@ describe("Metadata edge cases", {
 
 # Test padding edge cases ####
 describe("Padding edge cases", {
-
     test_that("handles extreme padding values", {
         tp <- tilePlan("spatial")
         ext(tp) <- c(0, 100, 0, 100)
@@ -218,7 +214,7 @@ describe("Padding edge cases", {
         expect_length(tiles, 2)
 
         # Bounds should still be valid integers
-        for(tile in tiles) {
+        for (tile in tiles) {
             expect_type(tile, "integer")
             expect_length(tile, 4)
         }
@@ -240,7 +236,6 @@ describe("Padding edge cases", {
 
 # Test indexing edge cases ####
 describe("Indexing edge cases", {
-
     test_that("handles duplicate indices", {
         tp <- tilePlan("spatial")
         ext(tp) <- c(0, 100, 0, 100)
@@ -302,14 +297,13 @@ describe("Indexing edge cases", {
         expect_length(reverse_ij, length(tp))
 
         # Non-contiguous i,j
-        sparse_ij <- tp[c(1,3), c(2,4)]
+        sparse_ij <- tp[c(1, 3), c(2, 4)]
         expect_length(sparse_ij, 4)
     })
 })
 
 # Test memory and performance edge cases ####
 describe("Memory and performance", {
-
     test_that("handles repeated access patterns", {
         tp <- tilePlan("spatial")
         ext(tp) <- c(0, 100, 0, 100)
@@ -321,7 +315,7 @@ describe("Memory and performance", {
         expect_identical(as.vector(tile1_first), as.vector(tile1_second))
 
         # Mixed access patterns
-        for(i in 1:10) {
+        for (i in 1:10) {
             random_tile <- tp[sample(length(tp), 1)]
             expect_length(random_tile, 1)
         }
@@ -339,7 +333,7 @@ describe("Memory and performance", {
         tp$status <- sample(c("pending", "processing", "complete"), length(tp), replace = TRUE)
 
         # Repeated metadata access
-        for(i in 1:20) {
+        for (i in 1:20) {
             meta <- tp[[sample(length(tp), 1)]]
             expect_s3_class(meta, "data.frame")
             expect_true(all(c("batch", "priority", "status") %in% colnames(meta)))
@@ -349,7 +343,6 @@ describe("Memory and performance", {
 
 # Test recovery from errors ####
 describe("Error recovery", {
-
     test_that("recovers from invalid operations", {
         tp <- tilePlan("spatial")
         ext(tp) <- c(0, 100, 0, 100)

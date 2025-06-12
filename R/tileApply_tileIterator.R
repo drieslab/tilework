@@ -66,28 +66,29 @@
 #' iter <- tileIterator(tp, batch_size = 5)
 #'
 #' # Process with worker initialization
-#' results <- tileApply(r, tiles = iter,
-#'   setup_FUN = function(.W, .X) {
-#'     # Initialize per-worker state
-#'     list(
-#'       worker_id = .W,
-#'       start_time = Sys.time(),
-#'       raster_info = list(nrow = nrow(.X), ncol = ncol(.X))
-#'     )
-#'   },
-#'   FUN = function(batch, .BATCH, .POSITION, .SETUP_OUT) {
-#'     # Process batch of tiles
-#'     batch_stats <- lapply(batch, function(tile) {
-#'       terra::global(tile, "mean", na.rm = TRUE)[[1]]
-#'     })
+#' results <- tileApply(r,
+#'     tiles = iter,
+#'     setup_FUN = function(.W, .X) {
+#'         # Initialize per-worker state
+#'         list(
+#'             worker_id = .W,
+#'             start_time = Sys.time(),
+#'             raster_info = list(nrow = nrow(.X), ncol = ncol(.X))
+#'         )
+#'     },
+#'     FUN = function(batch, .BATCH, .POSITION, .SETUP_OUT) {
+#'         # Process batch of tiles
+#'         batch_stats <- lapply(batch, function(tile) {
+#'             terra::global(tile, "mean", na.rm = TRUE)[[1]]
+#'         })
 #'
-#'     list(
-#'       worker = .SETUP_OUT$worker_id,
-#'       batch_num = .BATCH,
-#'       tiles_processed = .POSITION,
-#'       batch_mean = mean(unlist(batch_stats))
-#'     )
-#'   }
+#'         list(
+#'             worker = .SETUP_OUT$worker_id,
+#'             batch_num = .BATCH,
+#'             tiles_processed = .POSITION,
+#'             batch_mean = mean(unlist(batch_stats))
+#'         )
+#'     }
 #' )
 #'
 #' # Check results structure
@@ -98,16 +99,16 @@
 #' processed_count <- 0
 #'
 #' while (large_iter$has_next) {
-#'   batch <- getTile(r, large_iter)
+#'     batch <- getTile(r, large_iter)
 #'
-#'   # Process batch
-#'   batch_results <- lapply(batch, function(tile) {
-#'     # Your processing here
-#'     terra::global(tile, "mean")
-#'   })
+#'     # Process batch
+#'     batch_results <- lapply(batch, function(tile) {
+#'         # Your processing here
+#'         terra::global(tile, "mean")
+#'     })
 #'
-#'   processed_count <- processed_count + length(batch)
-#'   cat("Processed", processed_count, "of", length(tp), "tiles\n")
+#'     processed_count <- processed_count + length(batch)
+#'     cat("Processed", processed_count, "of", length(tp), "tiles\n")
 #' }
 NULL
 
@@ -120,124 +121,129 @@ NULL
 #' preprocessing `x` per worker before `setup_FUN` and batch streamed processing
 #' of `FUN` begins.
 #' @export
-setMethod("tileApply", signature("token", "missing", "tileIterator"),
-    function(x, tiles, FUN,
-    get_params_x = list(),
-    setup_FUN = NULL,
-    callback_x = NULL,
-    log = FALSE,
-    logpath = tempdir(),
-    simplify = FALSE,
-    future_params = list(future.seed = TRUE),
-    verbose = NULL,
-    ...) {
-    checkmate::assert_list(get_params_x)
-    checkmate::assert_list(future_params)
-    checkmate::assert_function(FUN)
+setMethod(
+    "tileApply", signature("token", "missing", "tileIterator"),
+    function(
+        x, tiles, FUN,
+        get_params_x = list(),
+        setup_FUN = NULL,
+        callback_x = NULL,
+        log = FALSE,
+        logpath = tempdir(),
+        simplify = FALSE,
+        future_params = list(future.seed = TRUE),
+        verbose = NULL,
+        ...) {
+        checkmate::assert_list(get_params_x)
+        checkmate::assert_list(future_params)
+        checkmate::assert_function(FUN)
 
-    vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
+        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
          Dot params:", names(list(...)))
 
-    # Get number of workers from future plan
-    n_workers <- future::nbrOfWorkers()
+        # Get number of workers from future plan
+        n_workers <- future::nbrOfWorkers()
 
-    # Split iterator across workers - each gets independent ranges
-    worker_iters <- iterSplit(tiles, n = n_workers, distribute = TRUE)
-    nsteps <- sum(ceiling(lengths(worker_iters) / tiles$batch_size))
+        # Split iterator across workers - each gets independent ranges
+        worker_iters <- iterSplit(tiles, n = n_workers, distribute = TRUE)
+        nsteps <- sum(ceiling(lengths(worker_iters) / tiles$batch_size))
 
-    with_pbar({
-        p <- pbar(steps = nsteps) # progress is batch based
+        with_pbar({
+            p <- pbar(steps = nsteps) # progress is batch based
 
-        .future_fun <- function(worker_idx) {
-            iter <- worker_iters[[worker_idx]]
-            worker_id <- sprintf("[worker %d]", worker_idx)
-
-            # logging ---- #
-            if (log) {
-                vmsg(.v = "log", sprintf("%s start - %d tiles", worker_id, iter$remaining),
-                     .log_path = logpath)
-            }
-            # logging ---- #
-
-            if (!is.null(callback_x)) {
-                x <- callback_x(x)
-            }
-
-            # worker setup steps (if needed)
-            setup_out <- NULL
-            if (!is.null(setup_FUN)) {
-                ws_a <- list()
-                nf_ws <- names(formals(setup_FUN))
-                if (".W" %in% nf_ws) ws_a$.W <- worker_idx
-                if (".X" %in% nf_ws) ws_a$.X <- x
-                setup_out <- do.call(setup_FUN, ws_a)
-            }
-
-            # setup get params
-            get_params_x <- c(list(x, iter), get_params_x, list(...))
-
-            # collect results within worker
-            res <- list()
-            bid <- 0L
-            while (iter$has_next) {
-                start_pos <- iter$position + 1L
-                bid <- bid + 1L
-                tilemeta <- iter$peek_batch() # get meta for this batch
-                batch <- do.call(getTile, get_params_x) # pulls next batch and advances iter
-                batch_size <- length(batch)
-                end_pos <- iter$position
-                idx <- vapply(FUN.VALUE = integer(1L), tilemeta, attr, "tile")
-                .tiles <- iter
-                while(!inherits(.tiles, "tilePlan")) {
-                    # get tilePLan
-                    .tiles <- .tiles[]
-                }
-                ij <- .tile_idx_to_ij(.tiles, idx)
+            .future_fun <- function(worker_idx) {
+                iter <- worker_iters[[worker_idx]]
+                worker_id <- sprintf("[worker %d]", worker_idx)
 
                 # logging ---- #
                 if (log) {
-                    vmsg(.v = "log", sprintf("<worker %s> start batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                    vmsg(
+                        .v = "log", sprintf("%s start - %d tiles", worker_id, iter$remaining),
+                        .log_path = logpath
+                    )
                 }
                 # logging ---- #
 
-                # special args
-                a <- list(batch)
-                nf <- names(formals(FUN))
-                if (".I" %in% nf) a$.I <- idx
-                if (".R" %in% nf) a$.R <- ij[[1L]]
-                if (".C" %in% nf) a$.C <- ij[[2L]]
-                if (".TILE" %in% nf) a$.TILE <- tilemeta
-                if (".POSITION" %in% nf) a$.POSITION <- c(start_pos, end_pos)
-                if (".BATCH" %in% nf) a$.BATCH <- bid
-                if (".SETUP_OUT" %in% nf) a$.SETUP_OUT <- setup_out
-
-                # apply function
-                res[[bid]] <- do.call(FUN, args = a)
-
-                # logging ---- #
-                if (log) {
-                    vmsg(.v = "log", sprintf("<worker %s> end batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                if (!is.null(callback_x)) {
+                    x <- callback_x(x)
                 }
-                # logging ---- #
-                # Update progress bar
-                p()
+
+                # worker setup steps (if needed)
+                setup_out <- NULL
+                if (!is.null(setup_FUN)) {
+                    ws_a <- list()
+                    nf_ws <- names(formals(setup_FUN))
+                    if (".W" %in% nf_ws) ws_a$.W <- worker_idx
+                    if (".X" %in% nf_ws) ws_a$.X <- x
+                    setup_out <- do.call(setup_FUN, ws_a)
+                }
+
+                # setup get params
+                get_params_x <- c(list(x, iter), get_params_x, list(...))
+
+                # collect results within worker
+                res <- list()
+                bid <- 0L
+                while (iter$has_next) {
+                    start_pos <- iter$position + 1L
+                    bid <- bid + 1L
+                    tilemeta <- iter$peek_batch() # get meta for this batch
+                    batch <- do.call(getTile, get_params_x) # pulls next batch and advances iter
+                    batch_size <- length(batch)
+                    end_pos <- iter$position
+                    idx <- vapply(FUN.VALUE = integer(1L), tilemeta, attr, "tile")
+                    .tiles <- iter
+                    while (!inherits(.tiles, "tilePlan")) {
+                        # get tilePLan
+                        .tiles <- .tiles[]
+                    }
+                    ij <- .tile_idx_to_ij(.tiles, idx)
+
+                    # logging ---- #
+                    if (log) {
+                        vmsg(.v = "log", sprintf("<worker %s> start batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                    }
+                    # logging ---- #
+
+                    # special args
+                    a <- list(batch)
+                    nf <- names(formals(FUN))
+                    if (".I" %in% nf) a$.I <- idx
+                    if (".R" %in% nf) a$.R <- ij[[1L]]
+                    if (".C" %in% nf) a$.C <- ij[[2L]]
+                    if (".TILE" %in% nf) a$.TILE <- tilemeta
+                    if (".POSITION" %in% nf) a$.POSITION <- c(start_pos, end_pos)
+                    if (".BATCH" %in% nf) a$.BATCH <- bid
+                    if (".SETUP_OUT" %in% nf) a$.SETUP_OUT <- setup_out
+
+                    # apply function
+                    res[[bid]] <- do.call(FUN, args = a)
+
+                    # logging ---- #
+                    if (log) {
+                        vmsg(.v = "log", sprintf("<worker %s> end batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                    }
+                    # logging ---- #
+                    # Update progress bar
+                    p()
+                }
+                return(res)
             }
-            return(res)
-        }
 
-        future_params <- c(
-            X = seq_along(worker_iters), # parallelize on number of worker iters
-            FUN = .future_fun,
-            future_params
-        )
+            future_params <- c(
+                X = seq_along(worker_iters), # parallelize on number of worker iters
+                FUN = .future_fun,
+                future_params
+            )
 
-        results_list <- do.call(lapply_flex, future_params)
+            results_list <- do.call(lapply_flex, future_params)
 
-        # flatten results from workers into single list
-        all_results <- unlist(results_list, recursive = FALSE)
-        return(all_results)
-    })
-})
+            # flatten results from workers into single list
+            all_results <- unlist(results_list, recursive = FALSE)
+            return(all_results)
+        })
+    }
+)
 
 #* token,token xy ####
 
@@ -246,147 +252,154 @@ setMethod("tileApply", signature("token", "missing", "tileIterator"),
 #' preprocessing `y` per worker before `setup_FUN` and batch streamed processing
 #' of `FUN` begins.
 #' @export
-setMethod("tileApply", signature("token", "token", "tileIterator"),
-    function(x, y, tiles, FUN,
-    get_params_x = list(),
-    get_params_y = list(),
-    pad_y = NULL,
-    setup_FUN = NULL,
-    callback_x = NULL,
-    callback_y = NULL,
-    log = FALSE,
-    logpath = tempdir(),
-    simplify = FALSE,
-    future_params = list(future.seed = TRUE),
-    verbose = NULL,
-    ...) {
-    checkmate::assert_list(get_params_x)
-    checkmate::assert_list(get_params_y)
-    checkmate::assert_list(future_params)
-    checkmate::assert_function(FUN)
+setMethod(
+    "tileApply", signature("token", "token", "tileIterator"),
+    function(
+        x, y, tiles, FUN,
+        get_params_x = list(),
+        get_params_y = list(),
+        pad_y = NULL,
+        setup_FUN = NULL,
+        callback_x = NULL,
+        callback_y = NULL,
+        log = FALSE,
+        logpath = tempdir(),
+        simplify = FALSE,
+        future_params = list(future.seed = TRUE),
+        verbose = NULL,
+        ...) {
+        checkmate::assert_list(get_params_x)
+        checkmate::assert_list(get_params_y)
+        checkmate::assert_list(future_params)
+        checkmate::assert_function(FUN)
 
-    vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
+        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
          Dot params:", names(list(...)))
 
-    # Get number of workers from future plan
-    n_workers <- future::nbrOfWorkers()
+        # Get number of workers from future plan
+        n_workers <- future::nbrOfWorkers()
 
-    # Split iterator across workers - each gets independent ranges
-    worker_iters <- iterSplit(tiles, n = n_workers, distribute = TRUE)
-    nsteps <- sum(ceiling(lengths(worker_iters) / tiles$batch_size))
+        # Split iterator across workers - each gets independent ranges
+        worker_iters <- iterSplit(tiles, n = n_workers, distribute = TRUE)
+        nsteps <- sum(ceiling(lengths(worker_iters) / tiles$batch_size))
 
-    with_pbar({
-        p <- pbar(steps = nsteps) # progress is batch based
+        with_pbar({
+            p <- pbar(steps = nsteps) # progress is batch based
 
-        .future_fun <- function(worker_idx) {
-            iter <- worker_iters[[worker_idx]]
-            worker_id <- sprintf("[worker %d]", worker_idx)
-
-            # logging ---- #
-            if (log) {
-                vmsg(.v = "log", sprintf("%s start - %d tiles", worker_id, iter$remaining),
-                     .log_path = logpath)
-            }
-            # logging ---- #
-
-            if (!is.null(callback_x)) {
-                x <- callback_x(x)
-            }
-            if (!is.null(callback_y)) {
-                y <- callback_y(y)
-            }
-
-            # worker setup steps (if needed)
-            setup_out <- NULL
-            if (!is.null(setup_FUN)) {
-                ws_a <- list()
-                nf_ws <- names(formals(setup_FUN))
-                if (".W" %in% nf_ws) ws_a$.W <- worker_idx
-                if (".X" %in% nf_ws) ws_a$.X <- x
-                if (".Y" %in% nf_ws) ws_a$.Y <- y
-                setup_out <- do.call(setup_FUN, ws_a)
-            }
-
-            # setup get params (use tiles[] to use unified indices for extraction)
-            get_params_x <- c(list(x, tiles[]), get_params_x, list(...))
-            get_params_y <- c(list(y, tiles[], pad = pad_y), get_params_y, list(...))
-
-            # collect results within worker
-            res <- list()
-            bid <- 0L
-            while (iter$has_next) {
-                start_pos <- iter$position + 1L
-                bid <- bid + 1L
-                tilemeta <- iter$peek_batch() # get meta for this batch
-                indices <- iter$next_indices(advance = TRUE)
-                get_params_x$i <- indices
-                get_params_y$i <- indices
-                batch_x <- do.call(getTile, get_params_x)
-                batch_y <- do.call(getTile, get_params_y)
-                batch_size <- length(batch_x)
-                end_pos <- iter$position
-                idx <- vapply(FUN.VALUE = integer(1L), tilemeta, attr, "tile")
-                .tiles <- iter
-                while(!inherits(.tiles, "tilePlan")) {
-                    # get tilePLan
-                    .tiles <- .tiles[]
-                }
-                ij <- .tile_idx_to_ij(.tiles, idx)
+            .future_fun <- function(worker_idx) {
+                iter <- worker_iters[[worker_idx]]
+                worker_id <- sprintf("[worker %d]", worker_idx)
 
                 # logging ---- #
                 if (log) {
-                    vmsg(.v = "log", sprintf("<worker %s> start batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                    vmsg(
+                        .v = "log", sprintf("%s start - %d tiles", worker_id, iter$remaining),
+                        .log_path = logpath
+                    )
                 }
                 # logging ---- #
 
-                # special args
-                a <- list(batch_x, batch_y)
-                nf <- names(formals(FUN))
-                if (".I" %in% nf) a$.I <- idx
-                if (".R" %in% nf) a$.R <- ij[[1L]]
-                if (".C" %in% nf) a$.C <- ij[[2L]]
-                if (".TILE" %in% nf) a$.TILE <- tilemeta
-                if (".POSITION" %in% nf) a$.POSITION <- c(start_pos, end_pos)
-                if (".BATCH" %in% nf) a$.BATCH <- bid
-                if (".SETUP_OUT" %in% nf) a$.SETUP_OUT <- setup_out
-
-                # apply function
-                res[[bid]] <- do.call(FUN, args = a)
-
-                # logging ---- #
-                if (log) {
-                    vmsg(.v = "log", sprintf("<worker %s> end batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                if (!is.null(callback_x)) {
+                    x <- callback_x(x)
                 }
-                # logging ---- #
-                # Update progress bar
-                p()
+                if (!is.null(callback_y)) {
+                    y <- callback_y(y)
+                }
+
+                # worker setup steps (if needed)
+                setup_out <- NULL
+                if (!is.null(setup_FUN)) {
+                    ws_a <- list()
+                    nf_ws <- names(formals(setup_FUN))
+                    if (".W" %in% nf_ws) ws_a$.W <- worker_idx
+                    if (".X" %in% nf_ws) ws_a$.X <- x
+                    if (".Y" %in% nf_ws) ws_a$.Y <- y
+                    setup_out <- do.call(setup_FUN, ws_a)
+                }
+
+                # setup get params (use tiles[] to use unified indices for extraction)
+                get_params_x <- c(list(x, tiles[]), get_params_x, list(...))
+                get_params_y <- c(list(y, tiles[], pad = pad_y), get_params_y, list(...))
+
+                # collect results within worker
+                res <- list()
+                bid <- 0L
+                while (iter$has_next) {
+                    start_pos <- iter$position + 1L
+                    bid <- bid + 1L
+                    tilemeta <- iter$peek_batch() # get meta for this batch
+                    indices <- iter$next_indices(advance = TRUE)
+                    get_params_x$i <- indices
+                    get_params_y$i <- indices
+                    batch_x <- do.call(getTile, get_params_x)
+                    batch_y <- do.call(getTile, get_params_y)
+                    batch_size <- length(batch_x)
+                    end_pos <- iter$position
+                    idx <- vapply(FUN.VALUE = integer(1L), tilemeta, attr, "tile")
+                    .tiles <- iter
+                    while (!inherits(.tiles, "tilePlan")) {
+                        # get tilePLan
+                        .tiles <- .tiles[]
+                    }
+                    ij <- .tile_idx_to_ij(.tiles, idx)
+
+                    # logging ---- #
+                    if (log) {
+                        vmsg(.v = "log", sprintf("<worker %s> start batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                    }
+                    # logging ---- #
+
+                    # special args
+                    a <- list(batch_x, batch_y)
+                    nf <- names(formals(FUN))
+                    if (".I" %in% nf) a$.I <- idx
+                    if (".R" %in% nf) a$.R <- ij[[1L]]
+                    if (".C" %in% nf) a$.C <- ij[[2L]]
+                    if (".TILE" %in% nf) a$.TILE <- tilemeta
+                    if (".POSITION" %in% nf) a$.POSITION <- c(start_pos, end_pos)
+                    if (".BATCH" %in% nf) a$.BATCH <- bid
+                    if (".SETUP_OUT" %in% nf) a$.SETUP_OUT <- setup_out
+
+                    # apply function
+                    res[[bid]] <- do.call(FUN, args = a)
+
+                    # logging ---- #
+                    if (log) {
+                        vmsg(.v = "log", sprintf("<worker %s> end batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                    }
+                    # logging ---- #
+                    # Update progress bar
+                    p()
+                }
+                return(res)
             }
-            return(res)
-        }
 
-        future_params <- c(
-            X = seq_along(worker_iters), # parallelize on number of worker iters
-            FUN = .future_fun,
-            future_params
-        )
+            future_params <- c(
+                X = seq_along(worker_iters), # parallelize on number of worker iters
+                FUN = .future_fun,
+                future_params
+            )
 
-        results_list <- do.call(lapply_flex, future_params)
+            results_list <- do.call(lapply_flex, future_params)
 
-        # flatten results from workers into single list
-        all_results <- unlist(results_list, recursive = FALSE)
-        return(all_results)
-    })
-})
+            # flatten results from workers into single list
+            all_results <- unlist(results_list, recursive = FALSE)
+            return(all_results)
+        })
+    }
+)
 
 # specific methods ####
 
 #' @rdname redispatch_tileapply
 #' @export
-setMethod("redispatch_tileapply", signature("character", "tileIterator"),
-function(sig, tiles, ...) {
-    sig <- GiottoUtils::handle_warnings(.terra_read(sig))$result
-    redispatch_tileapply(sig, tiles, ...)
-})
+setMethod(
+    "redispatch_tileapply", signature("character", "tileIterator"),
+    function(sig, tiles, ...) {
+        sig <- GiottoUtils::handle_warnings(.terra_read(sig))$result
+        redispatch_tileapply(sig, tiles, ...)
+    }
+)
 
 #' @rdname redispatch_tileapply
 #' @export
@@ -436,12 +449,13 @@ setMethod("redispatch_tileapply", signature("SpatVector", "tileIterator"), funct
 
 #' @rdname redispatch_tileapply
 #' @export
-setMethod("redispatch_tileapply", signature("ANY", "tileIterator"), function(sig, tiles,
-    default_get_params = list(),
-    default_callback = NULL,
-    param_xy,
-    verbose = NULL,
-    ...) {
+setMethod("redispatch_tileapply", signature("ANY", "tileIterator"), function(
+        sig, tiles,
+        default_get_params = list(),
+        default_callback = NULL,
+        param_xy,
+        verbose = NULL,
+        ...) {
     checkmate::assert_list(default_get_params)
     param_xy <- match.arg(param_xy, c("x", "y"))
     vmsg(.v = verbose, .is_debug = TRUE, "[redispatch] step done. Route as", param_xy, "...")
@@ -457,8 +471,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileIterator"), function(sig
         a$get_params_x <- a$get_params_x[!duplicated(ns)]
         a$callback_x <- a$callback_x %null% default_callback
         do.call(tileApply, c(list(x = sig), a))
-    }
-    else {
+    } else {
         vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(list(...))))
         a$get_params_y <- c(a$get_params_y, default_get_params)
         ns <- names(a$get_params_y)
@@ -467,4 +480,3 @@ setMethod("redispatch_tileapply", signature("ANY", "tileIterator"), function(sig
         do.call(tileApply, c(list(y = sig), a))
     }
 })
-

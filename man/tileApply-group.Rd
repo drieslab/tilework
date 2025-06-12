@@ -138,32 +138,33 @@ length(tp) <- 16
 
 # Organize into groups (e.g., by geographic region)
 tg <- tileGroup(tp, groups = list(
-  "north" = 1:8,      # northern tiles
-  "south" = 9:16,     # southern tiles
-  "corners" = c(1, 4, 13, 16)  # corner tiles
+    "north" = 1:8, # northern tiles
+    "south" = 9:16, # southern tiles
+    "corners" = c(1, 4, 13, 16) # corner tiles
 ))
 
 # Process groups in parallel, with group-level aggregation
-results <- tileApply(r, tiles = tg,
-  parallel_strategy = "groups",
-  FUN = function(tile, .I, .GROUP) {
-    # Process individual tile
-    list(
-      tile_id = .I,
-      group = .GROUP,
-      stats = terra::global(tile, c("mean", "sd"), na.rm = TRUE)
-    )
-  },
-  group_FUN = function(group_results, .GROUP) {
-    # Aggregate results within each group
-    means <- sapply(group_results, function(x) x$stats$mean)
-    list(
-      group = .GROUP,
-      n_tiles = length(group_results),
-      group_mean = mean(means),
-      group_range = range(means)
-    )
-  }
+results <- tileApply(r,
+    tiles = tg,
+    parallel_strategy = "groups",
+    FUN = function(tile, .I, .GROUP) {
+        # Process individual tile
+        list(
+            tile_id = .I,
+            group = .GROUP,
+            stats = terra::global(tile, c("mean", "sd"), na.rm = TRUE)
+        )
+    },
+    group_FUN = function(group_results, .GROUP) {
+        # Aggregate results within each group
+        means <- sapply(group_results, function(x) x$stats$mean)
+        list(
+            group = .GROUP,
+            n_tiles = length(group_results),
+            group_mean = mean(means),
+            group_range = range(means)
+        )
+    }
 )
 
 # Results organized by group

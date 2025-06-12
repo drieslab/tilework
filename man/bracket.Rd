@@ -84,7 +84,7 @@ spat <- tilePlan("spatial")
 ext(spat) <- c(0, 1000, 0, 1000)
 length(spat) <- 9
 spat[1]
-spat[1,2:3]
+spat[1, 2:3]
 spat[]
 
 px <- tilePlan("pixel")

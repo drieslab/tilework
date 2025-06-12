@@ -4,13 +4,12 @@
 
 # Helper function to create test raster
 create_test_raster <- function(nrow = 100, ncol = 100, extent = c(0, 100, 0, 100)) {
-    r <- rast(nrows = nrow, ncols = ncol, extent = extent, vals = 1:(nrow*ncol))
+    r <- rast(nrows = nrow, ncols = ncol, extent = extent, vals = 1:(nrow * ncol))
     return(r)
 }
 
 # Test tilePlan with getTile ####
 describe("tilePlan with getTile", {
-
     test_that("spatialTilePlan works with SpatRaster getTile", {
         # Create test data
         r <- create_test_raster()
@@ -118,7 +117,6 @@ describe("tilePlan with getTile", {
 
 # Test tilePlan with getBoundedData ####
 describe("tilePlan with getBoundedData", {
-
     test_that("tilePlan bounds work with getBoundedData", {
         r <- create_test_raster()
 
@@ -189,7 +187,6 @@ describe("tilePlan with getBoundedData", {
 
 # Test tilePlan with tileGroup ####
 describe("tilePlan with tileGroup", {
-
     test_that("tileGroup creation with tilePlan", {
         tp <- tilePlan("spatial")
         ext(tp) <- c(0, 100, 0, 100)
@@ -245,7 +242,6 @@ describe("tilePlan with tileGroup", {
 
 # Test tilePlan with tileIterator ####
 describe("tilePlan with tileIterator", {
-
     test_that("tileIterator creation with tilePlan", {
         tp <- tilePlan("spatial")
         ext(tp) <- c(0, 100, 0, 100)
@@ -321,7 +317,6 @@ describe("tilePlan with tileIterator", {
 
 # Test complex integration scenarios ####
 describe("Complex integration scenarios", {
-
     test_that("end-to-end spatial workflow", {
         # Create test raster
         r <- create_test_raster(100, 100, c(0, 1000, 0, 1000))
@@ -352,7 +347,7 @@ describe("Complex integration scenarios", {
 
         processed_tiles <- list()
         batch_count <- 0
-        while(iter_high$has_next) {
+        while (iter_high$has_next) {
             batch_count <- batch_count + 1
             batch <- getTile(temp_file, iter_high)
             processed_tiles[[batch_count]] <- batch
@@ -378,18 +373,18 @@ describe("Complex integration scenarios", {
         tp$pxdims <- dim(r)[1:2]
         tp$nrows <- 20
         tp$ncols <- 20
-        tp_padded <- tp + 5  # Add 5 pixel padding
+        tp_padded <- tp + 5 # Add 5 pixel padding
 
         # Step 2: Create iterator for batch processing
         iter <- tileIterator(tp_padded, batch_size = 4)
 
         # Step 3: Process in batches
         all_results <- list()
-        while(iter$has_next) {
+        while (iter$has_next) {
             batch <- getTile(temp_file, iter, extend = TRUE, fill = 0)
 
             # Each tile should be 30x30 (20 + 2*5 padding)
-            for(tile in batch) {
+            for (tile in batch) {
                 expect_equal(dim(tile), c(30, 30, 1))
             }
 

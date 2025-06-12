@@ -196,14 +196,16 @@ setMethod("[", signature(x = "spatialTilePlan", i = "numeric", j = "numeric", dr
 
 #' @rdname centroids
 #' @export
-setMethod("centroids", signature("spatialTilePlan"),
+setMethod(
+    "centroids", signature("spatialTilePlan"),
     function(x, zero = FALSE, ...) {
-    a <- GiottoUtils::get_args_list(...)
-    a$fun <- vect
-    e <- ext(x)
-    a$offset <- c(terra::ymin(e), terra::xmin(e))
-    do.call(callNextMethod, a)
-})
+        a <- GiottoUtils::get_args_list(...)
+        a$fun <- vect
+        e <- ext(x)
+        a$offset <- c(terra::ymin(e), terra::xmin(e))
+        do.call(callNextMethod, a)
+    }
+)
 
 
 # helpers ####

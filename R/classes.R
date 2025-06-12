@@ -1,4 +1,3 @@
-
 setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 
 #' @name giottoTile-class

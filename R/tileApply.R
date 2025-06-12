@@ -46,12 +46,14 @@
 #' data/tile interactions.
 #' @examples
 #' if (FALSE) {
-#' # Extending for a custom data type:
-#' setMethod("getBoundedData", signature("MyDataType", "SpatExtent"),
-#'     function(x, bound) {
-#'         # Your data extraction logic here
-#'         my_extract_function(x, bound)
-#'     })
+#'     # Extending for a custom data type:
+#'     setMethod(
+#'         "getBoundedData", signature("MyDataType", "SpatExtent"),
+#'         function(x, bound) {
+#'             # Your data extraction logic here
+#'             my_extract_function(x, bound)
+#'         }
+#'     )
 #' }
 NULL
 
@@ -243,11 +245,12 @@ setMethod("[", signature("token", "missing", "missing", "missing"), function(x, 
 
 #' @rdname redispatch_tileapply
 #' @export
-setMethod("redispatch_tileapply", signature("ANY", "ANY"), function(sig, tiles,
-    default_get_params = list(),
-    param_xy,
-    verbose = NULL,
-    ...) {
+setMethod("redispatch_tileapply", signature("ANY", "ANY"), function(
+        sig, tiles,
+        default_get_params = list(),
+        param_xy,
+        verbose = NULL,
+        ...) {
     checkmate::assert_list(default_get_params)
     param_xy <- match.arg(param_xy, c("x", "y"))
     vmsg(.v = verbose, .is_debug = TRUE, "[redispatch] step done. Route as", param_xy, "...")
@@ -262,8 +265,7 @@ setMethod("redispatch_tileapply", signature("ANY", "ANY"), function(sig, tiles,
         ns <- names(a$get_params_x)
         a$get_params_x <- a$get_params_x[!duplicated(ns)]
         do.call(tileApply, c(list(x = sig), a))
-    }
-    else {
+    } else {
         vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(list(...))))
         a$get_params_y <- c(a$get_params_y, default_get_params)
         ns <- names(a$get_params_y)
@@ -277,11 +279,13 @@ setMethod("redispatch_tileapply", signature("ANY", "ANY"), function(sig, tiles,
 
 # x: terra::sources() output
 .guard_disk_terra <- function(x, what) {
-    if (!any(x == "")) return(invisible())
+    if (!any(x == "")) {
+        return(invisible())
+    }
     stop(call. = FALSE, wrap_txtf(
         "[tileApply] no filepath found for %s.
-        Please first write to disk.", what)
-    )
+        Please first write to disk.", what
+    ))
 }
 
 .guard_disk_terra_raster <- function(x) {

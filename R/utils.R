@@ -1,4 +1,3 @@
-
 .terra_read <- function(x, prefer = NULL, vect_params = list(), rast_params = list()) {
     rast_params$noflip <- rast_params$noflip %null% TRUE # expect no CRS
     vect_params$proxy <- vect_params$proxy %null% TRUE # read as SpatVectorProxy
@@ -14,9 +13,13 @@
 
     # fallback: try with handling
     try_rast <- try(.terra_read_raster(x, rast_params), silent = TRUE)
-    if (!inherits(try_rast, "try-error")) return(try_rast)
+    if (!inherits(try_rast, "try-error")) {
+        return(try_rast)
+    }
     try_vect <- try(.terra_read_vector(x, vect_params), silent = TRUE)
-    if (!inherits(try_vect, "try-error")) return(try_vect)
+    if (!inherits(try_vect, "try-error")) {
+        return(try_vect)
+    }
     stop("[fileConnect] File not readable by {terra}\n", call. = FALSE)
 }
 
@@ -60,5 +63,3 @@
     }
     ((i - 1) * ncol(x)) + j
 }
-
-

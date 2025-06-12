@@ -1,4 +1,3 @@
-
 # Test tilePlan factory function ####
 test_that("tilePlan factory function works correctly", {
     # Test spatial type
@@ -19,7 +18,6 @@ test_that("tilePlan factory function works correctly", {
 
 # Test spatialTilePlan ####
 describe("spatialTilePlan", {
-
     test_that("initialization works correctly", {
         tp <- tilePlan("spatial")
 
@@ -169,7 +167,6 @@ describe("spatialTilePlan", {
 
 # Test pixelTilePlan ####
 describe("pixelTilePlan", {
-
     test_that("initialization works correctly", {
         tp <- tilePlan("pixel")
 
@@ -206,7 +203,7 @@ describe("pixelTilePlan", {
         expect_equal(tp@tile_dims, c(20, 25))
 
         # Should generate correct number of tiles
-        expected_tiles <- ceiling(100/20) * ceiling(100/25) # 5 * 4 = 20
+        expected_tiles <- ceiling(100 / 20) * ceiling(100 / 25) # 5 * 4 = 20
         expect_equal(length(tp), expected_tiles)
         expect_equal(dim(tp), c(5, 4))
     })
@@ -308,7 +305,6 @@ describe("pixelTilePlan", {
 
 # Test common tilePlan functionality ####
 describe("Common tilePlan functionality", {
-
     # Helper function to create test plans
     create_test_plans <- function() {
         # Spatial plan
@@ -336,7 +332,7 @@ describe("Common tilePlan functionality", {
     test_that("dimension methods work consistently", {
         plans <- create_test_plans()
 
-        for(plan in plans) {
+        for (plan in plans) {
             # Basic dimension checks
             expect_type(length(plan), "integer")
             expect_type(nrow(plan), "integer")
@@ -353,7 +349,7 @@ describe("Common tilePlan functionality", {
     test_that("metadata system works consistently", {
         plans <- create_test_plans()
 
-        for(plan in plans) {
+        for (plan in plans) {
             # Default metadata should exist
             expect_true("tile" %in% colnames(plan@metadata))
             expect_equal(plan$tile, seq_len(length(plan)))
@@ -373,7 +369,7 @@ describe("Common tilePlan functionality", {
     test_that("arithmetic operations work consistently", {
         plans <- create_test_plans()
 
-        for(plan in plans) {
+        for (plan in plans) {
             original_pad <- plan@pad
 
             # Test addition
@@ -394,7 +390,7 @@ describe("Common tilePlan functionality", {
     test_that("indexing edge cases are handled", {
         plans <- create_test_plans()
 
-        for(plan in plans) {
+        for (plan in plans) {
             # Test empty extraction
             empty <- plan[integer(0)]
             expect_type(empty, "list")
@@ -414,15 +410,17 @@ describe("Common tilePlan functionality", {
 
 # Test error conditions ####
 describe("Error handling", {
-
     test_that("spatialTilePlan validates extent", {
         tp <- tilePlan("spatial")
 
         # Invalid extent length
-        expect_error({
-            tp@extent <- c(1, 2, 3) # Only 3 values
-            initialize(tp)
-        }, "invalid extent information")
+        expect_error(
+            {
+                tp@extent <- c(1, 2, 3) # Only 3 values
+                initialize(tp)
+            },
+            "invalid extent information"
+        )
     })
 
     test_that("pixelTilePlan validates dimensions", {
@@ -455,7 +453,6 @@ describe("Error handling", {
 })
 
 describe("Integration scenarios", {
-
     test_that("workflow: spatial plan creation to tile extraction", {
         # Create plan
         tp <- tilePlan("spatial")
@@ -498,7 +495,7 @@ describe("Integration scenarios", {
         tp$nrows <- 100
         tp$ncols <- 100
 
-        expected_tiles <- ceiling(1000/100) * ceiling(1000/100) # 10 * 10 = 100
+        expected_tiles <- ceiling(1000 / 100) * ceiling(1000 / 100) # 10 * 10 = 100
         expect_equal(length(tp), expected_tiles)
         expect_equal(dim(tp), c(10, 10))
 

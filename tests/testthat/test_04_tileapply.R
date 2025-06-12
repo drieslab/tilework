@@ -5,14 +5,14 @@
 create_test_raster <- function(nrow = 50, ncol = 50, extent = c(0, 50, 0, 50), nlyr = 1, vals = NULL) {
     if (nlyr == 1) {
         if (is.null(vals)) {
-            vals <- 1:(nrow*ncol)
+            vals <- 1:(nrow * ncol)
         }
         r <- terra::rast(nrows = nrow, ncols = ncol, extent = extent, vals = vals)
     } else {
         r_list <- list()
         for (i in 1:nlyr) {
             if (is.null(vals)) {
-                layer_vals <- i * (1:(nrow*ncol))
+                layer_vals <- i * (1:(nrow * ncol))
             } else {
                 # If vals provided, use it for first layer and modify for others
                 layer_vals <- if (i == 1) vals else vals * i
@@ -39,7 +39,6 @@ create_test_vector <- function(n_features = 10, extent = c(0, 50, 0, 50)) {
 
 # Test tileApply with tilePlan (basic processing) ####
 describe("tileApply with tilePlan", {
-
     test_that("basic tileApply with spatialTilePlan works", {
         # Create test data
         r <- create_test_raster(60, 60)
@@ -98,21 +97,23 @@ describe("tileApply with tilePlan", {
 
         tp <- tilePlan("spatial")
         terra::ext(tp) <- terra::ext(r)
-        length(tp) <- 4  # 2x2 grid
+        length(tp) <- 4 # 2x2 grid
 
         # Function using special parameters
-        results <- tileApply(temp_file, tiles = tp,
+        results <- tileApply(temp_file,
+            tiles = tp,
             FUN = function(tile, .I, .TILE, .R, .C) {
-            list(
-                tile_id = .I,
-                row = .R,
-                col = .C,
-                extent_area = terra::expanse(
-                    terra::as.polygons(.TILE, crs = "local")
-                ),
-                tile_mean = terra::global(tile, "mean")[[1]]
-            )
-        })
+                list(
+                    tile_id = .I,
+                    row = .R,
+                    col = .C,
+                    extent_area = terra::expanse(
+                        terra::as.polygons(.TILE, crs = "local")
+                    ),
+                    tile_mean = terra::global(tile, "mean")[[1]]
+                )
+            }
+        )
 
         expect_length(results, 4)
 
@@ -135,7 +136,7 @@ describe("tileApply with tilePlan", {
     test_that("tileApply with two input datasets works", {
         # Create two test rasters
         r1 <- create_test_raster(40, 40, vals = 1:1600)
-        r2 <- create_test_raster(40, 40, vals = 1600:1)  # Reverse values
+        r2 <- create_test_raster(40, 40, vals = 1600:1) # Reverse values
 
         temp_file1 <- tempfile(fileext = ".tif")
         temp_file2 <- tempfile(fileext = ".tif")
@@ -152,7 +153,6 @@ describe("tileApply with tilePlan", {
             y = temp_file2,
             tiles = tp,
             FUN = function(tile_x, tile_y) {
-
                 list(
                     x_mean = terra::global(tile_x, "mean")[[1]],
                     y_mean = terra::global(tile_y, "mean")[[1]],
@@ -198,7 +198,6 @@ describe("tileApply with tilePlan", {
 
 # Test tileApply with SpatRaster and SpatVector ####
 describe("tileApply with terra objects", {
-
     test_that("tileApply works with SpatRaster objects", {
         r <- create_test_raster(50, 50)
         temp_file <- tempfile(fileext = ".tif")
@@ -253,7 +252,6 @@ describe("tileApply with terra objects", {
 
 # Test tileApply with tileGroup ####
 describe("tileApply with tileGroup", {
-
     test_that("tileApply with group parallelization works", {
         r <- create_test_raster(60, 60)
         temp_file <- tempfile(fileext = ".tif")
@@ -262,7 +260,7 @@ describe("tileApply with tileGroup", {
         # Create tile plan and groups
         tp <- tilePlan("spatial")
         terra::ext(tp) <- terra::ext(r)
-        length(tp) <- 16  # 4x4 grid
+        length(tp) <- 16 # 4x4 grid
 
         tg <- tileGroup(tp, groups = list(
             "quadrant1" = 1:4,
@@ -292,7 +290,7 @@ describe("tileApply with tileGroup", {
             }
         )
 
-        expect_length(results, 4)  # 4 groups
+        expect_length(results, 4) # 4 groups
         expect_true(all(sapply(results, function(x) "group_name" %in% names(x))))
         expect_true(all(sapply(results, function(x) x$n_tiles == 4)))
 
@@ -325,10 +323,10 @@ describe("tileApply with tileGroup", {
                     sum_value = terra::global(tile, "sum")[[1]]
                 )
             },
-            simplify = TRUE  # Flatten to single list
+            simplify = TRUE # Flatten to single list
         )
 
-        expect_length(results, 12)  # All tiles
+        expect_length(results, 12) # All tiles
 
         # Check that group names are preserved
         groups <- sapply(results, function(x) x$group)
@@ -373,12 +371,16 @@ describe("tileApply with tileGroup", {
             }
         )
 
-        expect_length(results, 2)  # 2 groups
-        expect_length(results[[1]], 4)  # 4 tiles in first group
-        expect_length(results[[2]], 4)  # 4 tiles in second group
-        expect_equal(names(results[[1]][[1]]),
-                     c("tile_id", "processed_by_group", "data_class",
-                       "mean", "setup_time"))
+        expect_length(results, 2) # 2 groups
+        expect_length(results[[1]], 4) # 4 tiles in first group
+        expect_length(results[[2]], 4) # 4 tiles in second group
+        expect_equal(
+            names(results[[1]][[1]]),
+            c(
+                "tile_id", "processed_by_group", "data_class",
+                "mean", "setup_time"
+            )
+        )
 
         unlink(temp_file)
     })
@@ -386,7 +388,6 @@ describe("tileApply with tileGroup", {
 
 # Test tileApply with tileIterator ####
 describe("tileApply with tileIterator", {
-
     test_that("basic tileApply with tileIterator works", {
         r <- create_test_raster(50, 50)
         temp_file <- tempfile(fileext = ".tif")
@@ -519,7 +520,6 @@ describe("tileApply with tileIterator", {
 
 # Test performance and edge cases ####
 describe("tileApply performance and edge cases", {
-
     test_that("handles large number of small tiles", {
         skip_if_not(Sys.getenv("TEST_PERFORMANCE") == "true", "Performance tests skipped")
 
@@ -533,7 +533,7 @@ describe("tileApply performance and edge cases", {
         tp$nrows <- 5
         tp$ncols <- 5
 
-        expect_gt(length(tp), 1000)  # Should create many tiles
+        expect_gt(length(tp), 1000) # Should create many tiles
 
         # Sample subset for testing
         sample_indices <- sample(length(tp), 100)
@@ -546,7 +546,7 @@ describe("tileApply performance and edge cases", {
                 if (.I %in% sample_indices) {
                     terra::global(tile, "mean")[[1]]
                 } else {
-                    NA  # Skip processing for non-sampled tiles
+                    NA # Skip processing for non-sampled tiles
                 }
             }
         )
@@ -556,19 +556,19 @@ describe("tileApply performance and edge cases", {
 
         # Should complete in reasonable time
         processing_time <- as.numeric(end_time - start_time)
-        expect_lt(processing_time, 30)  # Should take less than 30 seconds
+        expect_lt(processing_time, 30) # Should take less than 30 seconds
 
         unlink(temp_file)
     })
 
     test_that("handles empty tiles gracefully", {
         # Create vector data that doesn't cover all tiles
-        v <- create_test_vector(5, extent = c(0, 25, 0, 25))  # Only covers part of extent
+        v <- create_test_vector(5, extent = c(0, 25, 0, 25)) # Only covers part of extent
         temp_file <- tempfile(fileext = ".shp")
         terra::writeVector(v, temp_file, overwrite = TRUE)
 
         tp <- tilePlan("spatial")
-        terra::ext(tp) <- c(0, 50, 0, 50)  # Larger extent than vector data
+        terra::ext(tp) <- c(0, 50, 0, 50) # Larger extent than vector data
         length(tp) <- 9
 
         results <- tileApply(temp_file, tiles = tp, FUN = function(tile_vectors) {
@@ -591,7 +591,7 @@ describe("tileApply performance and edge cases", {
     })
 
     test_that("handles edge tiles with padding correctly", {
-        r <- create_test_raster(47, 53)  # Odd dimensions
+        r <- create_test_raster(47, 53) # Odd dimensions
         temp_file <- tempfile(fileext = ".tif")
         terra::writeRaster(r, temp_file, overwrite = TRUE)
 
@@ -602,7 +602,7 @@ describe("tileApply performance and edge cases", {
         tp_padded <- tp + 3
 
         # Test edge tiles with extension
-        edge_indices <- c(1, tp@dims[2], length(tp) - tp@dims[2] + 1, length(tp))  # Corner tiles
+        edge_indices <- c(1, tp@dims[2], length(tp) - tp@dims[2] + 1, length(tp)) # Corner tiles
 
         results <- tileApply(
             temp_file,
@@ -635,7 +635,8 @@ describe("tileApply performance and edge cases", {
         expect_true(all(sapply(edge_results, function(x) x$is_edge)))
         expect_true(all(sapply(
             # everything is padded + extend including edges
-            edge_results, function(x) identical(x$dimensions, c(16, 16, 1)))))
+            edge_results, function(x) identical(x$dimensions, c(16, 16, 1))
+        )))
 
         unlink(temp_file)
     })
@@ -643,7 +644,6 @@ describe("tileApply performance and edge cases", {
 
 # Integration test - complete workflow ####
 describe("tileApply integration workflow", {
-
     test_that("complete spatial analysis workflow", {
         # Create test datasets
         r_elevation <- create_test_raster(80, 80, vals = runif(6400, 0, 1000))
@@ -666,7 +666,7 @@ describe("tileApply integration workflow", {
 
         # Add processing metadata
         tp$priority <- sample(1:3, length(tp), replace = TRUE)
-        tp$region <- rep(c("north", "south"), each = length(tp)/2)
+        tp$region <- rep(c("north", "south"), each = length(tp) / 2)
 
         # Create groups by priority
         high_priority <- which(tp$priority == 3)
@@ -729,7 +729,7 @@ describe("tileApply integration workflow", {
         )
 
         # Validate results
-        expect_length(analysis_results, 3)  # 3 priority groups
+        expect_length(analysis_results, 3) # 3 priority groups
         expect_true(all(sapply(analysis_results, function(x) "priority_group" %in% names(x))))
         expect_true(all(sapply(analysis_results, function(x) x$n_tiles > 0)))
 
@@ -771,7 +771,8 @@ describe("tileApply integration workflow", {
         # Cleanup
         unlink(c(elev_file, temp_file))
         unlink(list.files(dirname(points_file),
-                          pattern = tools::file_path_sans_ext(basename(points_file)),
-                          full.names = TRUE))
+            pattern = tools::file_path_sans_ext(basename(points_file)),
+            full.names = TRUE
+        ))
     })
 })

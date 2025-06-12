@@ -53,11 +53,13 @@ data/tile interactions.
 
 \examples{
 if (FALSE) {
-# Extending for a custom data type:
-setMethod("getBoundedData", signature("MyDataType", "SpatExtent"),
-    function(x, bound) {
-        # Your data extraction logic here
-        my_extract_function(x, bound)
-    })
+    # Extending for a custom data type:
+    setMethod(
+        "getBoundedData", signature("MyDataType", "SpatExtent"),
+        function(x, bound) {
+            # Your data extraction logic here
+            my_extract_function(x, bound)
+        }
+    )
 }
 }

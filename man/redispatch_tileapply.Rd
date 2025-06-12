@@ -14,7 +14,7 @@
 \alias{redispatch_tileapply,ANY,tileIterator-method}
 \alias{redispatch_tileapply,character,tilePlan-method}
 \alias{redispatch_tileapply,SpatVector,spatialTilePlan-method}
-\alias{redispatch_tileapply,SpatRaster,spatialtilePlan-method}
+\alias{redispatch_tileapply,SpatRaster,spatialTilePlan-method}
 \alias{redispatch_tileapply,SpatRaster,pixelTilePlan-method}
 \title{\emph{Developer API} Redispatch for \code{tileApply()}}
 \usage{
@@ -70,7 +70,7 @@
 
 \S4method{redispatch_tileapply}{SpatVector,spatialTilePlan}(sig, tiles, ...)
 
-\S4method{redispatch_tileapply}{SpatRaster,spatialtilePlan}(sig, tiles, ...)
+\S4method{redispatch_tileapply}{SpatRaster,spatialTilePlan}(sig, tiles, ...)
 
 \S4method{redispatch_tileapply}{SpatRaster,pixelTilePlan}(sig, tiles, ...)
 }

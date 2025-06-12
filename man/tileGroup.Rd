@@ -25,10 +25,10 @@ length(tp) <- 16
 
 # Create groups
 tg <- tileGroup(tp, groups = list(
-  "g1" = 1:4,           # vector indexing
-  "g2" = list(2, 1:4),  # ij indexing
-  "g3" = list(2:4, 1:2) # selection overlaps are allowed
-  # (not all tiles need to be selected)
+    "g1" = 1:4, # vector indexing
+    "g2" = list(2, 1:4), # ij indexing
+    "g3" = list(2:4, 1:2) # selection overlaps are allowed
+    # (not all tiles need to be selected)
 ))
 
 # length() returns number of groups
@@ -48,7 +48,7 @@ tg$active <- "g1"
 # length() is based on group length when active is set
 length(tg)
 
-tg[2]        # Position 2 from g1
+tg[2] # Position 2 from g1
 
 # iterator can be created when active group is set
 iter <- tileIterator(tg, batch_size = 2)
@@ -56,5 +56,5 @@ iter$next_batch()
 iter$next_batch()
 iter$next_batch() # no more items
 
-tg$active <- NULL  # Clear active group by setting NULL
+tg$active <- NULL # Clear active group by setting NULL
 }

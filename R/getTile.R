@@ -40,7 +40,7 @@
 #' @returns `list` of tile data
 #' @seealso [getBoundedData()]
 #' @examples
-#' f <- system.file("ex/elev.tif", package="terra")
+#' f <- system.file("ex/elev.tif", package = "terra")
 #' r <- terra::rast(f)
 #' tp <- tilePlan("pixel")
 #' tp$pxdims <- dim(r)[1:2]
@@ -65,7 +65,8 @@ NULL
 
 #' @rdname getTile
 #' @export
-setMethod("getTile", signature("token", "tilePlan"),
+setMethod(
+    "getTile", signature("token", "tilePlan"),
     function(x, tiles, ...) {
         getTile(x[], tiles, ...) # unwrap and re-call.
     }
@@ -73,21 +74,26 @@ setMethod("getTile", signature("token", "tilePlan"),
 
 #' @rdname getTile
 #' @export
-setMethod("getTile", signature("ANY", "tilePlan"),
+setMethod(
+    "getTile", signature("ANY", "tilePlan"),
     function(x, tiles, i = NULL, j, pad = NULL, get_params = list(), ...) {
-    checkmate::assert_integerish(i)
-    checkmate::assert_list(get_params)
-    if (!is.null(pad)) {
-        checkmate::assert_numeric(pad)
-        tiles <- tiles + pad
+        checkmate::assert_integerish(i)
+        checkmate::assert_list(get_params)
+        if (!is.null(pad)) {
+            checkmate::assert_numeric(pad)
+            tiles <- tiles + pad
+        }
+        if (missing(j)) {
+            bounds_list <- tiles[i, ...]
+        } else {
+            bounds_list <- tiles[i, j, ...]
+        }
+        lapply(bounds_list, function(b) {
+            a <- c(list(x, b), get_params)
+            do.call(getBoundedData, a)
+        })
     }
-    if (missing(j)) bounds_list <- tiles[i, ...]
-    else bounds_list <- tiles[i, j, ...]
-    lapply(bounds_list, function(b) {
-        a <- c(list(x, b), get_params)
-        do.call(getBoundedData, a)
-    })
-})
+)
 
 #' @rdname getTile
 #' @param ext **`SpatRaster` or raster filepath (`character`) only** `numeric`
@@ -95,82 +101,97 @@ setMethod("getTile", signature("ANY", "tilePlan"),
 #' @param prefer **`character` filepath only** character. Hint for file reading
 #' (`"raster"` or `"vector"`). If provided, skips automatic type detection.
 #' @export
-setMethod("getTile", signature("character", "tilePlan"),
+setMethod(
+    "getTile", signature("character", "tilePlan"),
     function(x, tiles, prefer = NULL, ext = NULL, ...) {
-    checkmate::assert_file_exists(x)
-    x <- .terra_read(x, prefer = prefer)
-    if (!is.null(ext)) ext(x) <- ext
-    getTile(x, tiles, ...)
-})
+        checkmate::assert_file_exists(x)
+        x <- .terra_read(x, prefer = prefer)
+        if (!is.null(ext)) ext(x) <- ext
+        getTile(x, tiles, ...)
+    }
+)
 
 ## pixelTilePlan ####
 
 #' @rdname getTile
 #' @export
-setMethod("getTile", signature("SpatRaster", "pixelTilePlan"),
+setMethod(
+    "getTile", signature("SpatRaster", "pixelTilePlan"),
     function(x, tiles, lyr = NULL, extend = FALSE, fill = NA, get_params = list(), ...) {
-    checkmate::assert_integerish(lyr, null.ok = TRUE)
-    checkmate::assert_logical(extend)
-    if (!is.null(lyr)) x <- x[[lyr]]
-    get_params$extend <- extend
-    get_params$fill <- fill
-    get_params$tiles <- tiles
-    callNextMethod(x, tiles, get_params = get_params, ...)
-})
+        checkmate::assert_integerish(lyr, null.ok = TRUE)
+        checkmate::assert_logical(extend)
+        if (!is.null(lyr)) x <- x[[lyr]]
+        get_params$extend <- extend
+        get_params$fill <- fill
+        get_params$tiles <- tiles
+        callNextMethod(x, tiles, get_params = get_params, ...)
+    }
+)
 
 ## spatialTilePlan ####
 
 #' @rdname getTile
 #' @export
-setMethod("getTile", signature("SpatRaster", "spatialTilePlan"),
+setMethod(
+    "getTile", signature("SpatRaster", "spatialTilePlan"),
     function(x, tiles, lyr = NULL, ...) {
-    if (!is.null(lyr)) x <- x[[lyr]]
-    callNextMethod(x, tiles, ...)
-})
+        if (!is.null(lyr)) x <- x[[lyr]]
+        callNextMethod(x, tiles, ...)
+    }
+)
 
 ## tileGroup ####
 
-setMethod("getTile", signature("SpatRaster", "tileGroup"),
+setMethod(
+    "getTile", signature("SpatRaster", "tileGroup"),
     function(x, tiles, i, j, lyr = NULL, ...) {
-    checkmate::assert_integerish(lyr, null.ok = TRUE)
-    if (!is.null(lyr)) x <- x[[lyr]]
-    if (missing(j)) callNextMethod(x, tiles, i = i, ...)
-    else callNextMethod(x, tiles, i = i, j = j, ...)
-})
+        checkmate::assert_integerish(lyr, null.ok = TRUE)
+        if (!is.null(lyr)) x <- x[[lyr]]
+        if (missing(j)) {
+            callNextMethod(x, tiles, i = i, ...)
+        } else {
+            callNextMethod(x, tiles, i = i, j = j, ...)
+        }
+    }
+)
 
 #' @rdname getTile
 #' @export
-setMethod("getTile", signature("ANY", "tileGroup"),
+setMethod(
+    "getTile", signature("ANY", "tileGroup"),
     function(x, tiles, i, j, ...) {
-    checkmate::assert_integerish(i)
-    if (missing(j)) {
-        if (!.has_active(tiles)) {
-            stop("getTile: tileGroup `j` may only be omitted when an active group is set.\n", call. = FALSE)
+        checkmate::assert_integerish(i)
+        if (missing(j)) {
+            if (!.has_active(tiles)) {
+                stop("getTile: tileGroup `j` may only be omitted when an active group is set.\n", call. = FALSE)
+            }
+            j <- tiles@active
         }
-        j <- tiles@active
-    }
-    g <- tiles@groups[[j]]
+        g <- tiles@groups[[j]]
 
-    # dispatch to getTile() tilePlan methods
-    if (!.is_ij_group(g)) {
-        # g is vector index
-        getTile(x, tiles[], i = g[i], ...)
-    } else {
-        # expand to ij pairlist then get indices of interest
-        ij <- .g_index(g, i)
-        getTile(x, tiles[], i = ij[[1L]], j = ij[[2L]], expand_grid = FALSE, ...)
+        # dispatch to getTile() tilePlan methods
+        if (!.is_ij_group(g)) {
+            # g is vector index
+            getTile(x, tiles[], i = g[i], ...)
+        } else {
+            # expand to ij pairlist then get indices of interest
+            ij <- .g_index(g, i)
+            getTile(x, tiles[], i = ij[[1L]], j = ij[[2L]], expand_grid = FALSE, ...)
+        }
     }
-})
+)
 
 ## tileIterator ####
 
 #' @rdname getTile
 #' @export
-setMethod("getTile", signature("ANY", "tileIterator"),
+setMethod(
+    "getTile", signature("ANY", "tileIterator"),
     function(x, tiles, advance = TRUE, ...) {
-    dots <- list(...)
-    if (any(names(dots) %in% c("i", "j"))) {
-        stop("i and j indexing are not used with `tileIterator`\n", call. = FALSE)
+        dots <- list(...)
+        if (any(names(dots) %in% c("i", "j"))) {
+            stop("i and j indexing are not used with `tileIterator`\n", call. = FALSE)
+        }
+        getTile(x, tiles[], i = tiles$next_indices(advance = advance), ...)
     }
-    getTile(x, tiles[], i = tiles$next_indices(advance = advance), ...)
-})
+)

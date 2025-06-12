@@ -88,7 +88,7 @@ is only needed if additional params/operations should be performed before
 the tile selection, (for example layer selection with raster data).
 }
 \examples{
-f <- system.file("ex/elev.tif", package="terra")
+f <- system.file("ex/elev.tif", package = "terra")
 r <- terra::rast(f)
 tp <- tilePlan("pixel")
 tp$pxdims <- dim(r)[1:2]

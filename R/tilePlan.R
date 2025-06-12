@@ -125,7 +125,7 @@ NULL
 #' ext(spat) <- c(0, 1000, 0, 1000)
 #' length(spat) <- 9
 #' spat[1]
-#' spat[1,2:3]
+#' spat[1, 2:3]
 #' spat[]
 #'
 #' px <- tilePlan("pixel")
@@ -250,7 +250,9 @@ setMethod("$<-", signature("tilePlan", "ANY"), function(x, name, value) {
 #' @rdname dollar
 #' @export
 setMethod("$", signature("tilePlan"), function(x, name) {
-    if (name == "pad") return(x@pad)
+    if (name == "pad") {
+        return(x@pad)
+    }
     x@metadata[[name]]
 })
 
@@ -269,7 +271,7 @@ setMethod(
         p$extent_list <- x[]
 
         if (x@pad > 0) {
-            p$alpha  <- p$alpha %null% 0.3
+            p$alpha <- p$alpha %null% 0.3
         }
 
         do.call(.preview_chunk_plan, args = p)
@@ -312,15 +314,17 @@ setMethod("[", signature(x = "tilePlan", i = "numeric", j = "missing", drop = "m
 
 #' @rdname bracket
 #' @export
-setMethod("[", signature(x = "tilePlan", i = "numeric", j = "numeric", drop = "missing"),
-          function(x, i, j, tile_fun = .spat_tile_bounds, fun = function(x) x, zero = FALSE, expand_grid = TRUE, drop) {
-    .extract_ij_tile(x, i, j,
-        expand_grid = expand_grid,
-        tile_fun = tile_fun,
-        fun = fun,
-        zero = zero
-    )
-})
+setMethod(
+    "[", signature(x = "tilePlan", i = "numeric", j = "numeric", drop = "missing"),
+    function(x, i, j, tile_fun = .spat_tile_bounds, fun = function(x) x, zero = FALSE, expand_grid = TRUE, drop) {
+        .extract_ij_tile(x, i, j,
+            expand_grid = expand_grid,
+            tile_fun = tile_fun,
+            fun = fun,
+            zero = zero
+        )
+    }
+)
 
 #' @rdname bracket
 #' @usage
@@ -443,11 +447,12 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
 # fun: function. Function to run on the output bounds as post-processing
 #   (e.g. ext())
 # zero: logical. Whether to zero out padding effects.
-.extract_ij_tile <- function(x, i, j,
-    expand_grid = TRUE,
-    tile_fun = .spat_tile_bounds,
-    fun = function(x) x,
-    zero = FALSE) {
+.extract_ij_tile <- function(
+        x, i, j,
+        expand_grid = TRUE,
+        tile_fun = .spat_tile_bounds,
+        fun = function(x) x,
+        zero = FALSE) {
     if (any(is.na(i))) stop("[tilePlan] i index may not be NA", call. = FALSE)
     if (any(is.na(j))) stop("[tilePlan] j index may not be NA", call. = FALSE)
 
@@ -487,4 +492,3 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
     res <- fun(res)
     res
 }
-

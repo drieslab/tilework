@@ -37,7 +37,7 @@
 #' expected tile dimensions
 #' @param fill numeric. if `extend = TRUE`, what value to fill with
 #' @examples
-#' f <- system.file("ex/elev.tif", package="terra")
+#' f <- system.file("ex/elev.tif", package = "terra")
 #' r <- terra::rast(f)
 #'
 #' pixel_selection <- getBoundedData(r, c(10, 50, 30, 40))
@@ -53,43 +53,52 @@ NULL
 #' @param tiles `tile*` object. Only needed if `extend = TRUE` for the contained
 #' tiledims and padding information.
 #' @export
-setMethod("getBoundedData", signature("SpatRaster", "numeric"),
+setMethod(
+    "getBoundedData", signature("SpatRaster", "numeric"),
     function(x, bound, tiles, extend = FALSE, fill = NA) {
         # get px tile from x as r
-    r <- x[bound[[3]]:min(nrow(x), bound[[4]]), # rows (y)
-           bound[[1]]:min(ncol(x), bound[[2]]), # cols (x)
-           drop = FALSE]
-    if (!extend) return(r) # return early if not extend
+        r <- x[bound[[3]]:min(nrow(x), bound[[4]]), # rows (y)
+            bound[[1]]:min(ncol(x), bound[[2]]), # cols (x)
+            drop = FALSE
+        ]
+        if (!extend) {
+            return(r)
+        } # return early if not extend
 
-    # handle extend and masking
-    pad <- 2 * tiles@pad # since padding is added on both sides
-    expected_dim <- c(tiles@tile_dims[[1L]] + pad, tiles@tile_dims[[2L]] + pad)
-    if (nrow(r) != expected_dim[[1L]] ||
-        ncol(r) != expected_dim[[2L]]) {
-        if (extend) {
-            bottom_rows <- expected_dim[[1L]] - nrow(r)
-            right_cols <- expected_dim[[2L]] - ncol(r)
-            r <- terra::extend(r,
-                # left, right, bottom, top
-                c(0, right_cols, bottom_rows, 0),
-                fill = fill
-            )
+        # handle extend and masking
+        pad <- 2 * tiles@pad # since padding is added on both sides
+        expected_dim <- c(tiles@tile_dims[[1L]] + pad, tiles@tile_dims[[2L]] + pad)
+        if (nrow(r) != expected_dim[[1L]] ||
+            ncol(r) != expected_dim[[2L]]) {
+            if (extend) {
+                bottom_rows <- expected_dim[[1L]] - nrow(r)
+                right_cols <- expected_dim[[2L]] - ncol(r)
+                r <- terra::extend(r,
+                    # left, right, bottom, top
+                    c(0, right_cols, bottom_rows, 0),
+                    fill = fill
+                )
+            }
         }
+        r
     }
-    r
-})
+)
 
 #' @rdname getBoundedData
 #' @export
-setMethod("getBoundedData", signature("SpatRaster", "SpatExtent"),
+setMethod(
+    "getBoundedData", signature("SpatRaster", "SpatExtent"),
     function(x, bound) {
-    terra::window(x) <- bound
-    x
-})
+        terra::window(x) <- bound
+        x
+    }
+)
 
 #' @rdname getBoundedData
 #' @export
-setMethod("getBoundedData", signature("SpatVectorProxy", "SpatExtent"),
+setMethod(
+    "getBoundedData", signature("SpatVectorProxy", "SpatExtent"),
     function(x, bound) {
-    terra::query(x, extent = bound)
-})
+        terra::query(x, extent = bound)
+    }
+)

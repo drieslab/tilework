@@ -2,8 +2,14 @@
 % Please edit documentation in R/tileIterator.R
 \name{tileIterator}
 \alias{tileIterator}
+\alias{$,tileIterator-method}
+\alias{$<-,tileIterator-method}
 \title{Stateful Tile Iterator}
 \usage{
+\S4method{$}{tileIterator}(x, name)
+
+\S4method{$}{tileIterator}(x, name) <- value
+
 tileIterator(
   tiles = NULL,
   position = 0,
@@ -13,6 +19,12 @@ tileIterator(
 )
 }
 \arguments{
+\item{x}{\code{tileIterator}}
+
+\item{name}{Name of method or attribute to access (See Methods section)}
+
+\item{value}{value to set for an attribute (See Methods section)}
+
 \item{tiles}{A tile* object}
 
 \item{position}{numeric. Set the starting position of the iterator. Default
@@ -129,15 +141,15 @@ iter$progress
 
 # Get next batch
 batch1 <- iter$next_batch()
-length(batch1)  # 3 tiles
+length(batch1) # 3 tiles
 
 # Check updated status
-iter$progress  # position has advanced
+iter$progress # position has advanced
 
 # Peek at next batch without advancing
 peek <- iter$peek_batch()
 peek
-iter$position  # unchanged
+iter$position # unchanged
 
 # serialize and unserialize, preserving state
 temp <- tempfile()
@@ -153,8 +165,8 @@ iter$peek_indices()
 
 # Process all remaining batches
 while (iter$has_next) {
-  batch <- iter$next_batch()
-  cat("Processing batch of", length(batch), "tiles\n")
+    batch <- iter$next_batch()
+    cat("Processing batch of", length(batch), "tiles\n")
 }
 
 # Reset and try different batch size
@@ -163,14 +175,14 @@ iter$batch_size <- 5
 
 # Apply function across all batches
 while (iter$has_next) {
-  batch <- iter$next_batch()
-  cat("Processing batch of", length(batch), "tiles\n")
+    batch <- iter$next_batch()
+    cat("Processing batch of", length(batch), "tiles\n")
 }
 
 # tileIterator with tileGroup
 tg <- tileGroup(tp, groups = list(
-  "g1" = c(2, 4, 6, 8, 10, 12, 14, 16),
-  "g2" = 1:16
+    "g1" = c(2, 4, 6, 8, 10, 12, 14, 16),
+    "g2" = 1:16
 ))
 
 tg$active <- "g1"

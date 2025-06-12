@@ -1,4 +1,3 @@
-
 #' @name tileGroup
 #' @title Create a Tile Group
 #' @description
@@ -15,10 +14,10 @@
 #'
 #' # Create groups
 #' tg <- tileGroup(tp, groups = list(
-#'   "g1" = 1:4,           # vector indexing
-#'   "g2" = list(2, 1:4),  # ij indexing
-#'   "g3" = list(2:4, 1:2) # selection overlaps are allowed
-#'   # (not all tiles need to be selected)
+#'     "g1" = 1:4, # vector indexing
+#'     "g2" = list(2, 1:4), # ij indexing
+#'     "g3" = list(2:4, 1:2) # selection overlaps are allowed
+#'     # (not all tiles need to be selected)
 #' ))
 #'
 #' # length() returns number of groups
@@ -38,7 +37,7 @@
 #' # length() is based on group length when active is set
 #' length(tg)
 #'
-#' tg[2]        # Position 2 from g1
+#' tg[2] # Position 2 from g1
 #'
 #' # iterator can be created when active group is set
 #' iter <- tileIterator(tg, batch_size = 2)
@@ -46,7 +45,7 @@
 #' iter$next_batch()
 #' iter$next_batch() # no more items
 #'
-#' tg$active <- NULL  # Clear active group by setting NULL
+#' tg$active <- NULL # Clear active group by setting NULL
 NULL
 
 #' @rdname tileGroup
@@ -71,7 +70,7 @@ setMethod("initialize", signature("tileGroup"), function(.Object, ...) {
 setMethod("show", signature("tileGroup"), function(object) {
     cat(sprintf("<%s>: %s\n", class(object), class(object@tp)))
     if (.has_active(object)) {
-        cat("active:", object@active,"\n")
+        cat("active:", object@active, "\n")
     }
     cat(color_yellow("groups-------------------------\n"))
     plist <- lapply(object@groups, function(g) {
@@ -86,8 +85,12 @@ setMethod("show", signature("tileGroup"), function(object) {
 setMethod("$<-", signature("tileGroup", "ANY"), function(x, name, value) {
     if (name == "active") {
         checkmate::assert_character(value, len = 1L, null.ok = TRUE)
-        if (is.null(value)) x@active <- character() # reset
-        else x@active <- value
+        if (is.null(value)) {
+            x@active <- character()
+        } # reset
+        else {
+            x@active <- value
+        }
         return(x)
     }
     x@metadata[[name]] <- value
@@ -97,7 +100,9 @@ setMethod("$<-", signature("tileGroup", "ANY"), function(x, name, value) {
 #' @rdname dollar
 #' @export
 setMethod("$", signature("tileGroup"), function(x, name) {
-    if (name == "active") return(x@active)
+    if (name == "active") {
+        return(x@active)
+    }
     x@metadata[[name]]
 })
 
@@ -235,9 +240,9 @@ setMethod("-", signature("tileGroup", "numeric"), function(e1, e2) {
 
     # Convert linear position to ij coordinates within the group
     # Using standard row-major ordering (same as tilePlan)
-    pos_zero <- pos - 1L  # Convert to 0-based
-    row_idx <- pos_zero %/% n_cols + 1L  # Which row in the group
-    col_idx <- pos_zero %% n_cols + 1L   # Which col in the group
+    pos_zero <- pos - 1L # Convert to 0-based
+    row_idx <- pos_zero %/% n_cols + 1L # Which row in the group
+    col_idx <- pos_zero %% n_cols + 1L # Which col in the group
 
     # Map back to actual tilePlan coordinates
     actual_i <- i_vals[row_idx]
