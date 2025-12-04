@@ -3,7 +3,7 @@ setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 #' @name giottoTile-class
 #' @title Virtual Class `giottoTile`
 #' @description
-#' The `giottoTile` class ia s a class contaiend by all actual classes in the
+#' The `giottoTile` class is a class contained by all actual classes in the
 #' \pkg{GiottoTile} package. It is a "virtual" class.
 #' @exportClass giottoTile
 setClass("giottoTile", contains = "VIRTUAL")
