@@ -199,7 +199,7 @@ setMethod("[", signature(x = "spatialTilePlan", i = "numeric", j = "numeric", dr
 setMethod(
     "centroids", signature("spatialTilePlan"),
     function(x, zero = FALSE, ...) {
-        a <- GiottoUtils::get_args_list(...)
+        a <- .get_args_list(...)
         a$fun <- vect
         e <- ext(x)
         a$offset <- c(terra::ymin(e), terra::xmin(e))

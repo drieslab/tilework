@@ -135,7 +135,7 @@ setMethod(
         vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
          Dot params:", names(list(...)))
 
-        a <- GiottoUtils::get_args_list(...) # get all args
+        a <- .get_args_list(...) # get all args
         # remove args not used downstream
         a$parallel_strategy <- NULL
         a$verbose <- NULL
@@ -185,7 +185,7 @@ setMethod(
         vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
          Dot params:", names(list(...)))
 
-        a <- GiottoUtils::get_args_list(...) # get all args
+        a <- .get_args_list(...) # get all args
         # remove args not used downstream
         a$parallel_strategy <- NULL
         a$verbose <- NULL

@@ -63,3 +63,17 @@
     }
     ((i - 1) * ncol(x)) + j
 }
+
+# convenience for getting all the args supplied to the function as a list
+# `keep` - character, names of input args to keep
+# `toplevel` - numeric number of levels to go up the callstack
+#  ... additional params to capture
+.get_args_list <- function (toplevel = 1L, keep = NULL, ...) {
+    a <- as.list(as.environment(parent.frame(toplevel)))
+    if (!is.null(keep)) {
+        a <- a[names(a) %in% keep]
+    }
+    c(a, list(...))
+}
+
+
