@@ -5,6 +5,6 @@
 \alias{giottoTile-class}
 \title{Virtual Class \code{giottoTile}}
 \description{
-The \code{giottoTile} class ia s a class contaiend by all actual classes in the
+The \code{giottoTile} class is a class contained by all actual classes in the
 \pkg{GiottoTile} package. It is a "virtual" class.
 }
