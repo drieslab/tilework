@@ -201,8 +201,8 @@ NULL
 #' @keywords internal
 #' @export
 setMethod("tileApply", signature("ANY", "missing", "ANY"), function(x, tiles, verbose = NULL, ...) {
-    vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] x only. Start redispatch x...
-         Dot params:", toString(names(list(...))))
+    .dmsg(.v = verbose, "[tileApply] x only. Start redispatch x...",
+          plist = list(...))
     redispatch_tileapply(x, tiles, param_xy = "x", verbose = verbose, ...)
 })
 
@@ -210,8 +210,8 @@ setMethod("tileApply", signature("ANY", "missing", "ANY"), function(x, tiles, ve
 #' @keywords internal
 #' @export
 setMethod("tileApply", signature("ANY", "ANY", "ANY"), function(x, y, tiles, verbose = NULL, ...) {
-    vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] x and y. Start redispatch x...
-         Dot params:", toString(names(list(...))))
+    .dmsg(.v = verbose, "[tileApply] x and y. Start redispatch x...",
+          plist = list(...))
     redispatch_tileapply(x, tiles, y = y, param_xy = "x", verbose = verbose, ...)
 })
 
@@ -219,8 +219,8 @@ setMethod("tileApply", signature("ANY", "ANY", "ANY"), function(x, y, tiles, ver
 #' @keywords internal
 #' @export
 setMethod("tileApply", signature("token", "ANY", "ANY"), function(x, y, tiles, verbose = NULL, ...) {
-    vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] x done. Start redispatch y...
-         Dot params:", toString(names(list(...))))
+    .dmsg(.v = verbose, "[tileApply] x done. Start redispatch y...",
+          plist = list(...))
     redispatch_tileapply(y, tiles, param_xy = "y", x = x, verbose = verbose, ...)
 })
 
@@ -253,20 +253,20 @@ setMethod("redispatch_tileapply", signature("ANY", "ANY"), function(
         ...) {
     checkmate::assert_list(default_get_params)
     param_xy <- match.arg(param_xy, c("x", "y"))
-    vmsg(.v = verbose, .is_debug = TRUE, "[redispatch] step done. Route as", param_xy, "...")
+    .dmsg(.v = verbose, "[redispatch] step done. Route as", param_xy, "...")
     # default is no change
     sig <- as(sig, "token")
     # args list
     a <- list(tiles = tiles, verbose = verbose, ...)
 
     if (param_xy == "x") {
-        vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(list(...))))
+        .dmsg(.v = verbose, .initial = "  ", plist = list(...))
         a$get_params_x <- c(a$get_params_x, default_get_params)
         ns <- names(a$get_params_x)
         a$get_params_x <- a$get_params_x[!duplicated(ns)]
         do.call(tileApply, c(list(x = sig), a))
     } else {
-        vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(list(...))))
+        .dmsg(.v = verbose, .initial = "  ", plist = list(...))
         a$get_params_y <- c(a$get_params_y, default_get_params)
         ns <- names(a$get_params_y)
         a$get_params_y <- a$get_params_y[!duplicated(ns)]
@@ -282,10 +282,8 @@ setMethod("redispatch_tileapply", signature("ANY", "ANY"), function(
     if (!any(x == "")) {
         return(invisible())
     }
-    stop(call. = FALSE, wrap_txtf(
-        "[tileApply] no filepath found for %s.
-        Please first write to disk.", what
-    ))
+    stop(call. = FALSE, c("[tileApply] no filepath found for ", what,
+        ".\n Please first write to disk."))
 }
 
 .guard_disk_terra_raster <- function(x) {

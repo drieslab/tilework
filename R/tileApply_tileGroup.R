@@ -105,7 +105,7 @@ NULL
 
 # methods ####
 
-# token x ####
+#* token x ####
 
 #' @rdname tileApply-group
 #' @export
@@ -119,7 +119,7 @@ setMethod(
         group_FUN = NULL,
         callback_x = NULL,
         log = FALSE,
-        logpath = tempdir(),
+        logpath = getTileworkLogDir(),
         simplify = FALSE,
         future_params = list(
             future.seed = TRUE
@@ -132,13 +132,11 @@ setMethod(
         checkmate::assert_function(FUN)
         checkmate::assert_function(group_FUN, null.ok = TRUE)
 
-        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
-         Dot params:", names(list(...)))
+        .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
         a <- .get_args_list(...) # get all args
         # remove args not used downstream
         a$parallel_strategy <- NULL
-        a$verbose <- NULL
         if (parallel_strategy == "tiles") {
             a$setup_FUN <- NULL
             a$callback_x <- NULL
@@ -168,7 +166,7 @@ setMethod(
         callback_x = NULL,
         callback_y = NULL,
         log = FALSE,
-        logpath = tempdir(),
+        logpath = getTileworkLogDir(),
         simplify = FALSE,
         future_params = list(
             future.seed = TRUE
@@ -182,13 +180,11 @@ setMethod(
         checkmate::assert_function(FUN)
         checkmate::assert_function(group_FUN, null.ok = TRUE)
 
-        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
-         Dot params:", names(list(...)))
+        .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
         a <- .get_args_list(...) # get all args
         # remove args not used downstream
         a$parallel_strategy <- NULL
-        a$verbose <- NULL
         if (parallel_strategy == "tiles") {
             a$setup_FUN <- NULL
             a$callback_x <- NULL
@@ -308,21 +304,21 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
     checkmate::assert_list(default_get_params)
     param_xy <- match.arg(param_xy, c("x", "y"))
 
-    vmsg(.v = verbose, .is_debug = TRUE, "[redispatch] step done. Route as", param_xy, "...")
+    .dmsg(.v = verbose, "[redispatch] step done. Route as", param_xy, "...")
     # default is no change
     sig <- as(sig, "token")
     # args list
     a <- list(tiles = tiles, verbose = verbose, ...)
 
+    .dmsg(.v = verbose, .initial = "  ", plist = list(...))
+
     if (param_xy == "x") {
-        vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(dots)))
         a$get_params_x <- c(a$get_params_x, default_get_params)
         ns <- names(a$get_params_x)
         a$get_params_x <- a$get_params_x[!duplicated(ns)]
         a$callback_x <- a$callback_x %null% default_callback
         do.call(tileApply, c(list(x = sig), a))
     } else {
-        vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(dots)))
         a$get_params_y <- c(a$get_params_y, default_get_params)
         ns <- names(a$get_params_y)
         a$get_params_y <- a$get_params_y[!duplicated(ns)]
@@ -344,18 +340,22 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         log,
         logpath,
         simplify = FALSE,
+        verbose = NULL,
         ...) {
     ngroups <- length(tiles)
+    if (log) {
+        jid <- getTileworkJobID(advance = TRUE)
+        .vmsg(.v = verbose, "logging as job", jid)
+    }
     with_pbar({
         p <- pbar(steps = ngroups)
 
         .future_fun <- function(group) {
             # logging ---- #
             if (log) {
-                vmsg(
-                    .v = "log", sprintf("[group %s] start", group),
-                    .log_path = logpath
-                )
+                conn <- .log_conn(log_dir = logpath, job_id = jid)
+                on.exit(close(conn), add = TRUE)
+                .log_write(conn, sprintf("[group %s] start", group))
             }
             # logging ---- #
 
@@ -383,7 +383,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
                 group = group,
                 setup_out = setup_out,
                 log = log,
-                logpath = logpath,
+                logconn = conn,
                 ...
             )
             gres <- do.call(.process_seq_tile, pst_args)
@@ -397,12 +397,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
             }
 
             # logging ---- #
-            if (log) {
-                vmsg(
-                    .v = "log", sprintf("[group %s] done", group),
-                    .log_path = logpath
-                )
-            }
+            if (log) .log_write(conn, sprintf("[group %s] done", group))
             # logging ---- #
 
             p(message = sprintf("[group %s] done", group))
@@ -437,11 +432,21 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         log,
         logpath,
         simplify = FALSE,
+        verbose = NULL,
         ...) {
     ngroups <- length(tiles)
     # allocate group results list
     group_results <- vector("list", length = ngroups)
     names(group_results) <- names(tiles)
+
+    if (log) {
+        jid <- getTileworkJobID(advance = TRUE)
+        .vmsg(.v = verbose, "logging as job", jid)
+        # make master directory for individual group jobs
+        logpath <- file.path(logpath, jid)
+        conn <- .log_conn(log_dir = logpath, job_id = jid)
+        on.exit(close(conn), add = TRUE)
+    }
 
     with_pbar({
         p <- pbar(steps = ngroups)
@@ -449,16 +454,17 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         for (group in names(tiles)) {
             # logging ---- #
             if (log) {
-                vmsg(
-                    .v = "log", sprintf("[group %s] start", group),
-                    .log_path = logpath
-                )
+                .log_write(conn, sprintf("[group %s] start", group))
+                sjid <- getTileworkJobID(advance = TRUE)
+                .vmsg(.v = verbose,
+                      sprintf("[group %s] logging as sub-job %s", group, sjid))
             }
+
             # logging ---- #
 
             gres <- .process_par_tile(
                 tiles = tiles, group = group, log = log, logpath = logpath,
-                future_params = future_params, ...
+                future_params = future_params, jid = sjid, ...
             )
 
             # Apply group function if provided
@@ -471,12 +477,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
             group_results[[group]] <- gres # append
 
             # logging ---- #
-            if (log) {
-                vmsg(
-                    .v = "log", sprintf("[group %s] done", group),
-                    .log_path = logpath
-                )
-            }
+            if (log) .log_write(conn, sprintf("[group %s] done", group))
             # logging ---- #
 
             p(message = sprintf("[group %s] done", group))
@@ -499,6 +500,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         FUN,
         log,
         logpath,
+        jid = "",
         future_params,
         ...) {
     tiles$active <- group
@@ -510,15 +512,15 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         ij <- .tile_idx_to_ij(tiles[], tile_idx)
         tile_id <- sprintf("[group %s][tile %d]", group, tile_idx)
 
+
         # logging ---- #
         if (log) {
-            vmsg(
-                .v = "log", sprintf(
-                    "%s start (row %d, col %d)",
-                    tile_id, ij[[1]], ij[[2]]
-                ),
-                .log_path = logpath
-            )
+            # sub-job ID passed from master session
+            conn <- .log_conn(log_dir = logpath, job_id = jid)
+            on.exit(close(conn), add = TRUE)
+            .log_write(conn, sprintf("%s start (row %d, col %d)",
+                tile_id, ij[[1]], ij[[2]]
+            ))
         }
         # logging ---- #
 
@@ -543,9 +545,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         results <- do.call(FUN, args = a)
 
         # logging ---- #
-        if (log) {
-            vmsg(.v = "log", sprintf("%s done", tile_id), .log_path = logpath)
-        }
+        if (log) .log_write(conn, sprintf("%s done", tile_id))
         # logging ---- #
         return(results)
     }
@@ -568,7 +568,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         FUN,
         setup_out = NULL,
         log,
-        logpath,
+        logconn, # conn opened and closed in calling function
         ...) {
     tiles$active <- group
     results <- vector("list", length = length(tiles))
@@ -586,13 +586,9 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         # logging ---- #
         tile_id <- sprintf("[group %s][tile %d]", group, tile_idx)
         if (log) {
-            vmsg(
-                .v = "log", sprintf(
-                    "%s start (row %d, col %d)",
-                    tile_id, ij[[1L]], ij[[2L]]
-                ),
-                .log_path = logpath
-            )
+            .log_write(logconn, sprintf("%s start (row %d, col %d)",
+                tile_id, ij[[1L]], ij[[2L]]
+            ))
         }
         # logging ---- #
 
@@ -619,9 +615,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         results[[i]] <- do.call(FUN, args = a)
 
         # logging ---- #
-        if (log) {
-            vmsg(.v = "log", sprintf("%s done", tile_id), .log_path = logpath)
-        }
+        if (log) .log_write(logconn, sprintf("%s done", tile_id))
         # logging ---- #
     }
 

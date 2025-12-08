@@ -76,4 +76,13 @@
     c(a, list(...))
 }
 
+# ID random across nodes and workers
+.random_id <- function(len = 12L) {
+    sampleset <- c(LETTERS, letters, seq(from = 0, to = 9))
+    paste0(sample(sampleset, size = len, replace = TRUE), collapse = "")
+}
 
+# consistent timestamping
+.timestamp <- function () {
+    format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+}

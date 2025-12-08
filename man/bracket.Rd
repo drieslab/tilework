@@ -13,7 +13,7 @@
 \alias{[,tileGroup,missing,.index,missing-method}
 \alias{[,tileGroup,numeric,.index,missing-method}
 \alias{[,tileIterator,missing,missing,missing-method}
-\alias{[<-,tileIterator,missing,missing,ANY-method}
+\alias{[<-,tileIterator,missing,missing-method}
 \title{Extract Bounds from Tile Object}
 \usage{
 \S4method{[}{tilePlan,numeric,missing,missing}(x, i, j, ..., drop = TRUE)
@@ -46,7 +46,7 @@ x[]
 
 \S4method{[}{tileIterator,missing,missing,missing}(x, i, j, ..., drop = TRUE)
 
-\S4method{[}{tileIterator,missing,missing,ANY}(x, i, j, ...) <- value
+\S4method{[}{tileIterator,missing,missing}(x, i, j, ...) <- value
 }
 \arguments{
 \item{x}{\verb{tile*} object}

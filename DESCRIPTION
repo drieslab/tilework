@@ -49,4 +49,5 @@ Collate:
     'tileApply_tileIterator.R'
     'tileApply_tilePlan.R'
     'tileIterator.R'
+    'utils-logging.R'
     'utils.R'

@@ -129,7 +129,7 @@ setMethod(
         setup_FUN = NULL,
         callback_x = NULL,
         log = FALSE,
-        logpath = tempdir(),
+        logpath = getTileworkLogDir(),
         simplify = FALSE,
         future_params = list(future.seed = TRUE),
         verbose = NULL,
@@ -138,8 +138,7 @@ setMethod(
         checkmate::assert_list(future_params)
         checkmate::assert_function(FUN)
 
-        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
-         Dot params:", names(list(...)))
+        .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
         # Get number of workers from future plan
         n_workers <- future::nbrOfWorkers()
@@ -147,6 +146,11 @@ setMethod(
         # Split iterator across workers - each gets independent ranges
         worker_iters <- iterSplit(tiles, n = n_workers, distribute = TRUE)
         nsteps <- sum(ceiling(lengths(worker_iters) / tiles$batch_size))
+
+        if (log) {
+            jid <- getTileworkJobID(advance = TRUE)
+            .vmsg(.v = verbose, "logging as job", jid)
+        }
 
         with_pbar({
             p <- pbar(steps = nsteps) # progress is batch based
@@ -157,10 +161,10 @@ setMethod(
 
                 # logging ---- #
                 if (log) {
-                    vmsg(
-                        .v = "log", sprintf("%s start - %d tiles", worker_id, iter$remaining),
-                        .log_path = logpath
-                    )
+                    conn <- .log_conn(log_dir = logpath, job_id = jid)
+                    on.exit(close(conn), add = TRUE)
+                    .log_write(conn, sprintf("%s start - %d tiles",
+                        worker_id, iter$remaining))
                 }
                 # logging ---- #
 
@@ -201,7 +205,9 @@ setMethod(
 
                     # logging ---- #
                     if (log) {
-                        vmsg(.v = "log", sprintf("<worker %s> start batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                        .log_write(conn,
+                            sprintf("<worker %s> start batch %d: %d tiles",
+                                worker_id, bid, batch_size))
                     }
                     # logging ---- #
 
@@ -221,7 +227,9 @@ setMethod(
 
                     # logging ---- #
                     if (log) {
-                        vmsg(.v = "log", sprintf("<worker %s> end batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                        .log_write(conn,
+                            sprintf("<worker %s> end batch %d: %d tiles",
+                                worker_id, bid, batch_size))
                     }
                     # logging ---- #
                     # Update progress bar
@@ -263,7 +271,7 @@ setMethod(
         callback_x = NULL,
         callback_y = NULL,
         log = FALSE,
-        logpath = tempdir(),
+        logpath = getTileworkLogDir(),
         simplify = FALSE,
         future_params = list(future.seed = TRUE),
         verbose = NULL,
@@ -273,8 +281,7 @@ setMethod(
         checkmate::assert_list(future_params)
         checkmate::assert_function(FUN)
 
-        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
-         Dot params:", names(list(...)))
+        .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
         # Get number of workers from future plan
         n_workers <- future::nbrOfWorkers()
@@ -282,6 +289,11 @@ setMethod(
         # Split iterator across workers - each gets independent ranges
         worker_iters <- iterSplit(tiles, n = n_workers, distribute = TRUE)
         nsteps <- sum(ceiling(lengths(worker_iters) / tiles$batch_size))
+
+        if (log) {
+            jid <- getTileworkJobID(advance = TRUE)
+            .vmsg(.v = verbose, "logging as job", jid)
+        }
 
         with_pbar({
             p <- pbar(steps = nsteps) # progress is batch based
@@ -292,10 +304,10 @@ setMethod(
 
                 # logging ---- #
                 if (log) {
-                    vmsg(
-                        .v = "log", sprintf("%s start - %d tiles", worker_id, iter$remaining),
-                        .log_path = logpath
-                    )
+                    conn <- .log_conn(log_dir = logpath, job_id = jid)
+                    on.exit(close(conn), add = TRUE)
+                    .log_write(conn, sprintf("%s start - %d tiles",
+                        worker_id, iter$remaining))
                 }
                 # logging ---- #
 
@@ -345,7 +357,9 @@ setMethod(
 
                     # logging ---- #
                     if (log) {
-                        vmsg(.v = "log", sprintf("<worker %s> start batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                        .log_write(conn,
+                            sprintf("<worker %s> start batch %d: %d tiles",
+                                worker_id, bid, batch_size))
                     }
                     # logging ---- #
 
@@ -365,7 +379,9 @@ setMethod(
 
                     # logging ---- #
                     if (log) {
-                        vmsg(.v = "log", sprintf("<worker %s> end batch %d: %d tiles", worker_id, bid, batch_size), .log_path = logpath)
+                        .log_write(conn,
+                            sprintf("<worker %s> end batch %d: %d tiles",
+                                worker_id, bid, batch_size))
                     }
                     # logging ---- #
                     # Update progress bar
@@ -458,21 +474,21 @@ setMethod("redispatch_tileapply", signature("ANY", "tileIterator"), function(
         ...) {
     checkmate::assert_list(default_get_params)
     param_xy <- match.arg(param_xy, c("x", "y"))
-    vmsg(.v = verbose, .is_debug = TRUE, "[redispatch] step done. Route as", param_xy, "...")
+    .dmsg(.v = verbose, "[redispatch] step done. Route as", param_xy, "...")
     # default is no change
     sig <- as(sig, "token")
     # args list
     a <- list(tiles = tiles, verbose = verbose, ...)
 
+    .dmsg(.v = verbose, .initial = "  ", plist = list(...))
+
     if (param_xy == "x") {
-        vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(list(...))))
         a$get_params_x <- c(a$get_params_x, default_get_params)
         ns <- names(a$get_params_x)
         a$get_params_x <- a$get_params_x[!duplicated(ns)]
         a$callback_x <- a$callback_x %null% default_callback
         do.call(tileApply, c(list(x = sig), a))
     } else {
-        vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(list(...))))
         a$get_params_y <- c(a$get_params_y, default_get_params)
         ns <- names(a$get_params_y)
         a$get_params_y <- a$get_params_y[!duplicated(ns)]

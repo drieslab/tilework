@@ -87,16 +87,18 @@ setMethod(
         x, tiles, FUN,
         get_params_x = list(),
         log = FALSE,
-        logpath = tempdir(),
+        logpath = getTileworkLogDir(),
         future_params = list(future.seed = TRUE),
         verbose = NULL,
         ...) {
-        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
-         Dot params:", toString(names(list(...))))
+        .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
         checkmate::assert_list(get_params_x)
         checkmate::assert_list(future_params)
         checkmate::assert_function(FUN)
+        checkmate::assert_flag(log)
+        jid <- getTileworkJobID(advance = TRUE)
+        if (log) .vmsg(.v = verbose, "logging as job", jid)
         with_pbar({
             p <- pbar(along = tiles)
 
@@ -104,14 +106,16 @@ setMethod(
                 ij <- .tile_idx_to_ij(tiles, i)
                 tile_id <- sprintf("[tile %d]", i)
                 if (log) {
-                    vmsg(.v = "log", sprintf("%s start (row %d, col %d)", tile_id, ij[[1]], ij[[2]]), .log_path = logpath)
+                    conn <- .log_conn(log_dir = logpath, job_id = jid)
+                    on.exit(close(conn), add = TRUE)
+                    .log_write(conn, sprintf("%s start (row %d, col %d)", tile_id, ij[[1]], ij[[2]]))
                 }
 
                 tile_ext <- tiles[i][[1L]]
 
                 if (log) {
-                    vmsg(.v = "log", tile_id, "bounds:", .ext_to_num_vec(tile_ext), .log_path = logpath)
-                    vmsg(.v = "log", tile_id, "pad:", tiles@pad, .log_path = logpath)
+                    .log_write(conn, tile_id, "bounds:", .ext_to_num_vec(tile_ext))
+                    .log_write(conn, tile_id, "pad:", tiles@pad)
                 }
 
                 get_params_x <- c(list(x, tiles, i = i), get_params_x, list(...))
@@ -127,7 +131,8 @@ setMethod(
 
                 res <- do.call(FUN, args = a)
 
-                p(message = sprintf("[tile %d] done", i))
+                p(message = paste(tile_id, "done"))
+                if (log) .log_write(conn, paste(tile_id, "done"))
                 return(res)
             }
 
@@ -154,17 +159,19 @@ setMethod(
         get_params_y = list(),
         pad_y = NULL,
         log = FALSE,
-        logpath = tempdir(),
+        logpath = getTileworkLogDir(),
         future_params = list(future.seed = TRUE),
         verbose = NULL,
         ...) {
-        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
-         Dot params:", names(list(...)))
+        .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
         checkmate::assert_list(get_params_x)
         checkmate::assert_list(get_params_y)
         checkmate::assert_list(future_params)
         checkmate::assert_function(FUN)
+        checkmate::assert_flag(log)
+        jid <- getTileworkJobID(advance = TRUE)
+        if (log) .vmsg(.v = verbose, "logging as job", jid)
         if (is.null(y)) stop("[tileApply] `y` may not be NULL\n.", call. = FALSE)
         with_pbar({
             p <- pbar(along = tiles)
@@ -173,14 +180,16 @@ setMethod(
                 ij <- .tile_idx_to_ij(tiles, i)
                 tile_id <- sprintf("[tile %d]", i)
                 if (log) {
-                    vmsg(.v = "log", sprintf("%s start (row %d, col %d)", tile_id, ij[[1]], ij[[2]]), .log_path = logpath)
+                    conn <- .log_conn(log_dir = logpath, job_id = jid)
+                    on.exit(close(conn), add = TRUE)
+                    .log_write(conn, sprintf("%s start (row %d, col %d)", tile_id, ij[[1]], ij[[2]]))
                 }
 
                 tile_ext <- tiles[i][[1L]]
 
                 if (log) {
-                    vmsg(.v = "log", tile_id, "bounds:", .ext_to_num_vec(tile_ext), .log_path = logpath)
-                    vmsg(.v = "log", tile_id, "pad:", tiles@pad, .log_path = logpath)
+                    .log_write(conn, tile_id, "bounds:", .ext_to_num_vec(tile_ext))
+                    .log_write(conn, tile_id, "pad:", tiles@pad)
                 }
 
                 # prep args
@@ -200,7 +209,8 @@ setMethod(
 
                 res <- do.call(FUN, args = a)
 
-                p(message = sprintf("[tile %d] done", i))
+                p(message = paste(tile_id, "done"))
+                if (log) .log_write(conn, paste(tile_id, "done"))
                 return(res)
             }
 
