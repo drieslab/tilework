@@ -352,6 +352,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
 
         .future_fun <- function(group) {
             # logging ---- #
+            conn <- NULL
             if (log) {
                 conn <- .log_conn(log_dir = logpath, job_id = jid)
                 on.exit(close(conn), add = TRUE)
