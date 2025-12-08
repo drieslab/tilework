@@ -12,7 +12,7 @@
   FUN,
   get_params_x = list(),
   log = FALSE,
-  logpath = tempdir(),
+  logpath = getTileworkLogDir(),
   future_params = list(future.seed = TRUE),
   verbose = NULL,
   ...
@@ -27,7 +27,7 @@
   get_params_y = list(),
   pad_y = NULL,
   log = FALSE,
-  logpath = tempdir(),
+  logpath = getTileworkLogDir(),
   future_params = list(future.seed = TRUE),
   verbose = NULL,
   ...
