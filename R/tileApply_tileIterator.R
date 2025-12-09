@@ -153,8 +153,8 @@ setMethod(
             .vmsg(.v = verbose, "logging as job", jid)
         }
 
-        with_pbar({
-            p <- pbar(steps = nsteps) # progress is batch based
+        progressr::with_progress({
+            p <- progressr::progressor(steps = nsteps) # progress is batch based
 
             .future_fun <- function(worker_idx) {
                 iter <- worker_iters[[worker_idx]]
@@ -296,8 +296,8 @@ setMethod(
             .vmsg(.v = verbose, "logging as job", jid)
         }
 
-        with_pbar({
-            p <- pbar(steps = nsteps) # progress is batch based
+        progressr::with_progress({
+            p <- progressr::progressor(steps = nsteps) # progress is batch based
 
             .future_fun <- function(worker_idx) {
                 iter <- worker_iters[[worker_idx]]

@@ -344,8 +344,8 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         jid <- getTileworkJobID(advance = TRUE)
         .vmsg(.v = verbose, "logging as job", jid)
     }
-    with_pbar({
-        p <- pbar(steps = ngroups)
+    progressr::with_progress({
+        p <- progressr::progressor(steps = ngroups)
 
         .future_fun <- function(group) {
             # logging ---- #
@@ -446,8 +446,8 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         on.exit(close(conn), add = TRUE)
     }
 
-    with_pbar({
-        p <- pbar(steps = ngroups)
+    progressr::with_progress({
+        p <- progressr::progressor(steps = ngroups)
 
         for (group in names(tiles)) {
             # logging ---- #

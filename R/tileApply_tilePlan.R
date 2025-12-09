@@ -100,8 +100,8 @@ setMethod(
         checkmate::assert_flag(log)
         jid <- getTileworkJobID(advance = TRUE)
         if (log) .vmsg(.v = verbose, "logging as job", jid)
-        with_pbar({
-            p <- pbar(along = tiles)
+        progressr::with_progress({
+            p <- progressr::progressor(along = tiles)
 
             .future_fun <- function(i) {
                 ij <- .tile_idx_to_ij(tiles, i)
@@ -174,8 +174,8 @@ setMethod(
         jid <- getTileworkJobID(advance = TRUE)
         if (log) .vmsg(.v = verbose, "logging as job", jid)
         if (is.null(y)) stop("[tileApply] `y` may not be NULL\n.", call. = FALSE)
-        with_pbar({
-            p <- pbar(along = tiles)
+        progressr::with_progress({
+            p <- progressr::progressor(along = tiles)
 
             .future_fun <- function(i) {
                 ij <- .tile_idx_to_ij(tiles, i)
