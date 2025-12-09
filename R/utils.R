@@ -86,3 +86,14 @@
 .timestamp <- function () {
     format(Sys.time(), "%Y-%m-%d %H:%M:%S")
 }
+
+.check_package <- function(x) {
+    if (length(x) > 1L) {
+        lapply(x, function(x_i) .check_package(x_i))
+        return(invisible())
+    }
+
+    if (requireNamespace(x, quietly = TRUE)) return(invisible())
+    stop(sprintf("{%s} is not installed yet.", x), call. = FALSE)
+    invisible()
+}
