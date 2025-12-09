@@ -286,8 +286,7 @@ library(future)
 plan(multisession, workers = 4)
 
 # Parallel tile processing
-results <- tileApply(r, tp = tp, 
-    cores = 4,
+results <- tileApply(r, tp = tp,
     FUN = function(x) {
         # Your processing function
         mean(values(x), na.rm = TRUE)
@@ -340,7 +339,6 @@ tp <- tp + 50  # 50-unit padding
 plan(multisession, workers = 8)
 
 results <- tileApply(large_raster, tp = tp,
-                    cores = 8,
                     FUN = function(x, .I) {
                         # Apply NDVI calculation
                         ndvi <- (x[[4]] - x[[3]]) / (x[[4]] + x[[3]])
