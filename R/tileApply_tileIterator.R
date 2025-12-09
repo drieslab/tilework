@@ -429,9 +429,9 @@ setMethod("redispatch_tileapply", signature("SpatRaster", "tileIterator"), funct
     lyr <- NULL # default
     dots <- list(...)
     if (param_xy == "x") {
-        lyr <- dots$get_params_x$lyr %null% lyr
+        lyr <- dots$get_params_x$lyr %||% lyr
     } else {
-        lyr <- dots$get_params_y$lyr %null% lyr
+        lyr <- dots$get_params_y$lyr %||% lyr
     }
 
     callNextMethod(f, tiles,
@@ -486,13 +486,13 @@ setMethod("redispatch_tileapply", signature("ANY", "tileIterator"), function(
         a$get_params_x <- c(a$get_params_x, default_get_params)
         ns <- names(a$get_params_x)
         a$get_params_x <- a$get_params_x[!duplicated(ns)]
-        a$callback_x <- a$callback_x %null% default_callback
+        a$callback_x <- a$callback_x %||% default_callback
         do.call(tileApply, c(list(x = sig), a))
     } else {
         a$get_params_y <- c(a$get_params_y, default_get_params)
         ns <- names(a$get_params_y)
         a$get_params_y <- a$get_params_y[!duplicated(ns)]
-        a$callback_y <- a$callback_y %null% default_callback
+        a$callback_y <- a$callback_y %||% default_callback
         do.call(tileApply, c(list(y = sig), a))
     }
 })

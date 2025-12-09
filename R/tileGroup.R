@@ -59,7 +59,7 @@ setMethod("initialize", signature("tileGroup"), function(.Object, ...) {
     # Initialize metadata if empty
     if (nrow(x@metadata) == 0 && length(x@groups) > 0) {
         x@metadata <- data.frame(
-            group = names(x@groups) %null% paste0("group_", seq_along(x@groups)),
+            group = names(x@groups) %||% paste0("group_", seq_along(x@groups)),
             n_tiles = lengths(x@groups),
             row.names = NULL
         )

@@ -271,7 +271,7 @@ setMethod(
         p$extent_list <- x[]
 
         if (x@pad > 0) {
-            p$alpha <- p$alpha %null% 0.3
+            p$alpha <- p$alpha %||% 0.3
         }
 
         do.call(.preview_chunk_plan, args = p)

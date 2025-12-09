@@ -1,6 +1,6 @@
 .terra_read <- function(x, prefer = NULL, vect_params = list(), rast_params = list()) {
-    rast_params$noflip <- rast_params$noflip %null% TRUE # expect no CRS
-    vect_params$proxy <- vect_params$proxy %null% TRUE # read as SpatVectorProxy
+    rast_params$noflip <- rast_params$noflip %||% TRUE # expect no CRS
+    vect_params$proxy <- vect_params$proxy %||% TRUE # read as SpatVectorProxy
 
     # if expected type
     if (!is.null(prefer)) {

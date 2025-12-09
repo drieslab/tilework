@@ -150,7 +150,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
     prefix <- "tileIterator: "
 
     .guard_pos_bound <- function(x = NULL) {
-        x <- x %null% position
+        x <- x %||% position
         if (x < (bound[1L] - 1) || x > bound[2L]) {
             stop(sprintf(
                 "%s `position` (%d) must be within `bound` (between %d and %d)\n",
@@ -160,7 +160,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
     }
 
     .guard_tp <- function(x = NULL) {
-        x <- x %null% tp
+        x <- x %||% tp
         if (is.null(x)) {
             stop(prefix, "No underlying `tilePlan`. Assign one with `[]`<-\n", call. = FALSE)
         }
@@ -173,7 +173,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
     }
 
     .guard_batch_size <- function(x = NULL) {
-        x <- x %null% batch_size
+        x <- x %||% batch_size
         if (x < 1L) {
             stop(sprintf(
                 "%s `batch_size` (%d) must be at least 1\n",
@@ -183,7 +183,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
     }
 
     .guard_bound <- function(x = NULL) {
-        x <- x %null% bound
+        x <- x %||% bound
         if (length(x) != 2L) {
             stop(prefix, "`bound` must be 2 numbers (start index, end index)\n", call. = FALSE)
         }
@@ -493,7 +493,7 @@ setMethod(
         checkmate::assert_integerish(n, len = 1L, lower = 1L)
         n <- as.integer(n)
         iters <- list()
-        batch_size <- batch_size %null% tiles$batch_size
+        batch_size <- batch_size %||% tiles$batch_size
 
         if (!distribute) {
             # each iterator gets the same settings
