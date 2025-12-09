@@ -77,7 +77,7 @@ setMethod("show", signature("tileGroup"), function(object) {
         len <- .g_length(g)
         sprintf("%d tiles", len)
     })
-    print_list(plist, pre = "  ")
+    .print_list(plist, pre = "  ")
 })
 
 #' @rdname dollar

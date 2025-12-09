@@ -170,7 +170,7 @@ setMethod("show", signature("pixelTilePlan"), function(object) {
         dim = toString(c(dim(object)[[1]], dim(object)[[2]])),
         pad = object@pad
     )
-    GiottoUtils::print_list(plist)
+    .print_list(plist)
 })
 
 #' @rdname bracket

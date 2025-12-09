@@ -162,7 +162,7 @@ setMethod("show", signature("spatialTilePlan"), function(object) {
         dim = paste(dim(object), collapse = " "),
         pad = object@pad
     )
-    print_list(plist)
+    .print_list(plist)
 })
 
 #' @rdname dim

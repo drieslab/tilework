@@ -409,7 +409,7 @@ setMethod("show", signature("tileIterator"), function(object) {
         progress = sprintf("%s%s", object@funs$progress(), "%"),
         remaining = object@funs$remaining()
     )
-    GiottoUtils::print_list(plist)
+    .print_list(plist)
 })
 
 #' @rdname bracket
