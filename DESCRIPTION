@@ -26,6 +26,7 @@ Imports:
     methods,
     terra (>= 1.8-21),
 Suggests:
+    BiocParallel,
     knitr,
     testthat (>= 3.0.0)
 Remotes: drieslab/GiottoUtils
