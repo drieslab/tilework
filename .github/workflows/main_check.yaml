@@ -59,6 +59,9 @@ jobs:
             any::remotes
             any::future
             any::future.apply
+            any::progressr
+            any::BiocParallel
+            any::terra
             any::knitr
           needs: check
 
