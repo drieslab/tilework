@@ -75,6 +75,9 @@ Group names will not be retained.}
 
 \item{parallel_params}{named param list. See \link{parallel_params}}
 
+\item{verbose}{verbosity. \code{TRUE}, \code{FALSE} or \code{"debug"} for more info on
+stack tracing.}
+
 \item{\dots}{additional params to pass to \code{\link[=bracket]{[}}}
 
 \item{y}{input data 2 (optional)}
@@ -87,10 +90,6 @@ full spatial context of \code{y}}
 
 \item{callback_y}{function. Optional preprocessing function for \code{y} per
 worker when \code{parallel_strategy = "groups"}}
-
-\item{lyr}{numeric. Layer number(s) to use (optional)}
-
-\item{future.seed}{logical. Enable reproducible random seeds}
 }
 \description{
 Apply functions across tileGroup objects with control over parallelization

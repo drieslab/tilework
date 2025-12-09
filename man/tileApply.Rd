@@ -18,19 +18,22 @@
 
 \item{tiles}{tile* object (\code{tilePlan}, \code{tileGroup}, or \code{tileIterator})}
 
-\item{...}{additional arguments passed to specific methods}
+\item{verbose}{verbosity. \code{TRUE}, \code{FALSE} or \code{"debug"} for more info on
+stack tracing.}
+
+\item{...}{additional arguments passed to specific methods (one of which is
+the \code{FUN} function applied across the tiles.)}
 
 \item{y}{input data 2 (optional)}
-
-\item{FUN}{function to apply across tiles}
-
-\item{pad_y}{numeric. Additional padding applied to \code{y} tiling so \code{x} has full
-spatial context of \code{y}}
 }
 \description{
+\strong{For more useful params info and examples, see the Tile Processing Methods
+section.}
+
 Apply a function across spatial tiles to speed up processing and manage
-memory usage for large data operations. This function dispatches to
-different processing methods based on the tile type.
+memory usage for large data operations. This is a landing page for the
+generic. \code{tileApply()} dispatches to different processing methods based on
+the tile type.
 
 \code{character} inputs to \code{x} and \code{y} are assumed to be \{terra\} readable.
 \code{SpatRaster} and \code{SpatVector} must first be written to file. If provided,

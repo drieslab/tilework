@@ -102,6 +102,7 @@ NULL
 NULL
 
 #' @name bracket
+#' @aliases `[`
 #' @title Extract Bounds from Tile Object
 #' @description
 #' Get a set of tile bounds from a `tile*` object. Values are always returned as
@@ -139,6 +140,7 @@ NULL
 NULL
 
 #' @name double_bracket
+#' @aliases `[[`
 #' @title Get and set metadata
 #' @description
 #' `[[` can be used to get the table of metadata for a specific tile.

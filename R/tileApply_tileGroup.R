@@ -49,13 +49,13 @@
 #' @param callback_y function. Optional preprocessing function for `y` per
 #'   worker when `parallel_strategy = "groups"`
 #' @param group_FUN function. Optional function to apply to each group's results
-#' @param lyr numeric. Layer number(s) to use (optional)
-#' @param future.seed logical. Enable reproducible random seeds
 #' @param log logical. Whether to log processing steps
 #' @param logpath character. Log file path (if log = `TRUE`)
 #' @param simplify logical. Whether to flatten group results into single list.
 #'   Group names will not be retained.
 #' @param parallel_params named param list. See [parallel_params]
+#' @param verbose verbosity. `TRUE`, `FALSE` or `"debug"` for more info on
+#'   stack tracing.
 #' @param \dots additional params to pass to [`[`][bracket]
 #'
 #' @seealso [tileApply], [tileGroup()], [tileGroup-class]

@@ -2,6 +2,7 @@
 % Please edit documentation in R/tilePlan.R
 \name{double_bracket}
 \alias{double_bracket}
+\alias{`[[`}
 \alias{[[,tilePlan,numeric,missing-method}
 \title{Get and set metadata}
 \usage{

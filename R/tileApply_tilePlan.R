@@ -31,7 +31,8 @@
 #' @param parallel_params named param list. See [parallel_params]
 #' @param log logical. Whether to log processing steps
 #' @param logpath character. Log file path (if log = `TRUE`)
-#' @param verbose be verbose. Set as "debug" for more info on stack tracing.
+#' @param verbose verbosity. `TRUE`, `FALSE` or `"debug"` for more info on
+#'   stack tracing.
 #' @param \dots additional params to pass to [`[`][bracket]
 #'
 #' @seealso [tileApply], [tilePlan()], [spatialTilePlan-class], [pixelTilePlan-class]

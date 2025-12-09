@@ -3,6 +3,7 @@
 %   R/spatialTilePlan.R, R/tileGroup.R, R/tileIterator.R
 \name{bracket}
 \alias{bracket}
+\alias{`[`}
 \alias{[,tilePlan,numeric,missing,missing-method}
 \alias{[,tilePlan,numeric,numeric,missing-method}
 \alias{[,tilePlan,missing,missing,missing-method}

@@ -65,6 +65,9 @@ of \code{FUN} begins.}
 
 \item{parallel_params}{named param list. See \link{parallel_params}}
 
+\item{verbose}{verbosity. \code{TRUE}, \code{FALSE} or \code{"debug"} for more info on
+stack tracing.}
+
 \item{\dots}{additional params to pass to \code{\link[=bracket]{[}}}
 
 \item{y}{input data 2 (optional)}
@@ -78,10 +81,6 @@ spatial context of \code{y}}
 \item{callback_y}{function, (advanced). If provided, programmatic escape hatch for
 preprocessing \code{y} per worker before \code{setup_FUN} and batch streamed processing
 of \code{FUN} begins.}
-
-\item{lyr}{numeric. Layer number(s) to use (optional)}
-
-\item{future.seed}{logical. Enable reproducible random seeds}
 }
 \description{
 Apply functions using tileIterator objects for memory-constrained batch

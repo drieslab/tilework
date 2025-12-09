@@ -43,12 +43,12 @@
 #' is accessible within `FUN` as `.SETUP_OUT`
 #' @param pad_y numeric. Additional padding applied to `y` tiling so `x` has full
 #' spatial context of `y`
-#' @param lyr numeric. Layer number(s) to use (optional)
-#' @param future.seed logical. Enable reproducible random seeds
 #' @param log logical. Whether to log processing steps
 #' @param logpath character. Log file path (if log = `TRUE`)
 #' @param simplify logical. Whether to flatten results
 #' @param parallel_params named param list. See [parallel_params]
+#' @param verbose verbosity. `TRUE`, `FALSE` or `"debug"` for more info on
+#'   stack tracing.
 #' @param \dots additional params to pass to [`[`][bracket]
 #'
 #' @seealso [tileApply], [tileIterator()], [tileIterator-class]

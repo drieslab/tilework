@@ -92,6 +92,11 @@ of \code{get_params_x} or \code{get_params_y} contents.}
 \item{param_xy}{character. Either "x" or "y" which param it is to modify
 dispatch on}
 
+\item{verbose}{verbosity. \code{TRUE}, \code{FALSE} or \code{"debug"} for more info on
+stack tracing.}
+
+\item{...}{additional params to pass}
+
 \item{default_callback}{internal use: Default callback function passed from an
 upstream (likely more specific) \code{redispatch_tileapply()} method to use
 as \code{callback_x} or \code{callback_y} if none has been provided.}

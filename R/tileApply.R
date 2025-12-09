@@ -157,15 +157,22 @@ NULL
 #' @param default_callback internal use: Default callback function passed from an
 #'   upstream (likely more specific) `redispatch_tileapply()` method to use
 #'   as `callback_x` or `callback_y` if none has been provided.
+#' @param verbose verbosity. `TRUE`, `FALSE` or `"debug"` for more info on
+#'   stack tracing.
+#' @param ... additional params to pass
 NULL
 
 
 #' @name tileApply
 #' @title Apply Functions Across Spatial Tiles
 #' @description
+#' **For more useful params info and examples, see the Tile Processing Methods
+#' section.**
+#'
 #' Apply a function across spatial tiles to speed up processing and manage
-#' memory usage for large data operations. This function dispatches to
-#' different processing methods based on the tile type.
+#' memory usage for large data operations. This is a landing page for the
+#' generic. `tileApply()` dispatches to different processing methods based on
+#' the tile type.
 #'
 #' `character` inputs to `x` and `y` are assumed to be \{terra\} readable.
 #' `SpatRaster` and `SpatVector` must first be written to file. If provided,
@@ -182,10 +189,10 @@ NULL
 #' @param x input data 1
 #' @param y input data 2 (optional)
 #' @param tiles tile* object (`tilePlan`, `tileGroup`, or `tileIterator`)
-#' @param FUN function to apply across tiles
-#' @param pad_y numeric. Additional padding applied to `y` tiling so `x` has full
-#' spatial context of `y`
-#' @param ... additional arguments passed to specific methods
+#' @param verbose verbosity. `TRUE`, `FALSE` or `"debug"` for more info on
+#'   stack tracing.
+#' @param ... additional arguments passed to specific methods (one of which is
+#' the `FUN` function applied across the tiles.)
 #'
 #' @seealso [tileApply-plan], [tileApply-group], [tileApply-iterator]
 #' @examples

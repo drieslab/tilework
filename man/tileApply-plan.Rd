@@ -49,7 +49,8 @@
 
 \item{parallel_params}{named param list. See \link{parallel_params}}
 
-\item{verbose}{be verbose. Set as "debug" for more info on stack tracing.}
+\item{verbose}{verbosity. \code{TRUE}, \code{FALSE} or \code{"debug"} for more info on
+stack tracing.}
 
 \item{\dots}{additional params to pass to \code{\link[=bracket]{[}}}
 
