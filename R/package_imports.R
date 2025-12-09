@@ -1,6 +1,5 @@
-# All @import tags for GiottoTile should be declared in this dummy documentation #
+# All @import tags for tilework should be declared in this dummy documentation #
 
-#' @import GiottoUtils
 #' @importFrom methods new show initialize signature
 #' @importFrom methods slot slot<- slotNames as
 #' @importFrom methods setMethod getMethod callNextMethod setGeneric setClass

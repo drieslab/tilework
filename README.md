@@ -1,9 +1,7 @@
-# GiottoTile
+# tilework
 
-Open source and S4 extensible framework for efficient spatial and pixel-based tiling operations on large datasets (currently only raster).
-GiottoTile provides easy-to-use tile iterators that enable memory-efficient processing of spatial data through parallelizable tile-based operations.
-
-This package is part of the Giotto Suite ecosystem for spatial-omics analysis, although the only other Giotto Suite package it depends on is {GiottoUtils}.
+Open source and S4 extensible framework for efficient spatial and pixel-based tiling operations on large datasets.
+{tilework} provides easy-to-use tile planners that enable memory-efficient processing of spatial data through parallelizable tile-based operations.
 
 For another approach to spatially tiled computation, see: [chopin](https://github.com/ropensci/chopin/tree/main)
 
@@ -20,7 +18,7 @@ For another approach to spatially tiled computation, see: [chopin](https://githu
 # Installation
 ```r
 # Install from GitHub
-devtools::install_github("drieslab/GiottoTile")
+devtools::install_github("drieslab/tilework")
 ```
 
 # Quick Start
@@ -28,7 +26,7 @@ devtools::install_github("drieslab/GiottoTile")
 ## Spatial Tiling
 
 ```r
-library(GiottoTile)
+library(tilework)
 library(terra)
 
 # Load a raster
@@ -384,11 +382,6 @@ Dependencies
 * **terra**: Spatial data handling and raster operations
 * **checkmate**: Input validation
 * **future.apply**: Parallel processing support
-* **GiottoUtils**: Utility functions (part of Giotto ecosystem)
-
-# Integration
-
-GiottoTile is part of the broader Giotto ecosystem for spatial data analysis. It provides the foundational tiling capabilities used by other Giotto packages for efficient processing of large-scale spatial datasets.
 
 # Contributing
 Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.

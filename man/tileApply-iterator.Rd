@@ -89,7 +89,7 @@ over processing workflow.
 
 \strong{\code{token}} is a stand-in for any input data class (e.g. \code{SpatRaster},
 \code{SpatExtent}, filpath, etc). See \link{redispatch_tileapply}
-and \link{extending_giottotile} for further information.
+and \link{extending_tilework} for further information.
 }
 \section{Worker Distribution}{
 

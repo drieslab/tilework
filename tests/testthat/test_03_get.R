@@ -1,4 +1,4 @@
-# Integration tests for tilePlan with other GiottoTile components
+# Integration tests for tilePlan with other tilework components
 # Tests interactions with getTile, getBoundedData, tileGroup, and tileIterator
 
 

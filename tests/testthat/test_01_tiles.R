@@ -4,13 +4,13 @@ test_that("tilePlan factory function works correctly", {
     spatial_plan <- tilePlan("spatial")
     expect_s4_class(spatial_plan, "spatialTilePlan")
     expect_s4_class(spatial_plan, "tilePlan")
-    expect_s4_class(spatial_plan, "giottoTile")
+    expect_s4_class(spatial_plan, "tilework")
 
     # Test pixel type
     pixel_plan <- tilePlan("pixel")
     expect_s4_class(pixel_plan, "pixelTilePlan")
     expect_s4_class(pixel_plan, "tilePlan")
-    expect_s4_class(pixel_plan, "giottoTile")
+    expect_s4_class(pixel_plan, "tilework")
 
     # Test invalid type
     expect_error(tilePlan("invalid"), "should be one of")

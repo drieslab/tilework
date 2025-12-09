@@ -9,7 +9,7 @@
 #'
 #' **`token`** is a stand-in for any input data class (e.g. `SpatRaster`,
 #' `SpatExtent`, filpath, etc). See [redispatch_tileapply]
-#' and [extending_giottotile] for further information.
+#' and [extending_tilework] for further information.
 #'
 #' @section Worker Distribution:
 #' [iterSplit()] is run with `n =` [future::nbrOfWorkers()] to distribute the
@@ -413,7 +413,7 @@ setMethod(
 setMethod(
     "redispatch_tileapply", signature("character", "tileIterator"),
     function(sig, tiles, ...) {
-        sig <- GiottoUtils::handle_warnings(.terra_read(sig))$result
+        sig <- .handle_warnings(.terra_read(sig))$result
         redispatch_tileapply(sig, tiles, ...)
     }
 )

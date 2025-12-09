@@ -6,10 +6,10 @@
 
 # docs ####
 
-#' @name extending_giottotile
-#' @title Extending GiottoTile
+#' @name extending_tilework
+#' @title Extending {tilework}
 #' @description
-#' GiottoTile provides an extensible framework for:
+#' {tilework} provides an extensible framework for:
 #'
 #' * [tile planning][tilePlan-class]
 #' * [tile selection][tileGroup-class]
@@ -36,7 +36,7 @@
 #'
 #' @section Adding new data type support:
 #'
-#' {GiottoTile} functionalities can be extended to work with  other data
+#' {tilework} functionalities can be extended to work with  other data
 #' types/backends by creating a [getBoundedData()] method for the data type.
 #' Optional additional steps:
 #'
@@ -179,7 +179,7 @@ NULL
 #' they are traced to their filepaths with [terra::sources()] and then processed
 #' via their filepaths for memory efficiency.
 #'
-#' For other data types, see [extending_giottotile]
+#' For other data types, see [extending_tilework]
 #'
 #' @section Tile Processing Methods:
 #' - **Basic tiling**: See [tileApply-plan] for `spatialTilePlan` and `pixelTilePlan`

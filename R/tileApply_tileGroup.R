@@ -9,7 +9,7 @@
 #'
 #' **`token`** is a stand-in for any input data class (e.g. `SpatRaster`,
 #' `SpatExtent`, filpath, etc). See [redispatch_tileapply]
-#' and [extending_giottotile] for further information.
+#' and [extending_tilework] for further information.
 #'
 #' @section Parallelization Strategies:
 #' - `"groups"` - Process groups in parallel, tiles within groups sequentially
@@ -201,7 +201,7 @@ setMethod(
 setMethod(
     "redispatch_tileapply", signature("character", "tileGroup"),
     function(sig, tiles, ...) {
-        sig <- GiottoUtils::handle_warnings(.terra_read(sig))$result
+        sig <- .handle_warnings(.terra_read(sig))$result
         redispatch_tileapply(sig, tiles, ...)
     }
 )

@@ -60,7 +60,6 @@ jobs:
             any::future
             any::future.apply
             any::knitr
-            github::drieslab/GiottoUtils
           needs: check
 
       - name: Run R CMD check

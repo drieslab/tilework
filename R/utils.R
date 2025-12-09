@@ -121,6 +121,15 @@
     sprintf("<%s> length %d", class(x), length(x))
 }
 
+.handle_warnings <- function(expr) {
+    warnings <- character(0)
+    result <- withCallingHandlers(expr, warning = function(w) {
+        warnings <<- c(warnings, conditionMessage(w))
+        invokeRestart("muffleWarning")
+    })
+    list(result = result, warnings = warnings)
+}
+
 # backwards compat
 if (getRversion() < "4.4.0") {
     `%||%` <- function(x, y) {

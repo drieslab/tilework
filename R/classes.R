@@ -1,12 +1,12 @@
 setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 
-#' @name giottoTile-class
-#' @title Virtual Class `giottoTile`
+#' @name tilework-class
+#' @title Virtual Class `tilework`
 #' @description
-#' The `giottoTile` class is a class contained by all actual classes in the
-#' \pkg{GiottoTile} package. It is a "virtual" class.
-#' @exportClass giottoTile
-setClass("giottoTile", contains = "VIRTUAL")
+#' The `tilework` class is a class contained by all actual classes in the
+#' \pkg{tilework} package. It is a "virtual" class.
+#' @exportClass tilework
+setClass("tilework", contains = "VIRTUAL")
 
 #' @name token-class
 #' @title `token` Class
@@ -47,7 +47,7 @@ setClass("token",
 #' [tilePlan()] for creation of these objects.
 setClass(
     "tilePlan",
-    contains = c("VIRTUAL", "giottoTile"),
+    contains = c("VIRTUAL", "tilework"),
     slots = list(
         n = "numeric",
         dims = "integer",
@@ -105,7 +105,7 @@ setClass(
 #' @slot metadata data.frame. Metadata about each group
 #' @exportClass tileGroup
 setClass("tileGroup",
-    contains = "giottoTile",
+    contains = "tilework",
     slots = list(
         tp = "tilePlan",
         groups = "list",
@@ -126,7 +126,7 @@ setClass("tileGroup",
 #' @seealso [tileIterator]
 #' @exportClass tileIterator
 setClass("tileIterator",
-    contains = "giottoTile",
+    contains = "tilework",
     slots = list(
         funs = "list"
     )

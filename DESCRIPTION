@@ -1,15 +1,11 @@
-Package: GiottoTile
-Title: Data Tiling for the Giotto Ecosystem
+Package: tilework
+Title: Data Tiling and Parallelizable Workflows
 Version: 0.0.1
 Authors@R: c(
 	person("Ruben", "Dries", email = "rubendries@gmail.com",
 		 role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7650-7754")),
 	person("Jiaji", "George Chen", email = "jiajic@bu.edu",
-		 role = c("aut")),
-	person("Guo-Cheng", "Yuan", email = "guo-cheng.yuan@mssm.edu",
-		 role = c("aut")),
-	person("Joselyn C.", "Chávez-Fuentes", email = "joselynchavezf@gmail.com",
-	     role = c("aut"), comment = c(ORCID = "0000-0002-4974-4591"))
+		 role = c("aut"))
 	)
 Description: Open source and S4 extensible framework for performing 
     tile/patch-based processing and analysis.
@@ -23,19 +19,17 @@ Imports:
     checkmate,
     future,
     future.apply,
-    GiottoUtils (>= 0.2.5),
     methods,
     terra (>= 1.8-21),
 Suggests:
     BiocParallel,
     knitr,
     testthat (>= 3.0.0)
-Remotes: drieslab/GiottoUtils
 Config/testthat/edition: 3
-URL: https://drieslab.github.io/GiottoTile/
+URL: https://drieslab.github.io/tilework/
 biocViews: Software, Technology, Spatial
 VignetteBuilder: knitr
-BugReports: https://github.com/drieslab/GiottoTile/issues
+BugReports: https://github.com/drieslab/tilework/issues
 Collate: 
     'classes.R'
     'generics.R'

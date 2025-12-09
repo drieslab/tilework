@@ -40,7 +40,7 @@ the tile type.
 they are traced to their filepaths with \code{\link[terra:sources]{terra::sources()}} and then processed
 via their filepaths for memory efficiency.
 
-For other data types, see \link{extending_giottotile}
+For other data types, see \link{extending_tilework}
 }
 \section{Tile Processing Methods}{
 
