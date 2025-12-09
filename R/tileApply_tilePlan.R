@@ -28,7 +28,7 @@
 #'   `y`
 #' @param pad_y numeric. Additional padding applied to `y` tiling so `x` has full
 #' spatial context of `y`
-#' @param future.seed logical. Enable reproducible random seeds
+#' @param parallel_params named param list. See [parallel_params]
 #' @param log logical. Whether to log processing steps
 #' @param logpath character. Log file path (if log = `TRUE`)
 #' @param verbose be verbose. Set as "debug" for more info on stack tracing.
@@ -88,13 +88,13 @@ setMethod(
         get_params_x = list(),
         log = FALSE,
         logpath = getTileworkLogDir(),
-        future_params = list(future.seed = TRUE),
+        parallel_params = list(),
         verbose = NULL,
         ...) {
         .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
         checkmate::assert_list(get_params_x)
-        checkmate::assert_list(future_params)
+        checkmate::assert_list(parallel_params)
         checkmate::assert_function(FUN)
         checkmate::assert_flag(log)
         jid <- getTileworkJobID(advance = TRUE)
@@ -136,13 +136,13 @@ setMethod(
                 return(res)
             }
 
-            future_params <- c(
+            parallel_params <- c(
                 X = list(seq_along(tiles)),
                 FUN = .future_fun,
-                future_params
+                parallel_params
             )
 
-            do.call(lapply_flex, future_params)
+            do.call(.par_lapply, parallel_params)
         })
     }
 )
@@ -160,14 +160,14 @@ setMethod(
         pad_y = NULL,
         log = FALSE,
         logpath = getTileworkLogDir(),
-        future_params = list(future.seed = TRUE),
+        parallel_params = list(),
         verbose = NULL,
         ...) {
         .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
         checkmate::assert_list(get_params_x)
         checkmate::assert_list(get_params_y)
-        checkmate::assert_list(future_params)
+        checkmate::assert_list(parallel_params)
         checkmate::assert_function(FUN)
         checkmate::assert_flag(log)
         jid <- getTileworkJobID(advance = TRUE)
@@ -214,13 +214,13 @@ setMethod(
                 return(res)
             }
 
-            future_params <- c(
+            parallel_params <- c(
                 X = list(seq_along(tiles)),
                 FUN = .future_fun,
-                future_params
+                parallel_params
             )
 
-            do.call(lapply_flex, future_params)
+            do.call(.par_lapply, parallel_params)
         })
     }
 )

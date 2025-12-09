@@ -18,7 +18,7 @@
   log = FALSE,
   logpath = getTileworkLogDir(),
   simplify = FALSE,
-  future_params = list(future.seed = TRUE),
+  parallel_params = list(),
   verbose = NULL,
   ...
 )
@@ -39,7 +39,7 @@
   log = FALSE,
   logpath = getTileworkLogDir(),
   simplify = FALSE,
-  future_params = list(future.seed = TRUE),
+  parallel_params = list(),
   verbose = NULL,
   ...
 )
@@ -72,6 +72,8 @@ worker when \code{parallel_strategy = "groups"}}
 
 \item{simplify}{logical. Whether to flatten group results into single list.
 Group names will not be retained.}
+
+\item{parallel_params}{named param list. See \link{parallel_params}}
 
 \item{\dots}{additional params to pass to \code{\link[=bracket]{[}}}
 

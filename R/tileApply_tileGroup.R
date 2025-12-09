@@ -55,6 +55,7 @@
 #' @param logpath character. Log file path (if log = `TRUE`)
 #' @param simplify logical. Whether to flatten group results into single list.
 #'   Group names will not be retained.
+#' @param parallel_params named param list. See [parallel_params]
 #' @param \dots additional params to pass to [`[`][bracket]
 #'
 #' @seealso [tileApply], [tileGroup()], [tileGroup-class]
@@ -121,14 +122,12 @@ setMethod(
         log = FALSE,
         logpath = getTileworkLogDir(),
         simplify = FALSE,
-        future_params = list(
-            future.seed = TRUE
-        ),
+        parallel_params = list(),
         verbose = NULL,
         ...) {
         parallel_strategy <- match.arg(parallel_strategy, choices = c("groups", "tiles"))
         checkmate::assert_list(get_params_x)
-        checkmate::assert_list(future_params)
+        checkmate::assert_list(parallel_params)
         checkmate::assert_function(FUN)
         checkmate::assert_function(group_FUN, null.ok = TRUE)
 
@@ -168,15 +167,13 @@ setMethod(
         log = FALSE,
         logpath = getTileworkLogDir(),
         simplify = FALSE,
-        future_params = list(
-            future.seed = TRUE
-        ),
+        parallel_params = list(),
         verbose = NULL,
         ...) {
         parallel_strategy <- match.arg(parallel_strategy, choices = c("groups", "tiles"))
         checkmate::assert_list(get_params_x)
         checkmate::assert_list(get_params_y)
-        checkmate::assert_list(future_params)
+        checkmate::assert_list(parallel_params)
         checkmate::assert_function(FUN)
         checkmate::assert_function(group_FUN, null.ok = TRUE)
 
@@ -336,7 +333,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         group_FUN = NULL,
         callback_x = NULL,
         callback_y = NULL,
-        future_params,
+        parallel_params,
         log,
         logpath,
         simplify = FALSE,
@@ -405,13 +402,13 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
             return(gres)
         }
 
-        future_params <- c(
+        parallel_params <- c(
             X = list(names(tiles)),
             FUN = .future_fun,
-            future_params
+            parallel_params
         )
 
-        group_results <- do.call(lapply_flex, future_params)
+        group_results <- do.call(.par_lapply, parallel_params)
 
         if (simplify) {
             group_results <- unlist(group_results,
@@ -429,7 +426,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
 .tapp_seq_groups <- function(
         tiles,
         group_FUN,
-        future_params,
+        parallel_params,
         log,
         logpath,
         simplify = FALSE,
@@ -465,7 +462,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
 
             gres <- .process_par_tile(
                 tiles = tiles, group = group, log = log, logpath = logpath,
-                future_params = future_params, jid = sjid, ...
+                parallel_params = parallel_params, jid = sjid, ...
             )
 
             # Apply group function if provided
@@ -502,7 +499,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         log,
         logpath,
         jid = "",
-        future_params,
+        parallel_params,
         ...) {
     tiles$active <- group
 
@@ -551,13 +548,13 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         return(results)
     }
 
-    future_params <- c(
+    parallel_params <- c(
         X = list(seq_along(tiles)),
         FUN = .future_fun,
-        future_params
+        parallel_params
     )
 
-    do.call(lapply_flex, future_params)
+    do.call(.par_lapply, parallel_params)
 }
 
 # group: group index (character name)

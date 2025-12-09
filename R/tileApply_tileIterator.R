@@ -48,6 +48,7 @@
 #' @param log logical. Whether to log processing steps
 #' @param logpath character. Log file path (if log = `TRUE`)
 #' @param simplify logical. Whether to flatten results
+#' @param parallel_params named param list. See [parallel_params]
 #' @param \dots additional params to pass to [`[`][bracket]
 #'
 #' @seealso [tileApply], [tileIterator()], [tileIterator-class]
@@ -131,11 +132,11 @@ setMethod(
         log = FALSE,
         logpath = getTileworkLogDir(),
         simplify = FALSE,
-        future_params = list(future.seed = TRUE),
+        parallel_params = list(),
         verbose = NULL,
         ...) {
         checkmate::assert_list(get_params_x)
-        checkmate::assert_list(future_params)
+        checkmate::assert_list(parallel_params)
         checkmate::assert_function(FUN)
 
         .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
@@ -238,13 +239,13 @@ setMethod(
                 return(res)
             }
 
-            future_params <- c(
+            parallel_params <- c(
                 X = seq_along(worker_iters), # parallelize on number of worker iters
                 FUN = .future_fun,
-                future_params
+                parallel_params
             )
 
-            results_list <- do.call(lapply_flex, future_params)
+            results_list <- do.call(.par_lapply, parallel_params)
 
             # flatten results from workers into single list
             all_results <- unlist(results_list, recursive = FALSE)
@@ -273,12 +274,12 @@ setMethod(
         log = FALSE,
         logpath = getTileworkLogDir(),
         simplify = FALSE,
-        future_params = list(future.seed = TRUE),
+        parallel_params = list(),
         verbose = NULL,
         ...) {
         checkmate::assert_list(get_params_x)
         checkmate::assert_list(get_params_y)
-        checkmate::assert_list(future_params)
+        checkmate::assert_list(parallel_params)
         checkmate::assert_function(FUN)
 
         .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
@@ -390,13 +391,13 @@ setMethod(
                 return(res)
             }
 
-            future_params <- c(
+            parallel_params <- c(
                 X = seq_along(worker_iters), # parallelize on number of worker iters
                 FUN = .future_fun,
-                future_params
+                parallel_params
             )
 
-            results_list <- do.call(lapply_flex, future_params)
+            results_list <- do.call(.par_lapply, parallel_params)
 
             # flatten results from workers into single list
             all_results <- unlist(results_list, recursive = FALSE)

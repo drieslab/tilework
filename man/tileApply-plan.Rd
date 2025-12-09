@@ -13,7 +13,7 @@
   get_params_x = list(),
   log = FALSE,
   logpath = getTileworkLogDir(),
-  future_params = list(future.seed = TRUE),
+  parallel_params = list(),
   verbose = NULL,
   ...
 )
@@ -28,7 +28,7 @@
   pad_y = NULL,
   log = FALSE,
   logpath = getTileworkLogDir(),
-  future_params = list(future.seed = TRUE),
+  parallel_params = list(),
   verbose = NULL,
   ...
 )
@@ -47,6 +47,8 @@
 
 \item{logpath}{character. Log file path (if log = \code{TRUE})}
 
+\item{parallel_params}{named param list. See \link{parallel_params}}
+
 \item{verbose}{be verbose. Set as "debug" for more info on stack tracing.}
 
 \item{\dots}{additional params to pass to \code{\link[=bracket]{[}}}
@@ -58,8 +60,6 @@
 
 \item{pad_y}{numeric. Additional padding applied to \code{y} tiling so \code{x} has full
 spatial context of \code{y}}
-
-\item{future.seed}{logical. Enable reproducible random seeds}
 }
 \description{
 Apply functions across \code{tilePlan}-inheriting objects.

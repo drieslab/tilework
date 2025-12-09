@@ -16,7 +16,7 @@
   log = FALSE,
   logpath = getTileworkLogDir(),
   simplify = FALSE,
-  future_params = list(future.seed = TRUE),
+  parallel_params = list(),
   verbose = NULL,
   ...
 )
@@ -35,7 +35,7 @@
   log = FALSE,
   logpath = getTileworkLogDir(),
   simplify = FALSE,
-  future_params = list(future.seed = TRUE),
+  parallel_params = list(),
   verbose = NULL,
   ...
 )
@@ -62,6 +62,8 @@ of \code{FUN} begins.}
 \item{logpath}{character. Log file path (if log = \code{TRUE})}
 
 \item{simplify}{logical. Whether to flatten results}
+
+\item{parallel_params}{named param list. See \link{parallel_params}}
 
 \item{\dots}{additional params to pass to \code{\link[=bracket]{[}}}
 

@@ -41,6 +41,7 @@ Collate:
     'getBoundedData.R'
     'getTile.R'
     'package_imports.R'
+    'parallel.R'
     'tilePlan.R'
     'pixelTilePlan.R'
     'spatialTilePlan.R'
