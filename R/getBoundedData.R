@@ -31,6 +31,22 @@
 #' - Add padding with `tiles + pad_value` to ensure spatial context
 #' - Use [terra::crop()] directly if you need `snap = "out"` or `snap = "in"`
 #'
+#' @section Boundary Inclusivity:
+#'
+#' Adjacent tiles share exact boundaries. Since \{tilework\} does not know the
+#' format or representation of the underlying data, it does not enforce whether
+#' those boundaries are inclusive or exclusive. It is up to the
+#' `getBoundedData()` implementation to decide how features on shared edges are
+#' handled.
+#'
+#' The existing \{terra\} methods do not implement inclusive/exclusive boundary
+#' control because raster pixel snapping and padding make exact boundary
+#' behavior largely irrelevant for that format. For point or tabular data,
+#' features on a shared boundary may appear in multiple tiles unless the
+#' implementation applies its own filtering (e.g. `>=` vs `>` comparisons).
+#' The tile's grid position can be passed via `get_params` from [getTile()] to
+#' inform which edges are interior.
+#'
 #' @param x data
 #' @param bound bounds to filter with
 #' @param extend logical (default = `FALSE`) whether to extend tile data to reach

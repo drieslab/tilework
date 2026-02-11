@@ -186,6 +186,21 @@ NULL
 #' - **Group processing**: See [tileApply-group] for `tileGroup` hierarchical processing
 #' - **Iterator processing**: See [tileApply-iterator] for `tileIterator` streaming/batch processing
 #'
+#' @section Boundary Inclusivity:
+#' Adjacent tiles share exact boundaries. Since \{tilework\} does not know the
+#' format or representation of the underlying data, it provides tile bounds as
+#' windows but does not enforce whether those boundaries are inclusive or
+#' exclusive — that is determined by the [getBoundedData()] method for the
+#' data type being processed.
+#'
+#' For raster data this is generally not an issue (pixel snapping assigns each
+#' cell unambiguously). For point or tabular data, features sitting exactly on
+#' a shared tile boundary may appear in multiple tiles unless the
+#' `getBoundedData()` implementation applies its own inclusive/exclusive
+#' filtering. Implementing packages can use the tile grid position (available
+#' via [getTile()]'s `get_params`) to determine which edges are shared and
+#' filter accordingly.
+#'
 #' @param x input data 1
 #' @param y input data 2 (optional)
 #' @param tiles tile* object (`tilePlan`, `tileGroup`, or `tileIterator`)
