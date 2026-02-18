@@ -525,8 +525,8 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         gt_params_x <- c(list(x, tiles, i = i), list(get_params = get_params_x), list(...))
         tile_x <- do.call(getTile, gt_params_x)[[1L]] # returns as list
         if (!is.null(y)) {
-            get_params_y <- c(list(y, tiles, i = i, pad = pad_y), get_params_y, list(...))
-            tile_y <- do.call(getTile, get_params_y)[[1L]]
+            gt_params_y <- c(list(y, tiles, i = i, pad = pad_y), list(get_params = get_params_y), list(...))
+            tile_y <- do.call(getTile, gt_params_y)[[1L]]
         }
 
         # Prepare function arguments
