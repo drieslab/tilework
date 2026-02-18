@@ -119,8 +119,8 @@ setMethod(
                     .log_write(conn, tile_id, "pad:", tiles@pad)
                 }
 
-                get_params_x <- c(list(x, tiles, i = i), get_params_x, list(...))
-                tile_data <- do.call(getTile, get_params_x)[[1L]]
+                gt_params_x <- c(list(x, tiles, i = i), get_params = get_params_x, list(...))
+                tile_data <- do.call(getTile, gt_params_x)[[1L]]
 
                 # special args injection
                 a <- list(tile_data)
@@ -194,11 +194,11 @@ setMethod(
                 }
 
                 # prep args
-                get_params_x <- c(list(x, tiles, i = i), get_params_x, list(...))
-                get_params_y <- c(list(y, tiles, i = i, pad = pad_y), get_params_y, list(...))
+                gt_params_x <- c(list(x, tiles, i = i), get_params = get_params_x, list(...))
+                gt_params_y <- c(list(y, tiles, i = i, pad = pad_y), get_params = get_params_y, list(...))
                 # these are retrieved as list of 1
-                tile_x <- do.call(getTile, get_params_x)[[1L]]
-                tile_y <- do.call(getTile, get_params_y)[[1L]]
+                tile_x <- do.call(getTile, gt_params_x)[[1L]]
+                tile_y <- do.call(getTile, gt_params_y)[[1L]]
 
                 # special args injection
                 a <- list(tile_x, tile_y)
