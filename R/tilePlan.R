@@ -355,6 +355,9 @@ setMethod("[", signature(x = "tilePlan", i = "missing", j = "missing", drop = "m
 setMethod("[", signature(x = "tilePlan", i = "numeric", j = "missing", drop = "logical"), function(x, i, ..., drop) {
     checkmate::assert_integerish(i)
     dots <- list(...)
+    if ("expand_grid" %in% names(dots)) {
+        stop("[tilePlan] expand_grid param not allowed when j is missing")
+    }
     if (length(dots) > 0) {
         warning("[tilePlan] ... params are not passed when drop = FALSE")
     }
@@ -366,7 +369,7 @@ setMethod("[", signature(x = "tilePlan", i = "numeric", j = "missing", drop = "l
     }
     # flat case
     if (drop) return(x[i, ...])
-    if (any(i > length(x))) stop("[tilePlan] subscript out of bounds\n", call. = FALSE)
+    if (any(i > length(x) | i <= 0)) stop("[tilePlan] subscript out of bounds\n", call. = FALSE)
     new("tileSelection", tp = x, indices = as.integer(i))
 })
 
@@ -374,7 +377,11 @@ setMethod("[", signature(x = "tilePlan", i = "numeric", j = "missing", drop = "l
 #' @export
 setMethod("[", signature(x = "tilePlan", i = "missing", j = "numeric", drop = "logical"), function(x, i, j, ..., drop) {
     if (drop) return(x[, j = j, ...])
-    if (length(list(...)) > 0) {
+    dots <- list(...)
+    if ("expand_grid" %in% names(dots)) {
+        stop("[tilePlan] expand_grid param not allowed when i is missing")
+    }
+    if (length(dots) > 0) {
         warning("[tilePlan] ... params are not passed when drop = FALSE")
     }
     checkmate::assert_integerish(j)
@@ -387,7 +394,8 @@ setMethod(
     "[", signature(x = "tilePlan", i = "numeric", j = "numeric", drop = "logical"),
     function(x, i, j, expand_grid = TRUE, ..., drop) {
         if (drop) return(x[i, j, expand_grid = expand_grid, ...])
-        if (length(list(...)) > 0) {
+        dots <- list(...)
+        if (length(dots) > 0) {
             warning("[tilePlan] ... params are not passed when drop = FALSE")
         }
         checkmate::assert_integerish(i)
