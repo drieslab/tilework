@@ -51,6 +51,23 @@ For other data types, see \link{extending_tilework}
 }
 }
 
+\section{Boundary Inclusivity}{
+
+Adjacent tiles share exact boundaries. Since \{tilework\} does not know the
+format or representation of the underlying data, it provides tile bounds as
+windows but does not enforce whether those boundaries are inclusive or
+exclusive — that is determined by the \code{\link[=getBoundedData]{getBoundedData()}} method for the
+data type being processed.
+
+For raster data this is generally not an issue (pixel snapping assigns each
+cell unambiguously). For point or tabular data, features sitting exactly on
+a shared tile boundary may appear in multiple tiles unless the
+\code{getBoundedData()} implementation applies its own inclusive/exclusive
+filtering. Implementing packages can use the tile grid position (available
+via \code{\link[=getTile]{getTile()}}'s \code{get_params}) to determine which edges are shared and
+filter accordingly.
+}
+
 \examples{
 # See specific help pages for detailed examples:
 # ?`tileApply-plan`     # Basic spatial/pixel tiling

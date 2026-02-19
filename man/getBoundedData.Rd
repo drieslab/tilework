@@ -61,6 +61,24 @@ patterns are:
 }
 }
 
+\section{Boundary Inclusivity}{
+
+
+Adjacent tiles share exact boundaries. Since \{tilework\} does not know the
+format or representation of the underlying data, it does not enforce whether
+those boundaries are inclusive or exclusive. It is up to the
+\code{getBoundedData()} implementation to decide how features on shared edges are
+handled.
+
+The existing \{terra\} methods do not implement inclusive/exclusive boundary
+control because raster pixel snapping and padding make exact boundary
+behavior largely irrelevant for that format. For point or tabular data,
+features on a shared boundary may appear in multiple tiles unless the
+implementation applies its own filtering (e.g. \code{>=} vs \code{>} comparisons).
+The tile's grid position can be passed via \code{get_params} from \code{\link[=getTile]{getTile()}} to
+inform which edges are interior.
+}
+
 \examples{
 f <- system.file("ex/elev.tif", package = "terra")
 r <- terra::rast(f)
