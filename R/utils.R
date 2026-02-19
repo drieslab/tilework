@@ -55,10 +55,10 @@
 # j: col index
 # returns: tile index as a numeric
 .ij_to_tile_idx <- function(x, i, j) {
-    if (i > nrow(x)) {
+    if (any(i > nrow(x))) {
         stop("[.ij_to_tile_idx] not that many rows", call. = FALSE)
     }
-    if (j > ncol(x)) {
+    if (any(j > ncol(x))) {
         stop("[.ij_to_tile_idx] not that many cols", call. = FALSE)
     }
     ((i - 1) * ncol(x)) + j
