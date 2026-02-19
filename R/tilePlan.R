@@ -309,9 +309,22 @@ setMethod("dim", signature("tilePlan"), function(x) {
 setMethod("[", signature(x = "tilePlan", i = "numeric", j = "missing", drop = "missing"), function(x, i, ..., drop) {
     i <- as.integer(i)
     if (any(is.na(i))) stop("[tilePlan] i index may not be NA", call. = FALSE)
+    if (nargs() - length(list(...)) == 3L) {
+        # row case
+        if (any(i > nrow(x) | i <= 0)) stop("[tilePlan] subscript out of bounds", call. = FALSE)
+        return(x[i, j = seq_len(ncol(x)), expand_grid = TRUE, ...]) # pass to numeric/numeric method
+    }
+    # flat case
     if (any(i > length(x) | i <= 0)) stop("[tilePlan] subscript out of bounds", call. = FALSE)
     ij <- .tile_idx_to_ij(x, i)
     x[ij[[1L]], ij[[2L]], expand_grid = FALSE, ...] # pass to numeric/numeric method
+})
+
+#' @rdname bracket
+#' @export
+setMethod("[", signature(x = "tilePlan", i = "missing", j = "numeric", drop = "missing"), function(x, i, j, ..., drop) {
+    j <- as.integer(j)
+    x[i = seq_len(nrow(x)), j, expand_grid = TRUE, ...]
 })
 
 #' @rdname bracket
@@ -337,10 +350,69 @@ setMethod("[", signature(x = "tilePlan", i = "missing", j = "missing", drop = "m
     x[seq_len(length(x))] # pass to numeric/missing method
 })
 
+#' @rdname bracket
+#' @export
+setMethod("[", signature(x = "tilePlan", i = "numeric", j = "missing", drop = "logical"), function(x, i, ..., drop) {
+    checkmate::assert_integerish(i)
+    dots <- list(...)
+    if (length(dots) > 0) {
+        warning("[tilePlan] ... params are not passed when drop = FALSE")
+    }
+    if (nargs() - length(dots) == 4) {
+        # row case
+        j <- seq_len(ncol(x))
+        if (drop) return(x[i, j = j, expand_grid = TRUE, ...])
+        return(x[i, j, expand_grid = TRUE, drop = FALSE])
+    }
+    # flat case
+    if (drop) return(x[i, ...])
+    if (any(i > length(x))) stop("[tilePlan] subscript out of bounds\n", call. = FALSE)
+    new("tileSelection", tp = x, indices = as.integer(i))
+})
+
+#' @rdname bracket
+#' @export
+setMethod("[", signature(x = "tilePlan", i = "missing", j = "numeric", drop = "logical"), function(x, i, j, ..., drop) {
+    if (drop) return(x[, j = j, ...])
+    if (length(list(...)) > 0) {
+        warning("[tilePlan] ... params are not passed when drop = FALSE")
+    }
+    checkmate::assert_integerish(j)
+    x[i = seq_len(nrow(x)), j, expand_grid = TRUE, drop = FALSE]
+})
+
+#' @rdname bracket
+#' @export
+setMethod(
+    "[", signature(x = "tilePlan", i = "numeric", j = "numeric", drop = "logical"),
+    function(x, i, j, expand_grid = TRUE, ..., drop) {
+        if (drop) return(x[i, j, expand_grid = expand_grid, ...])
+        if (length(list(...)) > 0) {
+            warning("[tilePlan] ... params are not passed when drop = FALSE")
+        }
+        checkmate::assert_integerish(i)
+        checkmate::assert_integerish(j)
+        if (isTRUE(expand_grid)) {
+            var_tab <- expand.grid(j, i) # j/i switch is intentional
+            i <- var_tab$Var2
+            j <- var_tab$Var1
+        }
+        i_final <- .ij_to_tile_idx(x, i, j)
+        x[i_final, drop = FALSE]
+    }
+)
+
+#' @rdname bracket
+#' @export
+setMethod("[", signature(x = "tilePlan", i = "missing", j = "missing", drop = "logical"), function(x, i, j, drop) {
+    if (drop) return(x[])
+    x[seq_len(length(x)), drop = FALSE] # pass to numeric/missing method
+})
+
 #' @rdname double_bracket
 #' @export
 setMethod("[[", signature("tilePlan", i = "numeric", j = "missing"), function(x, i, j, ...) {
-    x@metadata[i, , drop = FALSE]
+    x@metadata[i, drop = FALSE]
 })
 
 #' @rdname arith

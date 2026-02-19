@@ -60,6 +60,14 @@ setClass(
     )
 )
 
+setClass(
+    "tileSelection",
+    slots = list(
+        tp = "tilePlan",
+        indices = "integer"
+    )
+)
+
 #' @rdname spatialTilePlan-class
 #' @slot extent numeric. Spatial extent to tile across.
 #' @slot n numeric. Number of tiles to create.
