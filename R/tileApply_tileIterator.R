@@ -184,7 +184,7 @@ setMethod(
                 }
 
                 # setup get params
-                get_params_x <- c(list(x, iter), get_params_x, list(...))
+                gt_params_x <- c(list(x, iter), list(get_params = get_params_x), list(...))
 
                 # collect results within worker
                 res <- list()
@@ -193,7 +193,7 @@ setMethod(
                     start_pos <- iter$position + 1L
                     bid <- bid + 1L
                     tilemeta <- iter$peek_batch() # get meta for this batch
-                    batch <- do.call(getTile, get_params_x) # pulls next batch and advances iter
+                    batch <- do.call(getTile, gt_params_x) # pulls next batch and advances iter
                     batch_size <- length(batch)
                     end_pos <- iter$position
                     idx <- vapply(FUN.VALUE = integer(1L), tilemeta, attr, "tile")
@@ -331,8 +331,8 @@ setMethod(
                 }
 
                 # setup get params (use tiles[] to use unified indices for extraction)
-                get_params_x <- c(list(x, tiles[]), get_params_x, list(...))
-                get_params_y <- c(list(y, tiles[], pad = pad_y), get_params_y, list(...))
+                gt_params_x <- c(list(x, tiles[]), list(get_params = get_params_x), list(...))
+                gt_params_y <- c(list(y, tiles[], pad = pad_y), list(get_params = get_params_y), list(...))
 
                 # collect results within worker
                 res <- list()
@@ -342,10 +342,10 @@ setMethod(
                     bid <- bid + 1L
                     tilemeta <- iter$peek_batch() # get meta for this batch
                     indices <- iter$next_indices(advance = TRUE)
-                    get_params_x$i <- indices
-                    get_params_y$i <- indices
-                    batch_x <- do.call(getTile, get_params_x)
-                    batch_y <- do.call(getTile, get_params_y)
+                    gt_params_x$i <- indices
+                    gt_params_y$i <- indices
+                    batch_x <- do.call(getTile, gt_params_x)
+                    batch_y <- do.call(getTile, gt_params_y)
                     batch_size <- length(batch_x)
                     end_pos <- iter$position
                     idx <- vapply(FUN.VALUE = integer(1L), tilemeta, attr, "tile")
