@@ -30,7 +30,7 @@ setMethod("c", signature("tileSelection"), function(x, ...) {
 })
 
 setMethod("plot", signature("tileSelection", "missing"), function(x, y, border = "red", ...) {
-    plot(x@tp)
+    plot(x@tp, ...)
     for (i in x@indices) {
         e <- x@tp[i][[1L]]
         b <- terra::as.polygons(e)
