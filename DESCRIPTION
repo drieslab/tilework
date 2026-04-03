@@ -1,6 +1,6 @@
 Package: tilework
 Title: Data Tiling and Parallelizable Workflows
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(
 	person("Ruben", "Dries", email = "rubendries@gmail.com",
 		 role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7650-7754")),

@@ -238,6 +238,21 @@ tilePlan <- function(type = c("spatial", "pixel"), ...) {
     )
 }
 
+#' @rdname pointTilePlan-class
+#' @param input character. Coordinate space of coords, dims, and padding:
+#'   `"spatial"` for CRS units, `"pixel"` for pixel indices.
+#' @param output character. Bound type returned by [getTile()]. Defaults to
+#'   `input`. Cross-mode conversion requires a `SpatRaster` at [getTile()] time
+#'   (or `@rast_dims`/`@extent` set on the plan for standalone use).
+#' @export
+pointTilePlan <- function(input = c("spatial", "pixel"),
+                          output = input,
+                          ...) {
+    input  <- match.arg(input)
+    output <- match.arg(output, c("spatial", "pixel"))
+    new("pointTilePlan", input = input, output = output, ...)
+}
+
 #' @rdname dollar
 #' @export
 setMethod("$<-", signature("tilePlan", "ANY"), function(x, name, value) {

@@ -1,4 +1,5 @@
 #' @include generics.R
+#' @include pointTilePlan.R
 
 # docs ####
 
@@ -140,6 +141,39 @@ setMethod(
     }
 )
 
+## pointTilePlan ####
+
+#' @rdname getTile
+#' @export
+setMethod(
+    "getTile", signature("SpatRaster", "pointTilePlan"),
+    function(x, tiles, i = NULL, lyr = NULL, pad = NULL, get_params = list(), ...) {
+        checkmate::assert_integerish(lyr, null.ok = TRUE)
+        if (!is.null(lyr)) x <- x[[lyr]]
+
+        # same-mode: base method handles everything
+        if (tiles@input == tiles@output) {
+            return(callNextMethod(x, tiles, i = i, pad = pad, get_params = get_params, ...))
+        }
+
+        # cross-mode: get bounds in input space then convert before getBoundedData
+        checkmate::assert_integerish(i)
+        if (!is.null(pad)) tiles <- tiles + pad
+        bounds_list <- tiles[i, ...]
+
+        convert <- if (tiles@input == "spatial") {
+            function(b) .spat_bound_to_px(x, b)
+        } else {
+            function(b) .px_bound_to_spat(x, b)
+        }
+
+        lapply(bounds_list, function(b) {
+            a <- c(list(x, convert(b)), get_params)
+            do.call(getBoundedData, a)
+        })
+    }
+)
+
 ## tileGroup ####
 
 setMethod(
@@ -180,6 +214,34 @@ setMethod(
         }
     }
 )
+
+# helpers ####
+
+# Convert a SpatExtent bound to pixel integer[4] c(col_min, col_max, row_min, row_max)
+# using the raster's own grid. Matches the bound format expected by
+# getBoundedData(SpatRaster, numeric).
+.spat_bound_to_px <- function(r, b) {
+    b <- b[]
+    as.integer(c(
+        terra::colFromX(r, b[["xmin"]]),
+        terra::colFromX(r, b[["xmax"]]),
+        terra::rowFromY(r, b[["ymax"]]),  # ymax -> smaller row index
+        terra::rowFromY(r, b[["ymin"]])   # ymin -> larger row index
+    ))
+}
+
+# Convert a pixel integer[4] bound c(col_min, col_max, row_min, row_max) to
+# a SpatExtent using the raster's origin and resolution.
+.px_bound_to_spat <- function(r, b) {
+    xr <- terra::res(r)[[1L]] / 2
+    yr <- terra::res(r)[[2L]] / 2
+    terra::ext(c(
+        terra::xFromCol(r, b[[1L]]) - xr,   # xmin
+        terra::xFromCol(r, b[[2L]]) + xr,   # xmax
+        terra::yFromRow(r, b[[4L]]) - yr,   # ymin (larger row = lower y)
+        terra::yFromRow(r, b[[3L]]) + yr    # ymax (smaller row = higher y)
+    ))
+}
 
 ## tileIterator ####
 

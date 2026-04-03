@@ -9,3 +9,6 @@ inst/doc
 docs
 codecov.yml
 pkgdown
+
+/.quarto/
+**/*.quarto_ipynb

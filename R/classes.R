@@ -68,6 +68,51 @@ setClass(
     )
 )
 
+#' @name pointTilePlan-class
+#' @title Point Tile Plan
+#' @description
+#' Tile plan where each tile is centered on a user-supplied (x, y) coordinate
+#' with a uniform tile size. The center coordinates are primary — for use cases
+#' like survey sampling, object detection patches, or site-centered extractions
+#' where the point location is semantically meaningful.
+#' @slot coords matrix. n x 2 matrix of tile center coordinates (columns: x, y).
+#' @slot input character. Coordinate space of coords, dims, and padding:
+#' `"spatial"` for CRS units, `"pixel"` for pixel indices.
+#' @slot output character. Bound type returned by [getTile()]: `"spatial"` or
+#' `"pixel"`. Defaults to `input`. Evaluated at [getTile()] time, not `[i]`.
+#' @slot rast_dims numeric. `c(nrow, ncol)` of the reference raster. Required
+#' for `plot()` when `input = "pixel"` and for cross-mode conversion without a
+#' raster.
+#' @slot extent numeric. `c(xmin, xmax, ymin, ymax)` of the reference raster.
+#' Required for pixel → CRS conversion without a raster.
+#' @slot n numeric. Number of tiles (equals number of input points).
+#' @slot dims integer. Always `c(n, 1L)`.
+#' @slot tile_dims numeric. Uniform `c(height, width)` in input coordinate units.
+#' @slot pad numeric. Tile padding in input coordinate units.
+#' @slot metadata data.frame. Per-tile metadata; always has `"tile"`, `"x"`,
+#' and `"y"` columns.
+#' @exportClass pointTilePlan
+setClass(
+    "pointTilePlan",
+    contains = "tilePlan",
+    slots = list(
+        coords    = "matrix",    # n × 2: x, y in input coordinate space
+        input     = "character", # "spatial" | "pixel"
+        output    = "character", # "spatial" | "pixel" — getTile concern only
+        rast_dims = "numeric",   # c(nrow, ncol) — for pixel input plotting / cross-mode
+        extent    = "numeric"    # c(xmin, xmax, ymin, ymax) — for px->CRS conversion
+    ),
+    prototype = list(
+        n         = 0,
+        dims      = c(0L, 1L),
+        tile_dims = c(0, 0),
+        metadata  = data.frame(),
+        coords    = matrix(numeric(0), ncol = 2L),
+        rast_dims = numeric(0),
+        extent    = numeric(0)
+    )
+)
+
 #' @rdname spatialTilePlan-class
 #' @slot extent numeric. Spatial extent to tile across.
 #' @slot n numeric. Number of tiles to create.
