@@ -13,7 +13,7 @@
 \alias{[,tilePlan,missing,numeric,logical-method}
 \alias{[,tilePlan,numeric,numeric,logical-method}
 \alias{[,tilePlan,missing,missing,logical-method}
-\alias{[,pointTilePlan,numeric,numeric,missing-method}
+\alias{[,pointTilePlan,numeric,missing,missing-method}
 \alias{[,pixelTilePlan,numeric,numeric,missing-method}
 \alias{[,spatialTilePlan,numeric,numeric,missing-method}
 \alias{[,tileGroup,missing,missing,missing-method}
@@ -52,7 +52,7 @@ x[]
 
 \S4method{[}{tilePlan,missing,missing,logical}(x, i, j, drop)
 
-\S4method{[}{pointTilePlan,numeric,numeric,missing}(x, i, j, ..., drop = TRUE)
+\S4method{[}{pointTilePlan,numeric,missing,missing}(x, i, j, ..., drop = TRUE)
 
 \S4method{[}{pixelTilePlan,numeric,numeric,missing}(x, i, j, ..., drop = TRUE)
 

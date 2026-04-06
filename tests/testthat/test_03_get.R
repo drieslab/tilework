@@ -152,7 +152,7 @@ describe("tilePlan with getBoundedData", {
         pixel_bounds <- tp[1][[1]]
 
         # Use with getBoundedData
-        bounded_data <- getBoundedData(r, pixel_bounds, tiles = tp)
+        bounded_data <- getBoundedData(r, pixel_bounds)
         expect_s4_class(bounded_data, "SpatRaster")
         expect_equal(nrow(bounded_data), 20)
         expect_equal(ncol(bounded_data), 20)
@@ -170,10 +170,10 @@ describe("tilePlan with getBoundedData", {
         edge_bounds <- tp[length(tp)][[1]] # Last tile
 
         # Without extend
-        tile_no_extend <- getBoundedData(r, edge_bounds, tiles = tp, extend = FALSE)
+        tile_no_extend <- getBoundedData(r, edge_bounds, extend = FALSE)
 
         # With extend
-        tile_with_extend <- getBoundedData(r, edge_bounds, tiles = tp, extend = TRUE)
+        tile_with_extend <- getBoundedData(r, edge_bounds, extend = TRUE)
 
         # Extended tile should be exactly tile size
         expect_equal(nrow(tile_with_extend), 20)

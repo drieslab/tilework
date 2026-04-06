@@ -145,8 +145,9 @@ NULL
 #' @description
 #' `[[` can be used to get the table of metadata for a specific tile.
 #' @param x `tilePlan`
-#' @param i tile vector index
-#' @param j not used.
+#' @param i `integer-like`. tile vector index
+#' @param j `character`. Name of metadata information to get
+#' @param value `ANY` value to set
 #' @param ... not used.
 #' @examples
 #' spat <- tilePlan("spatial")
@@ -435,7 +436,39 @@ setMethod("[", signature(x = "tilePlan", i = "missing", j = "missing", drop = "l
 #' @rdname double_bracket
 #' @export
 setMethod("[[", signature("tilePlan", i = "numeric", j = "missing"), function(x, i, j, ...) {
-    x@metadata[i, drop = FALSE]
+    x@metadata[i, , drop = FALSE]
+})
+
+#' @rdname double_bracket
+#' @export
+setMethod("[[", signature("tilePlan", i = "missing", j = "missing"), function(x, i, j, ...) {
+    x@metadata
+})
+
+#' @rdname double_bracket
+#' @export
+setMethod("[[", signature("tilePlan", i = "missing", j = "character"), function(x, i, j, ...) {
+    x@metadata[, j, drop = FALSE]
+})
+
+#' @rdname double_bracket
+#' @export
+setMethod("[[", signature("tilePlan", i = "numeric", j = "character"), function(x, i, j, ...) {
+    x@metadata[i, j, drop = FALSE]
+})
+
+#' @rdname double_bracket
+#' @export
+setMethod("[[<-", signature("tilePlan", i = "numeric", j = "character", value = "ANY"), function(x, i, j, ..., value) {
+    x@metadata[i, j] <- value
+    x
+})
+
+#' @rdname double_bracket
+#' @export
+setMethod("[[<-", signature("tilePlan", i = "missing", j = "character", value = "ANY"), function(x, i, j, ..., value) {
+    x@metadata[, j] <- value
+    x
 })
 
 #' @rdname arith

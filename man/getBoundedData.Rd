@@ -7,9 +7,9 @@
 \alias{getBoundedData,SpatVectorProxy,SpatExtent-method}
 \title{Get Data Within Bounds}
 \usage{
-\S4method{getBoundedData}{SpatRaster,numeric}(x, bound, tiles, extend = FALSE, fill = NA)
+\S4method{getBoundedData}{SpatRaster,numeric}(x, bound, extend = FALSE, fill = NA)
 
-\S4method{getBoundedData}{SpatRaster,SpatExtent}(x, bound)
+\S4method{getBoundedData}{SpatRaster,SpatExtent}(x, bound, extend = FALSE, fill = NA)
 
 \S4method{getBoundedData}{SpatVectorProxy,SpatExtent}(x, bound)
 }
@@ -17,9 +17,6 @@
 \item{x}{data}
 
 \item{bound}{bounds to filter with}
-
-\item{tiles}{\verb{tile*} object. Only needed if \code{extend = TRUE} for the contained
-tiledims and padding information.}
 
 \item{extend}{logical (default = \code{FALSE}) whether to extend tile data to reach
 expected tile dimensions}

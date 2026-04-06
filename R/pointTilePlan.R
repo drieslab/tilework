@@ -196,18 +196,54 @@ setMethod("$", signature("pointTilePlan"), function(x, name) {
 
 # * [ ####
 
+setMethod("[", signature("pointTilePlan", i = "ANY", j = "ANY", drop = "missing"), function(x, i, j, ...) {
+    stop("[pointTilePlan] does not use `j` in indexing")
+})
+
 #' @rdname bracket
 #' @export
 setMethod(
-    "[", signature(x = "pointTilePlan", i = "numeric", j = "numeric", drop = "missing"),
-    function(x, i, j, ...) {
-        if (x@input == "spatial") {
-            callNextMethod(x, i, j, tile_fun = .point_tile_bounds, fun = ext, zero = FALSE, ...)
-        } else {
-            callNextMethod(x, i, j, tile_fun = .point_tile_bounds_px, fun = as.integer, zero = FALSE, ...)
+    "[", signature(x = "pointTilePlan", i = "numeric", j = "missing", drop = "missing"),
+    function(x, i, ...) {
+        .guard_tile_dims(x)
+
+        tilefun <- if (x@input == "spatial" && x@output == "spatial") {
+            .point_tile_bounds_s2s
+        } else if (x@input == "spatial" && x@output == "pixel") {
+            .point_tile_bounds_s2p
+        } else if (x@input == "pixel" && x@output == "pixel") {
+            .point_tile_bounds_p2p
+        } else if (x@input == "pixel" && x@output == "spatial") {
+            .point_tile_bounds_p2s
         }
+      
+        if (x@output == "spatial") {
+            fun <- ext
+        } else {
+            fun <- as.integer
+        }
+      
+        callNextMethod(x, i, tile_fun = tilefun, fun = fun, zero = FALSE, ...)
     }
 )
+
+# * ext ####
+
+#' @rdname ext
+#' @export
+setMethod("ext", signature("pointTilePlan"), function(x, ...) {
+    if (length(x@extent) == 0L) {
+        stop("[pointTilePlan] No extent set", call. = FALSE)
+    }
+    ext(x@extent, ...)
+})
+
+#' @rdname ext
+#' @export
+setMethod("ext<-", signature("pointTilePlan"), function(x, value) {
+    x@extent <- .ext_to_num_vec(ext(value))
+    return(initialize(x))
+})
 
 # * arith ####
 
@@ -252,24 +288,121 @@ setMethod("centroids", signature("pointTilePlan"), function(x, ...) {
       "input", "output", "rast_dims", "extent", "pad")
 }
 
-# Compute c(xmin, xmax, ymin, ymax) centred on coords[i,] in spatial units.
-# j is always 1 for pointTilePlan and is ignored.
-.point_tile_bounds <- function(x, i, j) {
-    cx <- x@coords[i, 1L]
-    cy <- x@coords[i, 2L]
-    hw <- x@tile_dims[[2L]] / 2   # half-width
-    hh <- x@tile_dims[[1L]] / 2   # half-height
+.guard_tile_dims <- function(x) {
+    error_dims <- c("height", "width")[x@tile_dims > c(0L, 0L)]
+    if (length(error_dims > 0L)) {
+        stop(sprintf("[%s] tile %s dim(s) are not greater than zero\n %s",
+            class(x),
+            toString(error_dims),
+            "Set using `$height<-` and `$width<-`"
+        ), call. = FALSE)
+    }
+    invisible(x)
+}
+
+.guard_rast_dims <- function(x) {
+    if (!checkmate::test_integerish(x@rast_dims, len = 2L)) {
+        stop(sprintf("[%s] image dims are not provided.\n %s\n %s",
+            class(x),
+            "Set using `$rast_dims<-c(nrows, ncols)`",
+            "Values should be integer-like"
+        ))
+    }
+    invisible(x)
+}
+
+.guard_ext <- function(x) {
+    if (!checkmate::test_numeric(x@extent, len = 4L)) {
+        stop(sprintf("[%s] spatial extent not set.\n %s",
+            class(x),
+            "Set using `ext(tilePlan) <- c(xmin, xmax, ymin, ymax)`"
+        ))
+    }
+    invisible(x)
+}
+
+# spatial-spatial
+.point_tile_bounds_s2s <- function(x, i) {
+    .point_tile_bounds(
+        xymat = x@coords,
+        i = i,
+        tile_dims = x@tile_dims
+    )
+}
+
+# pixel-pixel
+.point_tile_bounds_p2p <- function(x, i) {
+    .point_tile_bounds_px(
+        xymat = x@coords,
+        i = i,
+        tile_dims = x@tile_dims
+    )
+}
+
+# spatial-pixel
+.point_tile_bounds_s2p <- function(x, i) {
+    .guard_rast_dims(x)
+    .guard_ext(x)
+
+    e <- x@extent
+    d <- x@rast_dims
+
+    xres <- (e[2L] - e[1L]) / d[2L]
+    yres <- (e[4L] - e[3L]) / d[1L]
+  
+    col <- floor((x@coords[, 1L] - e[1L]) / xres) + 1L  # x -> col
+    row <- floor((e[4L] - x@coords[, 2L]) / yres) + 1L  # y -> row
+    xymat <- cbind(col, row)
+
+    .point_tile_bounds_px(
+        xymat = xymat,
+        i = i,
+        tile_dims = x@tile_dims
+    )
+}
+
+# pixel-spatial
+.point_tile_bounds_p2s <- function(x, i) {
+    .guard_rast_dims(x)
+    .guard_ext(x)
+
+    e <- x@extent
+    d <- x@rast_dims
+
+    xres <- (e[2L] - e[1L]) / d[2L]
+    yres <- (e[4L] - e[3L]) / d[1L]
+
+    px <- .point_tile_bounds_px(
+        xymat = x@coords, 
+        i = i, 
+        tile_dims = x@tile_dims
+    )
+    # px = c(col_min, col_max, row_min, row_max)
+    c(
+        e[1L] + (px[1L] - 1L) * xres,   # xmin: left edge of col_min
+        e[1L] +  px[2L]       * xres,   # xmax: right edge of col_max
+        e[4L] -  px[4L]       * yres,   # ymin: bottom edge of row_max
+        e[4L] - (px[3L] - 1L) * yres    # ymax: top edge of row_min
+    )
+}
+
+# Compute c(xmin, xmax, ymin, ymax) centered on coords[i,] in spatial units.
+.point_tile_bounds <- function(xymat, i, tile_dims) {
+    cx <- xymat[i, 1L]
+    cy <- xymat[i, 2L]
+    hw <- tile_dims[[2L]] / 2   # half-width
+    hh <- tile_dims[[1L]] / 2   # half-height
     c(cx - hw, cx + hw, cy - hh, cy + hh)
 }
 
 # Compute c(col_min, col_max, row_min, row_max) centred on integer pixel coords[i,].
 # Uses integer floor-division so odd dims produce exact symmetric tiles and even
-# dims are biased left/up. j is ignored.
-.point_tile_bounds_px <- function(x, i, j) {
-    cx <- as.integer(x@coords[i, 1L])
-    cy <- as.integer(x@coords[i, 2L])
-    w  <- as.integer(x@tile_dims[[2L]])
-    h  <- as.integer(x@tile_dims[[1L]])
+# dims are biased left/up.
+.point_tile_bounds_px <- function(xymat, i, tile_dims) {
+    cx <- as.integer(xymat[i, 1L])
+    cy <- as.integer(xymat[i, 2L])
+    w  <- as.integer(tile_dims[[2L]])
+    h  <- as.integer(tile_dims[[1L]])
     col_min <- cx - (w - 1L) %/% 2L
     col_max <- col_min + w - 1L
     row_min <- cy - (h - 1L) %/% 2L

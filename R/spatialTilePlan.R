@@ -176,7 +176,7 @@ setMethod("length<-", signature("spatialTilePlan"), function(x, value) {
 #' @export
 setMethod("ext", signature("spatialTilePlan"), function(x, ...) {
     if (length(x@extent) == 0L) {
-        stop("spatialTilePlan: No extent set", call. = FALSE)
+        stop("[spatialTilePlan] No extent set", call. = FALSE)
     }
     ext(x@extent, ...)
 })
