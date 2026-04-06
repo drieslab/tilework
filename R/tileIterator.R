@@ -515,9 +515,9 @@ setMethod(
         start_pos <- tiles$position # init position index
 
         if (n > rem) {
-            warning(wrap_txtf(
-                "More iterators (%d) than remaining tiles (%d).
-            Creating %d iterators instead.", n, rem, rem
+            warning(sprintf(
+                "More iterators (%d) than remaining tiles (%d). \nCreating %d iterators instead.", 
+                n, rem, rem
             ), call. = FALSE)
             n <- rem
         }

@@ -8,8 +8,7 @@
 # * docs ####
 
 #' @name freeTilePlan-class
-#' @title Fluid Tile Plan
-#' @aliases freeTilePlan
+#' @title Free Tile Plan
 #' @description
 #' Tile plan defined by explicit per-tile bounds with no required uniformity
 #' in size or spacing. Unlike grid-based plans, the bounds matrix is the

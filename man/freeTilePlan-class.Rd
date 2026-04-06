@@ -3,7 +3,6 @@
 \docType{class}
 \name{freeTilePlan-class}
 \alias{freeTilePlan-class}
-\alias{freeTilePlan}
 \title{Free Tile Plan}
 \description{
 Tile plan defined by explicit per-tile bounds with no required uniformity
