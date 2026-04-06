@@ -23,8 +23,10 @@ Imports:
     progressr,
     terra (>= 1.8-21),
 Suggests:
+    abind,
     BiocParallel,
     knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 URL: https://drieslab.github.io/tilework/
