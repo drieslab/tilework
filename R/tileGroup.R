@@ -72,7 +72,7 @@ setMethod("show", signature("tileGroup"), function(object) {
     if (.has_active(object)) {
         cat("active:", object@active, "\n")
     }
-    cat(color_yellow("groups-------------------------\n"))
+    cat(.color_yellow("groups-------------------------\n"))
     plist <- lapply(object@groups, function(g) {
         len <- .g_length(g)
         sprintf("%d tiles", len)

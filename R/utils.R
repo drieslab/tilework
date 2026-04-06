@@ -98,6 +98,10 @@
     invisible()
 }
 
+.color_yellow <- function(x) {
+    if (isatty(stdout())) paste0("\033[33m", x, "\033[0m") else x
+}
+
 .print_list <- function(x, pre = "") {
     if (length(x) == 0) {
         cat("<empty>\n")

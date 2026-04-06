@@ -1,0 +1,296 @@
+---
+title: "Choosing and Creating a Tile Plan"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Choosing and Creating a Tile Plan}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(tilework)
+library(terra)
+```
+
+## Overview
+
+tilework provides three concrete tile plan classes, each suited to a different
+way of thinking about how a dataset should be divided:
+
+| Class | Tile placement | Coordinate system | Returns |
+|---|---|---|---|
+| `spatialTilePlan` | Uniform grid | CRS units | `SpatExtent` |
+| `pixelTilePlan` | Uniform grid | Pixel indices | `integer[4]` |
+| `pointTilePlan` | Arbitrary centers | CRS or pixel | `SpatExtent` or `integer[4]` |
+
+The choice between them is usually straightforward:
+
+- Working with **georeferenced rasters or vectors** where coordinates are in
+  CRS units? → `spatialTilePlan`
+- Working with **images** where pixel position is what matters? → `pixelTilePlan`
+- Have a **list of locations** (cell centroids, tissue landmarks, sample sites)
+  you want to extract fixed-size patches around? → `pointTilePlan`
+
+---
+
+## `spatialTilePlan`
+
+`spatialTilePlan` divides a spatial extent into a uniform grid. Tile bounds are
+returned as `SpatExtent` objects, which route directly into terra's spatial
+windowing operations downstream.
+
+Two things are required: an extent and a tile count request. The actual number
+of tiles generated will be at least the requested number, arranged as squarely
+as possible given the extent's aspect ratio.
+
+```{r spat-setup}
+tp_spat <- tilePlan("spatial")
+ext(tp_spat) <- c(0, 1000, 0, 600)
+length(tp_spat) <- 12
+
+tp_spat
+dim(tp_spat)   # nrow x ncol of the tile grid
+length(tp_spat)
+```
+
+```{r spat-plot, fig.width=5, fig.height=3}
+plot(tp_spat)
+```
+
+Padding expands each tile's bounds equally on all four sides at extraction
+time. The plan's own extent is not affected.
+
+```{r spat-pad, fig.width=5, fig.height=3}
+tp_spat_padded <- tp_spat + 20
+plot(tp_spat_padded, alpha = 0.4)
+```
+
+Indexing returns `SpatExtent` objects:
+
+```{r spat-index}
+tp_spat[1]       # first tile
+tp_spat[2, 3]    # row 2, col 3
+```
+
+**When to use:** Any workflow where tile bounds need to be expressed in the
+same coordinate system as the data — georeferenced rasters, `sf` geometries,
+`SpatVector` objects.
+
+---
+
+## `pixelTilePlan`
+
+`pixelTilePlan` divides an image into a uniform grid of pixel-exact tiles.
+Bounds are returned as `integer[4]` vectors `c(xmin, xmax, ymin, ymax)` in
+pixel index space, routing into array/matrix subsetting operations downstream.
+
+Three things are required: the image's pixel dimensions (`$pxdims`), and the
+tile height and width in pixels (`$nrows`, `$ncols`).
+
+```{r px-setup}
+tp_px <- tilePlan("pixel")
+tp_px$pxdims <- c(500, 800)  # 500 rows x 800 cols
+tp_px$nrows  <- 100
+tp_px$ncols  <- 100
+
+tp_px
+dim(tp_px)
+length(tp_px)
+```
+
+```{r px-plot, fig.width=5, fig.height=3}
+plot(tp_px)
+```
+
+Padding for pixel plans is automatically zeroed against the top-left corner
+so that padded tiles on the first row/column do not produce negative indices.
+
+```{r px-pad}
+tp_px_padded <- tp_px + 5
+tp_px_padded[1]   # first tile: note xmin/ymin are still >= 1
+tp_px[1]          # unpadded for comparison
+```
+
+**When to use:** Image processing workflows where there is no meaningful
+spatial coordinate system — microscopy images, whole slide images, general
+computer vision pipelines. Also the right choice when pixel-exact tile
+boundaries matter (e.g. ML patch extraction where tile size must match model
+input exactly).
+
+---
+
+## `pointTilePlan`
+
+`pointTilePlan` places tiles at arbitrary (x, y) centers with a uniform tile
+size. Instead of dividing a grid, you provide the locations and the plan
+generates one tile per point.
+
+This is the right choice when the locations to sample are known in advance —
+cell nuclei, tissue landmarks, sampling sites, feature centroids — rather than
+when you want to exhaust a spatial extent.
+
+```{r pt-setup}
+tp_pt <- pointTilePlan("spatial")
+tp_pt$coords <- cbind(
+    x = c(100, 250, 400, 550),
+    y = c(80,  200, 150, 300)
+)
+tp_pt$width  <- 80
+tp_pt$height <- 80
+
+tp_pt
+length(tp_pt)
+```
+
+```{r pt-plot, fig.width=5, fig.height=4}
+plot(tp_pt)
+```
+
+### Coordinate modes: `input` and `output`
+
+`pointTilePlan` has two independent coordinate mode settings:
+
+- **`$input`** — the space in which `$coords`, `$width`, and `$height` are
+  expressed. Either `"spatial"` (CRS units) or `"pixel"` (pixel indices).
+- **`$output`** — the type of bounds returned by `getTile()`. Either
+  `"spatial"` (returns `SpatExtent`) or `"pixel"` (returns `integer[4]`).
+
+By default `output` matches `input`. Setting them to different values enables
+cross-mode conversion.
+
+The four combinations:
+
+| `input` | `output` | Meaning |
+|---|---|---|
+| `"spatial"` | `"spatial"` | Spatial coords in, spatial bounds out |
+| `"pixel"` | `"pixel"` | Pixel coords in, pixel bounds out |
+| `"spatial"` | `"pixel"` | Define location in CRS, extract pixel bounds |
+| `"pixel"` | `"spatial"` | Define location in pixel space, extract spatial bounds |
+
+### Same-mode: spatial → spatial
+
+The most common case. Coordinates, tile dims, and padding are all in CRS
+units. No raster metadata needed.
+
+```{r pt-s2s}
+tp_s2s <- pointTilePlan(input = "spatial", output = "spatial")
+tp_s2s$coords <- cbind(x = c(200, 500), y = c(150, 400))
+tp_s2s$width  <- 100
+tp_s2s$height <- 100
+
+tp_s2s[1]  # SpatExtent
+```
+
+### Same-mode: pixel → pixel
+
+Coordinates and tile dims are in pixel indices. Useful when sampling locations
+come from image analysis (e.g. detected cell positions in pixel space).
+
+```{r pt-p2p}
+tp_p2p <- pointTilePlan(input = "pixel", output = "pixel")
+tp_p2p$coords <- cbind(x = c(120L, 340L, 560L), y = c(80L, 200L, 310L))
+tp_p2p$width  <- 51L   # odd dims give unambiguous center pixel
+tp_p2p$height <- 51L
+
+tp_p2p[2]  # integer[4]: col_min, col_max, row_min, row_max
+```
+
+Note: tile dims should be **odd** in pixel mode. With even dimensions,
+`center ± width/2` is non-integer and bounds are truncated, biasing left/up.
+
+### Cross-mode: spatial → pixel and pixel → spatial
+
+Cross-mode conversion requires knowing how CRS coordinates map to pixel
+indices, which means the raster's resolution and extent must be known.
+
+When `getTile()` is called with a `SpatRaster`, this information is injected
+automatically from the raster — you do not need to set `$rast_dims` or
+`$extent` manually. They are only needed for standalone `[i]` calls without
+a raster (e.g. plotting, validation).
+
+```{r pt-cross-standalone}
+f <- system.file("ex/elev.tif", package = "terra")
+r <- rast(f)
+
+# spatial input, pixel output
+tp_s2p <- pointTilePlan(input = "spatial", output = "pixel")
+tp_s2p$coords <- cbind(
+    x = c(5.8, 6.0, 6.2),
+    y = c(49.9, 50.0, 50.1)
+)
+tp_s2p$width  <- 0.1
+tp_s2p$height <- 0.1
+
+# Standalone [i] requires rast_dims and extent:
+tp_s2p$rast_dims <- dim(r)[1:2]
+tp_s2p$extent    <- as.vector(ext(r))
+
+tp_s2p[1]  # pixel bounds, derived from spatial coords + raster metadata
+```
+
+```{r pt-cross-getTile}
+# At getTile() time, rast_dims and extent are injected from the raster
+# automatically — no manual setup needed for the extraction step:
+tiles <- getTile(r, tp_s2p, i = 1:3)
+dim(tiles[[1]])
+```
+
+---
+
+## Choosing tile size and padding
+
+Regardless of plan type, two practical considerations apply:
+
+**Tile size** controls the memory footprint per tile and, for ML workflows,
+should be chosen with the model's expected input dimensions in mind. Larger
+tiles mean fewer total tiles but more memory per tile. If the natural tile
+size does not match the model input exactly, `terra::aggregate()` or
+`terra::resample()` can resize the extracted tile inside `FUN` rather than
+constraining the tile plan itself.
+
+**Padding** handles edge effects for operations that need spatial context
+(convolutions, focal statistics, buffer-based extractions). The pad value
+should be at least as large as the half-width of the operation's kernel or
+buffer radius. For pixel plans, padding is zero-clamped at image edges; for
+spatial plans it extends beyond the plan extent, so shrink the plan extent
+inward by the pad amount if you want tiles to stay within the data boundary.
+
+```{r padding-demo, fig.width=5, fig.height=3}
+tp_demo <- tilePlan("spatial")
+ext(tp_demo) <- c(0, 100, 0, 100)
+length(tp_demo) <- 9
+
+# shrink extent inward by pad so padded tiles stay within data
+pad <- 3
+ext(tp_demo) <- ext(tp_demo) - pad
+tp_demo <- tp_demo + pad
+
+plot(tp_demo, alpha = 0.4)
+plot(ext(c(0, 100, 0, 100)), add = TRUE, border = "red")
+```
+
+---
+
+## Summary
+
+```{r summary-table, echo=FALSE}
+knitr::kable(data.frame(
+    Plan = c("spatialTilePlan", "pixelTilePlan", "pointTilePlan"),
+    `Tile placement` = c("Uniform grid", "Uniform grid", "Arbitrary centers"),
+    `Coordinate system` = c("CRS units", "Pixel indices", "CRS or pixel (configurable)"),
+    `Returns` = c("SpatExtent", "integer[4]", "SpatExtent or integer[4]"),
+    `Primary use case` = c(
+        "Georeferenced rasters and vectors",
+        "Images, ML patch extraction",
+        "Sampling at known locations"
+    ),
+    check.names = FALSE
+))
+```

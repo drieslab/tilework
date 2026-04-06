@@ -12,3 +12,5 @@ pkgdown
 
 /.quarto/
 **/*.quarto_ipynb
+/doc/
+/Meta/
