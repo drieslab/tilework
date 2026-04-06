@@ -118,23 +118,19 @@ pti$nrows <- 250             # Pixels per tile (height)
 
 **`pointTilePlan`**
 
-For tiling centered on arbitrary (x, y) coordinates with uniform tile dimensions:
-
-- Place tiles at known locations rather than a uniform grid
-- Supports spatial (CRS units) or pixel coordinate modes via `input` / `output` toggles
-- Cross-mode conversion (CRS ↔ pixel) resolved automatically at extraction time when a raster is provided
+For tiling centered on arbitrary (x, y) coordinates with uniform tile dimensions.
+Tile placement is driven by supplied point locations rather than a grid.
+Supports spatial (CRS units) or pixel coordinate modes via `input` / `output`
+toggles; cross-mode conversion is resolved automatically at extraction time when
+a raster is provided. See the
+[tile plans vignette](https://drieslab.github.io/tilework/articles/tile-plans.html)
+for full coverage of coordinate modes.
 
 ```r
 tp <- pointTilePlan("spatial")
 tp$coords <- cbind(x = c(10, 50, 90), y = c(10, 50, 90))
-tp$width  <- 20   # tile width in CRS units
-tp$height <- 20   # tile height in CRS units
-
-length(tp)  # 3 tiles
-tp[2]       # bounds for tile centered on (50, 50)
-
-# Extract tile data from a raster
-tiles <- getTile(r, tp, i = 1:3)
+tp$width  <- 20
+tp$height <- 20
 ```
 
 **`tileGroup`**
@@ -159,10 +155,12 @@ tg[, 2]     # Second tile from active group
 
 **`tileIterator`**
 
-Stateful iterator for streaming processing. These can be created on top of 
-`tilePlan` and `tileGroup` (when an active group is set) inheriting structures.
-Use with `tileApply()` for distribution of batches across parallelized {future} 
-workers.
+Stateful iterator for streaming processing. Created on top of `tilePlan` or
+`tileGroup` (with `$active` set). Use with `tileApply()` for distribution of
+batches across parallelized {future} workers. A `setup_FUN` argument initializes
+per-worker state (e.g. loading a model) once before batch processing begins —
+see the [ML vignette](https://drieslab.github.io/tilework/articles/patch-feature-extraction.html)
+for a worked example.
 
 ```r
 # Create iterator for batch processing
@@ -345,7 +343,7 @@ all_tiles <- tp[]
 
 1. Memory Management: Use appropriate tile sizes to balance memory usage and processing efficiency
 2. Pad Planning: Consider padding requirements for spatial operations to avoid edge effects
-3. Parallel Strategy: Choose between parallelizing across groups vs. within groups based on your workflow
+3. Parallel Strategy: Choose between parallelizing across groups vs. within groups based on your workflow — see the [decision table](https://drieslab.github.io/tilework/articles/tile-orchestration.html#choosing-between-them) in the orchestration vignette
 4. Metadata Usage: Leverage metadata for complex processing logic and file organization
 5. Iterator Patterns: Use stateful iterators for streaming large datasets that don't fit in memory
 
@@ -414,6 +412,12 @@ Dependencies
 * **terra**: Spatial data handling and raster operations
 * **checkmate**: Input validation
 * **future.apply**: Parallel processing support
+
+# Vignettes
+
+- [Choosing and Creating a Tile Plan](https://drieslab.github.io/tilework/articles/tile-plans.html) — when to use `spatialTilePlan`, `pixelTilePlan`, or `pointTilePlan`; coordinate modes; padding
+- [Selecting, Grouping, and Iterating Tiles](https://drieslab.github.io/tilework/articles/tile-orchestration.html) — `tileSelection`, `tileGroup` parallelization strategies, `tileIterator` streaming and per-worker setup
+- [Patch-Based Feature Extraction for Machine Learning](https://drieslab.github.io/tilework/articles/patch-feature-extraction.html) — end-to-end ML inference pipeline using `tileGroup`, `tileIterator`, and `setup_FUN`
 
 # Contributing
 Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
