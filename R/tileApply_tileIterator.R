@@ -184,7 +184,7 @@ setMethod(
                 }
 
                 # setup get params
-                gt_params_x <- c(list(x, iter), list(get_params = get_params_x), list(...))
+                gt_params_x <- c(list(x, iter), get_params_x, list(...))
 
                 # collect results within worker
                 res <- list()
@@ -331,8 +331,8 @@ setMethod(
                 }
 
                 # setup get params (use tiles[] to use unified indices for extraction)
-                gt_params_x <- c(list(x, tiles[]), list(get_params = get_params_x), list(...))
-                gt_params_y <- c(list(y, tiles[], pad = pad_y), list(get_params = get_params_y), list(...))
+                gt_params_x <- c(list(x, tiles[]), get_params_x, list(...))
+                gt_params_y <- c(list(y, tiles[], pad = pad_y), get_params_y, list(...))
 
                 # collect results within worker
                 res <- list()

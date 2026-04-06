@@ -2,9 +2,9 @@
 % Please edit documentation in R/tileApply.R
 \name{extending_tilework}
 \alias{extending_tilework}
-\title{Extending {tilework}}
+\title{Extending \{tilework\}}
 \description{
-{tilework} provides an extensible framework for:
+\{tilework\} provides an extensible framework for:
 \itemize{
 \item \link[=tilePlan-class]{tile planning}
 \item \link[=tileGroup-class]{tile selection}
@@ -40,7 +40,7 @@ source, provided with a set of bounds information (commonly a \code{SpatExtent} 
 \section{Adding new data type support}{
 
 
-{tilework} functionalities can be extended to work with  other data
+\{tilework\} functionalities can be extended to work with  other data
 types/backends by creating a \code{\link[=getBoundedData]{getBoundedData()}} method for the data type.
 Optional additional steps:
 \itemize{

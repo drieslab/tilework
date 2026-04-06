@@ -28,8 +28,8 @@
 #' @param j **ANY except tileIterator** tile col index
 #' @param pad (optional) additional padding to apply before tile retrieval.
 #'   Useful for temporarily increasing padding without affecting `tile*` object.
-#' @param get_params list of named params to pass to underlying [getBoundedData()]
-#'   call.
+#' @param sel_params list of named params to pass to the tile `[` selection call.
+#'   Rarely needed; covers internal `[` options such as `expand_grid`.
 #' @param advance **`tileIterator` only** logical (default = TRUE). Whether to
 #'   advance the iterator.
 #' @param lyr **`SpatRaster` only** if provided, which layers/channels to include
@@ -77,21 +77,20 @@ setMethod(
 #' @export
 setMethod(
     "getTile", signature("ANY", "tilePlan"),
-    function(x, tiles, i = NULL, j, pad = NULL, get_params = list(), ...) {
+    function(x, tiles, i = NULL, j, pad = NULL, sel_params = list(), ...) {
         checkmate::assert_integerish(i)
-        checkmate::assert_list(get_params)
+        checkmate::assert_list(sel_params)
         if (!is.null(pad)) {
             checkmate::assert_numeric(pad)
             tiles <- tiles + pad
         }
         if (missing(j)) {
-            bounds_list <- tiles[i, ...]
+            bounds_list <- do.call("[", c(list(tiles, i), sel_params))
         } else {
-            bounds_list <- tiles[i, j, ...]
+            bounds_list <- do.call("[", c(list(tiles, i, j), sel_params))
         }
         lapply(bounds_list, function(b) {
-            a <- c(list(x, b), get_params)
-            do.call(getBoundedData, a)
+            do.call(getBoundedData, c(list(x, b), list(...)))
         })
     }
 )
@@ -116,13 +115,28 @@ setMethod(
 #' @export
 setMethod(
     "getTile", signature("SpatRaster", "tilePlan"),
-    function(x, tiles, lyr = NULL, extend = FALSE, fill = NA, get_params = list(), ...) {
+    function(x, tiles, lyr = NULL, extend = FALSE, fill = NA, ...) {
         checkmate::assert_integerish(lyr, null.ok = TRUE)
         checkmate::assert_flag(extend)
         if (!is.null(lyr)) x <- x[[lyr]]
-        get_params$extend <- extend
-        get_params$fill <- fill
-        callNextMethod(x, tiles, get_params = get_params, ...)
+        callNextMethod(x, tiles, extend = extend, fill = fill, ...)
+    }
+)
+
+#' @rdname getTile
+#' @export
+setMethod(
+    "getTile", signature("SpatRaster", "pointTilePlan"),
+    function(x, tiles, lyr = NULL, extend = FALSE, fill = NA, ...) {
+        checkmate::assert_integerish(lyr, null.ok = TRUE)
+        checkmate::assert_flag(extend)
+        if (!is.null(lyr)) x <- x[[lyr]]
+        # for cross-mode conversion, populate rast metadata from raster
+        if (tiles@input != tiles@output) {
+            tiles@rast_dims <- dim(x)[1:2]
+            tiles@extent <- .ext_to_num_vec(ext(x))
+        }
+        callNextMethod(x, tiles, extend = extend, fill = fill, ...)
     }
 )
 
@@ -162,7 +176,7 @@ setMethod(
         } else {
             # expand to ij pairlist then get indices of interest
             ij <- .g_index(g, i)
-            getTile(x, tiles[], i = ij[[1L]], j = ij[[2L]], expand_grid = FALSE, ...)
+            getTile(x, tiles[], i = ij[[1L]], j = ij[[2L]], sel_params = list(expand_grid = FALSE), ...)
         }
     }
 )

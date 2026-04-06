@@ -6,25 +6,20 @@
 \alias{getTile,ANY,tilePlan-method}
 \alias{getTile,character,tilePlan-method}
 \alias{getTile,SpatRaster,tilePlan-method}
+\alias{getTile,SpatRaster,pointTilePlan-method}
 \alias{getTile,ANY,tileGroup-method}
 \alias{getTile,ANY,tileIterator-method}
 \title{Get Tile}
 \usage{
 \S4method{getTile}{token,tilePlan}(x, tiles, ...)
 
-\S4method{getTile}{ANY,tilePlan}(x, tiles, i = NULL, j, pad = NULL, get_params = list(), ...)
+\S4method{getTile}{ANY,tilePlan}(x, tiles, i = NULL, j, pad = NULL, sel_params = list(), ...)
 
 \S4method{getTile}{character,tilePlan}(x, tiles, prefer = NULL, ext = NULL, ...)
 
-\S4method{getTile}{SpatRaster,tilePlan}(
-  x,
-  tiles,
-  lyr = NULL,
-  extend = FALSE,
-  fill = NA,
-  get_params = list(),
-  ...
-)
+\S4method{getTile}{SpatRaster,tilePlan}(x, tiles, lyr = NULL, extend = FALSE, fill = NA, ...)
+
+\S4method{getTile}{SpatRaster,pointTilePlan}(x, tiles, lyr = NULL, extend = FALSE, fill = NA, ...)
 
 \S4method{getTile}{ANY,tileGroup}(x, tiles, i, j, ...)
 
@@ -44,8 +39,8 @@
 \item{pad}{(optional) additional padding to apply before tile retrieval.
 Useful for temporarily increasing padding without affecting \verb{tile*} object.}
 
-\item{get_params}{list of named params to pass to underlying \code{\link[=getBoundedData]{getBoundedData()}}
-call.}
+\item{sel_params}{list of named params to pass to the tile \code{[} selection call.
+Rarely needed; covers internal \code{[} options such as \code{expand_grid}.}
 
 \item{prefer}{\strong{\code{character} filepath only} character. Hint for file reading
 (\code{"raster"} or \code{"vector"}). If provided, skips automatic type detection.}

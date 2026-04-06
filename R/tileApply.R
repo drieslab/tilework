@@ -7,9 +7,9 @@
 # docs ####
 
 #' @name extending_tilework
-#' @title Extending {tilework}
+#' @title Extending \{tilework\}
 #' @description
-#' {tilework} provides an extensible framework for:
+#' \{tilework\} provides an extensible framework for:
 #'
 #' * [tile planning][tilePlan-class]
 #' * [tile selection][tileGroup-class]
@@ -36,7 +36,7 @@
 #'
 #' @section Adding new data type support:
 #'
-#' {tilework} functionalities can be extended to work with  other data
+#' \{tilework\} functionalities can be extended to work with  other data
 #' types/backends by creating a [getBoundedData()] method for the data type.
 #' Optional additional steps:
 #'

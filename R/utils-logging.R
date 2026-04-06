@@ -45,7 +45,7 @@ getTileworkJobID <- function(advance = FALSE) {
     node <- Sys.info()[["nodename"]]
     f <- file.path(log_dir, job_id, sprintf("LOG_node=%s_pid=%s.txt", node, pid))
     if (!checkmate::test_file_exists(f)) {
-        f <- .log_create(path = f) %>%
+        f <- .log_create(path = f) |>
             normalizePath()
     }
     file(f, open = "a+") # open in 'a'ppend and reading (+) mode

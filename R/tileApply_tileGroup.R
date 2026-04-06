@@ -522,10 +522,10 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         }
         # logging ---- #
 
-        gt_params_x <- c(list(x, tiles, i = i), list(get_params = get_params_x), list(...))
+        gt_params_x <- c(list(x, tiles, i = i), get_params_x, list(...))
         tile_x <- do.call(getTile, gt_params_x)[[1L]] # returns as list
         if (!is.null(y)) {
-            gt_params_y <- c(list(y, tiles, i = i, pad = pad_y), list(get_params = get_params_y), list(...))
+            gt_params_y <- c(list(y, tiles, i = i, pad = pad_y), get_params_y, list(...))
             tile_y <- do.call(getTile, gt_params_y)[[1L]]
         }
 
@@ -571,9 +571,9 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
     tiles$active <- group
     results <- vector("list", length = length(tiles))
 
-    gt_params_x <- c(list(x, tiles), list(get_params = get_params_x), list(...))
+    gt_params_x <- c(list(x, tiles), get_params_x, list(...))
     if (!is.null(y)) {
-        gt_params_y <- c(list(y, tiles, pad = pad_y), list(get_params = get_params_y), list(...))
+        gt_params_y <- c(list(y, tiles, pad = pad_y), get_params_y, list(...))
     }
 
     for (i in seq_along(tiles)) {

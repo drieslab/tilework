@@ -289,8 +289,8 @@ setMethod("centroids", signature("pointTilePlan"), function(x, ...) {
 }
 
 .guard_tile_dims <- function(x) {
-    error_dims <- c("height", "width")[x@tile_dims > c(0L, 0L)]
-    if (length(error_dims > 0L)) {
+    error_dims <- c("height", "width")[!(x@tile_dims > c(0L, 0L))]
+    if (length(error_dims) > 0L) {
         stop(sprintf("[%s] tile %s dim(s) are not greater than zero\n %s",
             class(x),
             toString(error_dims),
@@ -322,7 +322,7 @@ setMethod("centroids", signature("pointTilePlan"), function(x, ...) {
 }
 
 # spatial-spatial
-.point_tile_bounds_s2s <- function(x, i) {
+.point_tile_bounds_s2s <- function(x, i, j) {
     .point_tile_bounds(
         xymat = x@coords,
         i = i,
@@ -331,7 +331,7 @@ setMethod("centroids", signature("pointTilePlan"), function(x, ...) {
 }
 
 # pixel-pixel
-.point_tile_bounds_p2p <- function(x, i) {
+.point_tile_bounds_p2p <- function(x, i, j) {
     .point_tile_bounds_px(
         xymat = x@coords,
         i = i,
@@ -340,7 +340,7 @@ setMethod("centroids", signature("pointTilePlan"), function(x, ...) {
 }
 
 # spatial-pixel
-.point_tile_bounds_s2p <- function(x, i) {
+.point_tile_bounds_s2p <- function(x, i, j) {
     .guard_rast_dims(x)
     .guard_ext(x)
 
@@ -362,7 +362,7 @@ setMethod("centroids", signature("pointTilePlan"), function(x, ...) {
 }
 
 # pixel-spatial
-.point_tile_bounds_p2s <- function(x, i) {
+.point_tile_bounds_p2s <- function(x, i, j) {
     .guard_rast_dims(x)
     .guard_ext(x)
 

@@ -40,7 +40,7 @@ setMethod(
                     .log_write(conn, tile_id, "pad:", tp@pad)
                 }
 
-                gt_params_x <- c(list(x, tp, i = i), list(get_params = get_params_x), list(...))
+                gt_params_x <- c(list(x, tp, i = i), get_params_x, list(...))
                 tile_data <- do.call(getTile, gt_params_x)[[1L]]
 
                 # special args injection
@@ -117,8 +117,8 @@ setMethod(
                 }
 
                 # prep args
-                gt_params_x <- c(list(x, tp, i = i), list(get_params = get_params_x), list(...))
-                gt_params_y <- c(list(y, tp, i = i, pad = pad_y), list(get_params = get_params_y), list(...))
+                gt_params_x <- c(list(x, tp, i = i), get_params_x, list(...))
+                gt_params_y <- c(list(y, tp, i = i, pad = pad_y), get_params_y, list(...))
                 # these are retrieved as list of 1
                 tile_x <- do.call(getTile, gt_params_x)[[1L]]
                 tile_y <- do.call(getTile, gt_params_y)[[1L]]
@@ -183,16 +183,11 @@ setMethod("redispatch_tileapply", signature("SpatRaster", "tileSelection"), func
     .guard_disk_terra_raster(f)
     e <- .ext_to_num_vec(ext(sig))
   
-    dgp <- list(
-        lyr = NULL, # to getTile,SpatRaster
-        prefer = "raster", # to getTile,character
-        ext = e # to getTile,character
+    callNextMethod(f, tiles,
+        default_get_params = list(
+            prefer = "raster", # to getTile,character
+            ext = e # to getTile,character
+        ),
+        ...
     )
-  
-    if (inherits(tiles@tp, "pixelTilePlan")) {
-        dgp$extend <- FALSE # to getTile,SpatRaster,pixelTilePlan
-        dgp$fill <- NA # to getTile,SpatRaster,pixelTilePlan
-    }
-  
-    callNextMethod(f, tiles, default_get_params = dgp, ...)
 })
