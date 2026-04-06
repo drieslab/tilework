@@ -284,3 +284,19 @@ setMethod("redispatch_tileapply", signature("SpatRaster", "pixelTilePlan"), func
         ...
     )
 })
+
+#' @rdname redispatch_tileapply
+#' @export
+setMethod("redispatch_tileapply", signature("SpatRaster", "pointTilePlan"), function(sig, tiles, ...) {
+    f <- terra::sources(sig)
+    f <- unique(f)
+    .guard_disk_terra_raster(f)
+    e <- .ext_to_num_vec(ext(sig))
+    callNextMethod(f, tiles,
+        default_get_params = list(
+            prefer = "raster", # to getTile,character
+            ext = e # to getTile,character
+        ),
+        ...
+    )
+})

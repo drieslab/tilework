@@ -196,10 +196,6 @@ setMethod("$", signature("pointTilePlan"), function(x, name) {
 
 # * [ ####
 
-setMethod("[", signature("pointTilePlan", i = "ANY", j = "ANY", drop = "missing"), function(x, i, j, ...) {
-    stop("[pointTilePlan] does not use `j` in indexing")
-})
-
 #' @rdname bracket
 #' @export
 setMethod(

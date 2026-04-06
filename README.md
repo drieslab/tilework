@@ -7,7 +7,7 @@ For another approach to spatially tiled computation, see: [chopin](https://githu
 
 # Features
 
-- Flexible Tiling: Support for both spatial extent-based and pixel-exact tiling
+- Flexible Tiling: Support for spatial extent-based, pixel-exact, and arbitrary point-centered tiling
 - Memory Efficient: Process tilewise or batchwise without loading entire datasets into memory
 - Stateful Iteration: Iterator patterns for streaming and batch processing
 - Parallel Processing: Built-in support for parallel execution via the {future} framework
@@ -49,7 +49,7 @@ tile_grid <- tp[1, 2:3]  # Get specific grid positions
 
 # Apply a function across tiles
 outdir <- tempdir()
-tileApply(r, tp = tp, FUN = function(x, .I) {
+tileApply(r, tiles = tp, FUN = function(x, .I) {
     writeRaster(x, file.path(outdir, sprintf("tile_%03d.tif", .I)))
 })
 ```
@@ -69,7 +69,7 @@ length(px)  # Total number of tiles
 plot(px)    # Visualize grid
 
 # Apply processing with pixel tiles
-tileApply(r, tp = px, FUN = function(x) {
+tileApply(r, tiles = px, FUN = function(x) {
     # Process each 100x100 pixel tile
     mean(values(x), na.rm = TRUE)
 })
@@ -116,6 +116,27 @@ pti$ncols <- 250             # Pixels per tile (width)
 pti$nrows <- 250             # Pixels per tile (height)
 ```
 
+**`pointTilePlan`**
+
+For tiling centered on arbitrary (x, y) coordinates with uniform tile dimensions:
+
+- Place tiles at known locations rather than a uniform grid
+- Supports spatial (CRS units) or pixel coordinate modes via `input` / `output` toggles
+- Cross-mode conversion (CRS ↔ pixel) resolved automatically at extraction time when a raster is provided
+
+```r
+tp <- pointTilePlan("spatial")
+tp$coords <- cbind(x = c(10, 50, 90), y = c(10, 50, 90))
+tp$width  <- 20   # tile width in CRS units
+tp$height <- 20   # tile height in CRS units
+
+length(tp)  # 3 tiles
+tp[2]       # bounds for tile centered on (50, 50)
+
+# Extract tile data from a raster
+tiles <- getTile(r, tp, i = 1:3)
+```
+
 **`tileGroup`**
 
 Organize tiles groups. These are created on top of `tilePlan`
@@ -160,6 +181,17 @@ while (iter$has_next) {
 
 # Reset for another pass
 iter$reset()
+```
+
+**`tileSelection`**
+
+Lazy drop = FALSE selection wrapper — preserves a subset of tile indices without materialising bounds. Useful for selecting specific tiles to process without modifying the underlying plan.
+
+```r
+# Select tiles of interest (e.g. from a spatial query)
+sel <- tp[c(1, 3, 7), drop = FALSE]
+length(sel)   # 3
+tileApply(r, tiles = sel, FUN = function(x) terra::global(x, "mean"))
 ```
 
 # Processing Data
@@ -284,7 +316,7 @@ library(future)
 plan(multisession, workers = 4)
 
 # Parallel tile processing
-results <- tileApply(r, tp = tp,
+results <- tileApply(r, tiles = tp,
     FUN = function(x) {
         # Your processing function
         mean(values(x), na.rm = TRUE)
@@ -336,7 +368,7 @@ tp <- tp + 50  # 50-unit padding
 # Process tiles in parallel
 plan(multisession, workers = 8)
 
-results <- tileApply(large_raster, tp = tp,
+results <- tileApply(large_raster, tiles = tp,
                     FUN = function(x, .I) {
                         # Apply NDVI calculation
                         ndvi <- (x[[4]] - x[[3]]) / (x[[4]] + x[[3]])
@@ -364,7 +396,7 @@ pti$ncols <- 512    # 512x512 pixel tiles
 pti$nrows <- 512
 
 # Process each tile
-texture_metrics <- tileApply(image, tp = pti,
+texture_metrics <- tileApply(image, tiles = pti,
                            FUN = function(x) {
                                # Calculate texture metrics
                                vals <- values(x)
