@@ -7,7 +7,7 @@ For another approach to spatially tiled computation, see: [chopin](https://githu
 
 # Features
 
-- Flexible Tiling: Support for spatial extent-based, pixel-exact, and arbitrary point-centered tiling
+- Flexible Tiling: Support for spatial extent-based, pixel-exact, arbitrary point-centered, and adaptive variable-size tiling
 - Memory Efficient: Process tilewise or batchwise without loading entire datasets into memory
 - Stateful Iteration: Iterator patterns for streaming and batch processing
 - Parallel Processing: Built-in support for parallel execution via the {future} framework
@@ -131,6 +131,48 @@ tp <- pointTilePlan("spatial")
 tp$coords <- cbind(x = c(10, 50, 90), y = c(10, 50, 90))
 tp$width  <- 20
 tp$height <- 20
+```
+
+**`freeTilePlan`**
+
+For explicit per-tile bounds with no required uniformity in size or spacing.
+Tile bounds are the canonical representation — positions are not computed from
+a formula. The primary use case is adaptive decomposition via `quadtreePlan()`,
+where high-density regions use small tiles and sparse regions use large tiles.
+
+```r
+# Manual bounds (e.g. from an external partitioning algorithm)
+tp <- freeTilePlan()
+tp$bounds <- rbind(
+    c(0,  50,  0,  50),
+    c(50, 100, 0,  50),
+    c(0,  50,  50, 100),
+    c(50, 100, 50, 100)
+)
+length(tp)  # 4
+tp[2]       # SpatExtent for tile 2
+plot(tp)
+```
+
+`quadtreePlan()` builds a `freeTilePlan` automatically by iteratively
+subdividing tiles whose `FUN` value exceeds a threshold:
+
+```r
+# Points on disk (required for tileApply dispatch)
+pts <- terra::vect(f, proxy = TRUE)
+
+tp_start <- tilePlan("spatial")
+ext(tp_start) <- ext(pts)
+length(tp_start) <- 4L
+
+fp <- quadtreePlan(
+    x             = pts,
+    tiles         = tp_start,
+    FUN           = function(x) length(x),  # point count per tile
+    threshold     = 500L,
+    min_tile_size = 1
+)
+plot(fp)
 ```
 
 **`tileGroup`**
@@ -415,7 +457,7 @@ Dependencies
 
 # Vignettes
 
-- [Choosing and Creating a Tile Plan](https://drieslab.github.io/tilework/articles/tile-plans.html) — when to use `spatialTilePlan`, `pixelTilePlan`, or `pointTilePlan`; coordinate modes; padding
+- [Choosing and Creating a Tile Plan](https://drieslab.github.io/tilework/articles/tile-plans.html) — when to use `spatialTilePlan`, `pixelTilePlan`, `pointTilePlan`, or `freeTilePlan`; adaptive quadtree decomposition; coordinate modes; padding
 - [Selecting, Grouping, and Iterating Tiles](https://drieslab.github.io/tilework/articles/tile-orchestration.html) — `tileSelection`, `tileGroup` parallelization strategies, `tileIterator` streaming and per-worker setup
 - [Patch-Based Feature Extraction for Machine Learning](https://drieslab.github.io/tilework/articles/patch-feature-extraction.html) — end-to-end ML inference pipeline using `tileGroup`, `tileIterator`, and `setup_FUN`
 

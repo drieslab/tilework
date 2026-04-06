@@ -36,9 +36,10 @@ BugReports: https://github.com/drieslab/tilework/issues
 Collate: 
     'classes.R'
     'generics.R'
-    'getBoundedData.R'
     'package_imports.R'
     'tilePlan.R'
+    'freeTilePlan.R'
+    'getBoundedData.R'
     'pointTilePlan.R'
     'getTile.R'
     'parallel.R'

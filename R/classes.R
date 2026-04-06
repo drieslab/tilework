@@ -145,6 +145,29 @@ setClass(
     )
 )
 
+#' @name freeTilePlan-class
+#' @title Free Tile Plan
+#' @description
+#' Tile plan defined by explicit per-tile bounds with no required uniformity
+#' in size or spacing. The bounds matrix is the canonical representation —
+#' there is no center-plus-dims formula. Always returns `SpatExtent` from
+#' `[i]`. Primary use case is as the output of adaptive spatial decomposition
+#' algorithms such as quadtrees on vector/point data.
+#' @slot bounds matrix. n x 4 matrix: xmin, xmax, ymin, ymax (one row per tile).
+#' @note `@tile_dims` is intentionally not populated. Any method that requires
+#'   uniform tile dimensions will not work with `freeTilePlan`.
+#' @exportClass freeTilePlan
+setClass(
+    "freeTilePlan",
+    contains = "tilePlan",
+    slots = list(
+        bounds = "matrix"
+    ),
+    prototype = list(
+        bounds = matrix(numeric(0), ncol = 4L)
+    )
+)
+
 #' @name tileGroup-class
 #' @title Tile Group
 #' @description
