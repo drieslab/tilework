@@ -1,5 +1,6 @@
 #' @name parallel_params
 #' @title Parallel Processing Parameters
+#' @family parallel settings
 #' @description
 #' [tileApply()] is parallelized through either [future.apply::future_lapply()]
 #' (default) or [BiocParallel::bplapply()].

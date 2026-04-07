@@ -8,6 +8,7 @@
 
 #' @name extending_tilework
 #' @title Extending \{tilework\}
+#' @family tilework extension
 #' @description
 #' \{tilework\} provides an extensible framework for:
 #'
@@ -59,6 +60,7 @@ NULL
 
 #' @name redispatch_tileapply
 #' @title *Developer API* Redispatch for `tileApply()`
+#' @family tilework extension
 #' @description
 #' Utility generic for modifying `tileApply()` calls for streamlining extension
 #' with new datatypes and forcing datatype-specific handling to be added in the
@@ -165,6 +167,7 @@ NULL
 
 #' @name tileApply
 #' @title Apply Functions Across Spatial Tiles
+#' @family tile processing
 #' @description
 #' **For more useful params info and examples, see the Tile Processing Methods
 #' section.**

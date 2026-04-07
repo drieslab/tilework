@@ -2,6 +2,7 @@
 
 #' @name tileApply-group
 #' @title Hierarchical Tile Group Processing
+#' @family tile processing
 #' @description
 #' Apply functions across tileGroup objects with control over parallelization
 #' strategy. Useful when tiles are organized into logical groups that need

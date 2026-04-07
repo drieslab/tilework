@@ -9,6 +9,7 @@
 
 #' @name freeTilePlan-class
 #' @title Free Tile Plan
+#' @family tile plans
 #' @description
 #' Tile plan defined by explicit per-tile bounds with no required uniformity
 #' in size or spacing. Unlike grid-based plans, the bounds matrix is the
@@ -159,6 +160,7 @@ setMethod("centroids", signature("freeTilePlan"), function(x, ...) {
 
 #' @name freeTilePlan
 #' @title Create a Fluid Tile Plan
+#' @family tile plans
 #' @description
 #' Create an empty `freeTilePlan`. Populate bounds via `$bounds<-` or use
 #' [quadtreePlan()] to generate adaptive bounds automatically.
@@ -196,6 +198,7 @@ setMethod(
 
 #' @name quadtreePlan
 #' @title Adaptive Quadtree Tile Plan
+#' @family tile plans
 #' @description
 #' Iteratively subdivides a spatial extent into a `freeTilePlan` by running
 #' `FUN` on each tile and splitting any tile whose value exceeds `threshold`.

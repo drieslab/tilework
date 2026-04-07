@@ -10,6 +10,7 @@ setClass("tilework", contains = "VIRTUAL")
 
 #' @name token-class
 #' @title `token` Class
+#' @family tilework extension
 #' @description
 #' Utility class for flagging a piece of data as being ready for processing.
 #' This is internal machinery that is mainly useful for forcing S4 dispatch to
@@ -28,6 +29,7 @@ setClass("token",
 
 #' @name tilePlan-class
 #' @title Tile Plan
+#' @family tile plans
 #' @description
 #' Virtual parent class for tile planning objects. These objects are for planning
 #' tiles/patches of data to be operated over. Objects are indexable across
@@ -70,6 +72,7 @@ setClass(
 
 #' @name pointTilePlan-class
 #' @title Point Tile Plan
+#' @family tile plans
 #' @description
 #' Tile plan where each tile is centered on a user-supplied (x, y) coordinate
 #' with a uniform tile size. The center coordinates are primary — for use cases
@@ -147,6 +150,7 @@ setClass(
 
 #' @name freeTilePlan-class
 #' @title Free Tile Plan
+#' @family tile plans
 #' @description
 #' Tile plan defined by explicit per-tile bounds with no required uniformity
 #' in size or spacing. The bounds matrix is the canonical representation —
@@ -170,6 +174,7 @@ setClass(
 
 #' @name tileGroup-class
 #' @title Tile Group
+#' @family tile orchestration
 #' @description
 #' Class for organizing tiles into hierarchical groups for batch processing.
 #' Groups can represent spatial regions, processing stages, or any logical
@@ -192,6 +197,7 @@ setClass("tileGroup",
 
 #' @name tileIterator-class
 #' @title tileIterator
+#' @family tile orchestration
 #' @description
 #' A stateful iterator that progresses through tiles of an underlying `tilePlan`
 #' (or `tileGroup` if `$active` is set) object upon every call to `$next_batch()`
