@@ -163,14 +163,8 @@ neighboring leaf tiles back together when their combined value stays ≤
 # Points on disk (required for tileApply dispatch)
 pts <- terra::vect(f, proxy = TRUE)
 
-tp_start <- tilePlan("spatial")
-ext(tp_start) <- ext(pts)
-length(tp_start) <- 4L
-
 fp <- quadtreePlan(
     x             = pts,
-    tiles         = tp_start,
-    FUN           = function(x) length(x),  # point count per tile
     threshold     = 500L,
     min_tile_size = 1
 )

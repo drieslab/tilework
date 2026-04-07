@@ -6,8 +6,8 @@
 \usage{
 quadtreePlan(
   x,
-  tiles,
-  FUN,
+  tiles = NULL,
+  FUN = nrow,
   threshold,
   min_tile_size = NULL,
   max_depth = 10L,
@@ -55,16 +55,8 @@ f <- tempfile(fileext = "shp")
 terra::writeVector(pts, f)
 pts <- terra::vect(f, proxy = TRUE)
 
-# coarse starting grid
-tp <- tilePlan("spatial")
-ext(tp) <- ext(pts)
-length(tp) <- 4L
-
-fp <- quadtreePlan(
-    x            = pts,
-    tiles        = tp,
-    FUN          = function(x) length(x),  # point count per tile
-    threshold    = 500L,
+fp <- quadtreePlan(pts,
+    threshold = 500L,
     min_tile_size = 1
 )
 plot(fp)

@@ -227,27 +227,31 @@ setMethod(
 #' terra::writeVector(pts, f)
 #' pts <- terra::vect(f, proxy = TRUE)
 #'
-#' # coarse starting grid
-#' tp <- tilePlan("spatial")
-#' ext(tp) <- ext(pts)
-#' length(tp) <- 4L
-#'
-#' fp <- quadtreePlan(
-#'     x            = pts,
-#'     tiles        = tp,
-#'     FUN          = function(x) length(x),  # point count per tile
-#'     threshold    = 500L,
+#' fp <- quadtreePlan(pts,
+#'     threshold = 500L,
 #'     min_tile_size = 1
 #' )
 #' plot(fp)
 #' # plot with items per tile
 #' plot(fp, values = "n_records")
 #' @export
-quadtreePlan <- function(x, tiles, FUN, threshold, min_tile_size = NULL,
-                          max_depth = 10L, ...) {
+quadtreePlan <- function(x, 
+    tiles = NULL, 
+    FUN = nrow, 
+    threshold,
+    min_tile_size = NULL,
+    max_depth = 10L, 
+    ...) {
     checkmate::assert_number(threshold)
     checkmate::assert_number(min_tile_size, null.ok = TRUE)
     checkmate::assert_integerish(max_depth, len = 1L, lower = 1L)
+  
+    if (is.null(tiles)) {
+        # default coarse starting grid
+        tiles <- tilePlan("spatial")
+        ext(tiles) <- ext(x)
+        length(tiles) <- 4L
+    }
 
     # collect starting extents
     pending <- tiles[]
