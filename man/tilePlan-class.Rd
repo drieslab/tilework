@@ -39,6 +39,7 @@ Other tile plans:
 \code{\link{pointTilePlan-class}},
 \code{\link{quadtreePlan}()},
 \code{\link{spatialTilePlan-class}},
-\code{\link{tilePlan}}
+\code{\link{tilePlan}},
+\code{\link{tilework-class}}
 }
 \concept{tile plans}
