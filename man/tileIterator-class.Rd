@@ -19,4 +19,11 @@ position handling is also internalized within.
 
 \seealso{
 \link{tileIterator}
+
+Other tile orchestration: 
+\code{\link{iterSplit}()},
+\code{\link{tileGroup}},
+\code{\link{tileGroup-class}},
+\code{\link{tileIterator}}
 }
+\concept{tile orchestration}

@@ -150,4 +150,12 @@ unlink(outdir, recursive = TRUE)
 }
 \seealso{
 \link{tileApply}, \code{\link[=tilePlan]{tilePlan()}}, \linkS4class{spatialTilePlan}, \linkS4class{pixelTilePlan}
+
+Other tile processing: 
+\code{\link{getBoundedData}()},
+\code{\link{getTile}()},
+\code{\link{tileApply}()},
+\code{\link{tileApply-group}},
+\code{\link{tileApply-iterator}}
 }
+\concept{tile processing}

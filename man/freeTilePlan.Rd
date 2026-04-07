@@ -15,4 +15,14 @@ Create an empty \code{freeTilePlan}. Populate bounds via \verb{$bounds<-} or use
 }
 \seealso{
 \code{\link[=quadtreePlan]{quadtreePlan()}}, \linkS4class{freeTilePlan}
+
+Other tile plans: 
+\code{\link{freeTilePlan-class}},
+\code{\link{pixelTilePlan-class}},
+\code{\link{pointTilePlan-class}},
+\code{\link{quadtreePlan}()},
+\code{\link{spatialTilePlan-class}},
+\code{\link{tilePlan}},
+\code{\link{tilePlan-class}}
 }
+\concept{tile plans}

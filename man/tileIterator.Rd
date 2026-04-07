@@ -196,4 +196,11 @@ siter
 }
 \seealso{
 \linkS4class{tileIterator}
+
+Other tile orchestration: 
+\code{\link{iterSplit}()},
+\code{\link{tileGroup}},
+\code{\link{tileGroup-class}},
+\code{\link{tileIterator-class}}
 }
+\concept{tile orchestration}

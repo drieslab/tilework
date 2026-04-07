@@ -206,3 +206,9 @@ The \code{x} and \code{y} routing and \code{token} coercion are also handled by 
 \code{redispatch_tileapply(ANY, ANY)} method.
 }
 
+\seealso{
+Other tilework extension: 
+\code{\link{extending_tilework}},
+\code{\link{token-class}}
+}
+\concept{tilework extension}

@@ -64,3 +64,23 @@ length(tp)
 tp[2]
 plot(tp)
 }
+\seealso{
+Other tile plans: 
+\code{\link{freeTilePlan}},
+\code{\link{pixelTilePlan-class}},
+\code{\link{pointTilePlan-class}},
+\code{\link{quadtreePlan}()},
+\code{\link{spatialTilePlan-class}},
+\code{\link{tilePlan}},
+\code{\link{tilePlan-class}}
+
+Other tile plans: 
+\code{\link{freeTilePlan}},
+\code{\link{pixelTilePlan-class}},
+\code{\link{pointTilePlan-class}},
+\code{\link{quadtreePlan}()},
+\code{\link{spatialTilePlan-class}},
+\code{\link{tilePlan}},
+\code{\link{tilePlan-class}}
+}
+\concept{tile plans}

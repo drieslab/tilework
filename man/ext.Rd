@@ -31,3 +31,14 @@ tilePlan if \verb{ext<-()} and \code{SpatExtent} if \code{ext()}
 \description{
 Get and set a spatial extent.
 }
+\seealso{
+Other tile* methods: 
+\code{\link{arith}},
+\code{\link{bracket}},
+\code{\link{centroids}()},
+\code{\link{dim}()},
+\code{\link{dollar}},
+\code{\link{double_bracket}},
+\code{\link{plot}()}
+}
+\concept{tile* methods}

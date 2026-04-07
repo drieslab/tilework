@@ -53,3 +53,14 @@ dim(x)
 nrow(x)
 ncol(x)
 }
+\seealso{
+Other tile* methods: 
+\code{\link{arith}},
+\code{\link{bracket}},
+\code{\link{centroids}()},
+\code{\link{dollar}},
+\code{\link{double_bracket}},
+\code{\link{ext}()},
+\code{\link{plot}()}
+}
+\concept{tile* methods}

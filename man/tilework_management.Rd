@@ -31,3 +31,8 @@ the ID.
 A set of utilities to control the location and naming of automated tilework
 outputs. These are mostly to do with logging information right now.
 }
+\seealso{
+Other parallel settings: 
+\code{\link{parallel_params}}
+}
+\concept{parallel settings}

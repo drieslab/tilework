@@ -93,3 +93,14 @@ x$fname <- sprintf("tile_\%03d.tif", x$tile)
 x[[5]]
 x[[1:3]]$fname
 }
+\seealso{
+Other tile plans: 
+\code{\link{freeTilePlan}},
+\code{\link{freeTilePlan-class}},
+\code{\link{pointTilePlan-class}},
+\code{\link{quadtreePlan}()},
+\code{\link{spatialTilePlan-class}},
+\code{\link{tilePlan}},
+\code{\link{tilePlan-class}}
+}
+\concept{tile plans}

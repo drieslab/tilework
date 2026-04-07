@@ -173,4 +173,12 @@ str(results)
 }
 \seealso{
 \link{tileApply}, \code{\link[=tileGroup]{tileGroup()}}, \linkS4class{tileGroup}
+
+Other tile processing: 
+\code{\link{getBoundedData}()},
+\code{\link{getTile}()},
+\code{\link{tileApply}()},
+\code{\link{tileApply-iterator}},
+\code{\link{tileApply-plan}}
 }
+\concept{tile processing}
