@@ -3,9 +3,10 @@ setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 #' @name tilework-class
 #' @title Virtual Class `tilework`
 #' @description
-#' The `tilework` class is a class contained by all actual classes in the
+#' The `tilework` class is a class contained by all tile* classes in the
 #' \pkg{tilework} package. It is a "virtual" class.
 #' @exportClass tilework
+#' @family tile plans
 setClass("tilework", contains = "VIRTUAL")
 
 #' @name token-class

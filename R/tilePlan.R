@@ -8,6 +8,7 @@
 #' Dummy documentation for things that do not need much explanation (like
 #' `show` methods)
 #' @param object object
+#' @keywords internal
 NULL
 
 #' @title Get Tile Centroids
