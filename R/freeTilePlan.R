@@ -249,8 +249,10 @@ quadtreePlan <- function(x,
     if (is.null(tiles)) {
         # default coarse starting grid
         tiles <- tilePlan("spatial")
-        ext(tiles) <- ext(x)
-        length(tiles) <- 4L
+        e <- ext(tiles) <- ext(x)
+        erange <- range(e)
+        start_len <- round(max(erange) / min(erange)) * 4L
+        length(tiles) <- start_len
     }
 
     # collect starting extents
