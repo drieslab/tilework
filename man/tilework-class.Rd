@@ -5,6 +5,18 @@
 \alias{tilework-class}
 \title{Virtual Class \code{tilework}}
 \description{
-The \code{tilework} class is a class contained by all actual classes in the
+The \code{tilework} class is a class contained by all tile* classes in the
 \pkg{tilework} package. It is a "virtual" class.
 }
+\seealso{
+Other tile plans: 
+\code{\link{freeTilePlan}},
+\code{\link{freeTilePlan-class}},
+\code{\link{pixelTilePlan-class}},
+\code{\link{pointTilePlan-class}},
+\code{\link{quadtreePlan}()},
+\code{\link{spatialTilePlan-class}},
+\code{\link{tilePlan}},
+\code{\link{tilePlan-class}}
+}
+\concept{tile plans}

@@ -27,3 +27,4 @@
 Dummy documentation for things that do not need much explanation (like
 \code{show} methods)
 }
+\keyword{internal}

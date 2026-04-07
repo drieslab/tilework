@@ -71,6 +71,7 @@ Other tile plans:
 \code{\link{pointTilePlan-class}},
 \code{\link{spatialTilePlan-class}},
 \code{\link{tilePlan}},
-\code{\link{tilePlan-class}}
+\code{\link{tilePlan-class}},
+\code{\link{tilework-class}}
 }
 \concept{tile plans}
