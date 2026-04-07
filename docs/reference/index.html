@@ -60,41 +60,33 @@
     </div>
 
     <table class="ref-index"><colgroup><col class="alias"><col class="title"></colgroup><tbody><tr><th colspan="2">
-          <h2 id="all-functions">All functions <a href="#all-functions" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p>
+          <h2 id="tile-plans">Tile Plans <a href="#tile-plans" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Classes and constructors for planning how data is divided into tiles.</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="arith.html">`+`(<i>&lt;tilePlan&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`-`(<i>&lt;tilePlan&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`+`(<i>&lt;pointTilePlan&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`+`(<i>&lt;pixelTilePlan&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`+`(<i>&lt;tileGroup&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`-`(<i>&lt;tileGroup&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`+`(<i>&lt;tileSelection&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`-`(<i>&lt;tileSelection&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> </p>
+          <p><code><a href="tilework-class.html">tilework-class</a></code> </p>
         </td>
-        <td><p>Tile Pads</p></td>
+        <td><p>Virtual Class <code>tilework</code></p></td>
       </tr><tr><td>
-          <p><code><a href="bracket.html">`[`</a></code> <code><a href="bracket.html">`[&lt;-`(<i>&lt;tileIterator&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> </p>
+          <p><code><a href="tilePlan.html">tilePlan()</a></code> </p>
         </td>
-        <td><p>Extract Bounds from Tile Object</p></td>
+        <td><p>Create a Tiling Plan</p></td>
       </tr><tr><td>
-          <p><code><a href="centroids.html">centroids(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="centroids.html">centroids(<i>&lt;freeTilePlan&gt;</i>)</a></code> <code><a href="centroids.html">centroids(<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="centroids.html">centroids(<i>&lt;pixelTilePlan&gt;</i>)</a></code> <code><a href="centroids.html">centroids(<i>&lt;spatialTilePlan&gt;</i>)</a></code> </p>
+          <p><code><a href="tilePlan-class.html">tilePlan-class</a></code> </p>
         </td>
-        <td><p>Get Tile Centroids</p></td>
+        <td><p>Tile Plan</p></td>
       </tr><tr><td>
-          <p><code><a href="dim.html">nrow(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dim.html">ncol(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dim.html">length(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dim.html">dim(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dim.html">`length&lt;-`(<i>&lt;spatialTilePlan&gt;</i>)</a></code> <code><a href="dim.html">length(<i>&lt;tileIterator&gt;</i>)</a></code> </p>
+          <p><code><a href="spatialTilePlan-class.html">spatialTilePlan-class</a></code> <code><a href="spatialTilePlan-class.html">spatialTilePlan</a></code> </p>
         </td>
-        <td><p>Tile Plan Array Characteristics</p></td>
+        <td><p>Spatial Tile Plan</p></td>
       </tr><tr><td>
-          <p><code><a href="dollar.html">`$&lt;-`(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$`(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$&lt;-`(<i>&lt;freeTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$`(<i>&lt;freeTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$&lt;-`(<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$`(<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$&lt;-`(<i>&lt;pixelTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$`(<i>&lt;pixelTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$&lt;-`(<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="dollar.html">`$`(<i>&lt;tileGroup&gt;</i>)</a></code> </p>
+          <p><code><a href="pixelTilePlan-class.html">pixelTilePlan-class</a></code> <code><a href="pixelTilePlan-class.html">pixelTilePlan</a></code> </p>
         </td>
-        <td><p>Get and Set Tile Metadata and Params</p></td>
+        <td><p>Pixel Tile Plan</p></td>
       </tr><tr><td>
-          <p><code><a href="double_bracket.html">`[[`(<i>&lt;tilePlan&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="double_bracket.html">`[[`(<i>&lt;tilePlan&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="double_bracket.html">`[[`(<i>&lt;tilePlan&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="double_bracket.html">`[[`(<i>&lt;tilePlan&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="double_bracket.html">`[[&lt;-`(<i>&lt;tilePlan&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="double_bracket.html">`[[&lt;-`(<i>&lt;tilePlan&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;character&gt;</i>)</a></code> </p>
+          <p><code><a href="pointTilePlan-class.html">pointTilePlan()</a></code> </p>
         </td>
-        <td><p>Get and set metadata</p></td>
-      </tr><tr><td>
-          <p><code><a href="ext.html">ext(<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="ext.html">`ext&lt;-`(<i>&lt;pointTilePlan&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="ext.html">ext(<i>&lt;spatialTilePlan&gt;</i>)</a></code> <code><a href="ext.html">`ext&lt;-`(<i>&lt;spatialTilePlan&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Get and Set Spatial Extent</p></td>
-      </tr><tr><td>
-          <p><code><a href="extending_tilework.html">extending_tilework</a></code> </p>
-        </td>
-        <td><p>Extending {tilework}</p></td>
+        <td><p>Point Tile Plan</p></td>
       </tr><tr><td>
           <p><code><a href="freeTilePlan-class.html">freeTilePlan-class</a></code> </p>
         </td>
@@ -104,62 +96,50 @@
         </td>
         <td><p>Create a Fluid Tile Plan</p></td>
       </tr><tr><td>
-          <p><code><a href="getBoundedData.html">getBoundedData(<i>&lt;SpatRaster&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="getBoundedData.html">getBoundedData(<i>&lt;SpatRaster&gt;</i>,<i>&lt;SpatExtent&gt;</i>)</a></code> <code><a href="getBoundedData.html">getBoundedData(<i>&lt;SpatVectorProxy&gt;</i>,<i>&lt;SpatExtent&gt;</i>)</a></code> </p>
+          <p><code><a href="quadtreePlan.html">quadtreePlan()</a></code> </p>
         </td>
-        <td><p>Get Data Within Bounds</p></td>
+        <td><p>Adaptive Quadtree Tile Plan</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="tile-methods">tile* Methods <a href="#tile-methods" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Common accessors and operators that work across all tile* objects.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="bracket.html">`[`</a></code> <code><a href="bracket.html">`[&lt;-`(<i>&lt;tileIterator&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extract Bounds from Tile Object</p></td>
       </tr><tr><td>
-          <p><code><a href="getTile.html">getTile(<i>&lt;token&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;ANY&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;character&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;SpatRaster&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;SpatRaster&gt;</i>,<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;ANY&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;ANY&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> </p>
+          <p><code><a href="double_bracket.html">`[[`(<i>&lt;tilePlan&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="double_bracket.html">`[[`(<i>&lt;tilePlan&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="double_bracket.html">`[[`(<i>&lt;tilePlan&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="double_bracket.html">`[[`(<i>&lt;tilePlan&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="double_bracket.html">`[[&lt;-`(<i>&lt;tilePlan&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="double_bracket.html">`[[&lt;-`(<i>&lt;tilePlan&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;character&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Get Tile</p></td>
+        <td><p>Get and set metadata</p></td>
       </tr><tr><td>
-          <p><code><a href="hidden_docs.html">show(<i>&lt;freeTilePlan&gt;</i>)</a></code> <code><a href="hidden_docs.html">show(<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="hidden_docs.html">show(<i>&lt;pixelTilePlan&gt;</i>)</a></code> <code><a href="hidden_docs.html">show(<i>&lt;spatialTilePlan&gt;</i>)</a></code> <code><a href="hidden_docs.html">show(<i>&lt;tileIterator&gt;</i>)</a></code> </p>
+          <p><code><a href="dollar.html">`$&lt;-`(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$`(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$&lt;-`(<i>&lt;freeTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$`(<i>&lt;freeTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$&lt;-`(<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$`(<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$&lt;-`(<i>&lt;pixelTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$`(<i>&lt;pixelTilePlan&gt;</i>)</a></code> <code><a href="dollar.html">`$&lt;-`(<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="dollar.html">`$`(<i>&lt;tileGroup&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Hidden Docs</p></td>
+        <td><p>Get and Set Tile Metadata and Params</p></td>
       </tr><tr><td>
-          <p><code><a href="iterSplit.html">iterSplit(<i>&lt;tileIterator&gt;</i>)</a></code> </p>
+          <p><code><a href="arith.html">`+`(<i>&lt;tilePlan&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`-`(<i>&lt;tilePlan&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`+`(<i>&lt;pointTilePlan&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`+`(<i>&lt;pixelTilePlan&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`+`(<i>&lt;tileGroup&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`-`(<i>&lt;tileGroup&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`+`(<i>&lt;tileSelection&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="arith.html">`-`(<i>&lt;tileSelection&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Create multiple walkers from a single iterator</p></td>
+        <td><p>Tile Pads</p></td>
       </tr><tr><td>
-          <p><code><a href="parallel_params.html">getTileworkParMethod()</a></code> <code><a href="parallel_params.html">setTileworkParMethod()</a></code> </p>
+          <p><code><a href="ext.html">ext(<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="ext.html">`ext&lt;-`(<i>&lt;pointTilePlan&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="ext.html">ext(<i>&lt;spatialTilePlan&gt;</i>)</a></code> <code><a href="ext.html">`ext&lt;-`(<i>&lt;spatialTilePlan&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Parallel Processing Parameters</p></td>
+        <td><p>Get and Set Spatial Extent</p></td>
       </tr><tr><td>
-          <p><code><a href="pixelTilePlan-class.html">pixelTilePlan-class</a></code> <code><a href="pixelTilePlan-class.html">pixelTilePlan</a></code> </p>
+          <p><code><a href="dim.html">nrow(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dim.html">ncol(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dim.html">length(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dim.html">dim(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="dim.html">`length&lt;-`(<i>&lt;spatialTilePlan&gt;</i>)</a></code> <code><a href="dim.html">length(<i>&lt;tileIterator&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Pixel Tile Plan</p></td>
+        <td><p>Tile Plan Array Characteristics</p></td>
       </tr><tr><td>
           <p><code><a href="plot.html">plot(<i>&lt;tilePlan&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;freeTilePlan&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;pointTilePlan&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="plot.html">plot(<i>&lt;pixelTilePlan&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> </p>
         </td>
         <td><p>Plot a <code>tilePlan</code></p></td>
       </tr><tr><td>
-          <p><code><a href="pointTilePlan-class.html">pointTilePlan()</a></code> </p>
+          <p><code><a href="centroids.html">centroids(<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="centroids.html">centroids(<i>&lt;freeTilePlan&gt;</i>)</a></code> <code><a href="centroids.html">centroids(<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="centroids.html">centroids(<i>&lt;pixelTilePlan&gt;</i>)</a></code> <code><a href="centroids.html">centroids(<i>&lt;spatialTilePlan&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Point Tile Plan</p></td>
-      </tr><tr><td>
-          <p><code><a href="quadtreePlan.html">quadtreePlan()</a></code> </p>
-        </td>
-        <td><p>Adaptive Quadtree Tile Plan</p></td>
-      </tr><tr><td>
-          <p><code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;freeTilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;ANY&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;character&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatVector&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;ANY&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;character&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatVector&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;ANY&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;character&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatVector&gt;</i>,<i>&lt;spatialTilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;spatialTilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;pixelTilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;character&gt;</i>,<i>&lt;tileSelection&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatVector&gt;</i>,<i>&lt;tileSelection&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;tileSelection&gt;</i>)</a></code> </p>
-        </td>
-        <td><p><em>Developer API</em> Redispatch for <code><a href="../reference/tileApply.html">tileApply()</a></code></p></td>
-      </tr><tr><td>
-          <p><code><a href="spatialTilePlan-class.html">spatialTilePlan-class</a></code> <code><a href="spatialTilePlan-class.html">spatialTilePlan</a></code> </p>
-        </td>
-        <td><p>Spatial Tile Plan</p></td>
-      </tr><tr><td>
-          <p><code><a href="tileApply-group.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="tileApply-group.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;token&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Hierarchical Tile Group Processing</p></td>
-      </tr><tr><td>
-          <p><code><a href="tileApply-iterator.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> <code><a href="tileApply-iterator.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;token&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Streaming Tile Processing with Iterators</p></td>
-      </tr><tr><td>
-          <p><code><a href="tileApply-plan.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="tileApply-plan.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;token&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="tileApply-plan.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;tileSelection&gt;</i>)</a></code> <code><a href="tileApply-plan.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;token&gt;</i>,<i>&lt;tileSelection&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Basic Tile Processing</p></td>
-      </tr><tr><td>
+        <td><p>Get Tile Centroids</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="tile-orchestration">Tile Orchestration <a href="#tile-orchestration" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Tools for grouping, selecting, and iterating over tiles.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
           <p><code><a href="tileGroup-class.html">tileGroup-class</a></code> </p>
         </td>
         <td><p>Tile Group</p></td>
@@ -176,21 +156,61 @@
         </td>
         <td><p>Stateful Tile Iterator</p></td>
       </tr><tr><td>
-          <p><code><a href="tilePlan-class.html">tilePlan-class</a></code> </p>
+          <p><code><a href="iterSplit.html">iterSplit(<i>&lt;tileIterator&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Tile Plan</p></td>
+        <td><p>Create multiple walkers from a single iterator</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="tile-processing">Tile Processing <a href="#tile-processing" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Apply functions across tiles and extract data by bounds.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="tileApply.html">tileApply(<i>&lt;ANY&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="tileApply.html">tileApply(<i>&lt;ANY&gt;</i>,<i>&lt;ANY&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="tileApply.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;ANY&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Apply Functions Across Spatial Tiles</p></td>
       </tr><tr><td>
-          <p><code><a href="tilePlan.html">tilePlan()</a></code> </p>
+          <p><code><a href="tileApply-plan.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="tileApply-plan.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;token&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="tileApply-plan.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;tileSelection&gt;</i>)</a></code> <code><a href="tileApply-plan.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;token&gt;</i>,<i>&lt;tileSelection&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Create a Tiling Plan</p></td>
+        <td><p>Basic Tile Processing</p></td>
       </tr><tr><td>
-          <p><code><a href="tilework-class.html">tilework-class</a></code> </p>
+          <p><code><a href="tileApply-group.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="tileApply-group.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;token&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Virtual Class <code>tilework</code></p></td>
+        <td><p>Hierarchical Tile Group Processing</p></td>
+      </tr><tr><td>
+          <p><code><a href="tileApply-iterator.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> <code><a href="tileApply-iterator.html">tileApply(<i>&lt;token&gt;</i>,<i>&lt;token&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Streaming Tile Processing with Iterators</p></td>
+      </tr><tr><td>
+          <p><code><a href="getTile.html">getTile(<i>&lt;token&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;ANY&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;character&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;SpatRaster&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;SpatRaster&gt;</i>,<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;ANY&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="getTile.html">getTile(<i>&lt;ANY&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Get Tile</p></td>
+      </tr><tr><td>
+          <p><code><a href="getBoundedData.html">getBoundedData(<i>&lt;SpatRaster&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="getBoundedData.html">getBoundedData(<i>&lt;SpatRaster&gt;</i>,<i>&lt;SpatExtent&gt;</i>)</a></code> <code><a href="getBoundedData.html">getBoundedData(<i>&lt;SpatVectorProxy&gt;</i>,<i>&lt;SpatExtent&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Get Data Within Bounds</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="parallel-settings">Parallel Settings <a href="#parallel-settings" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Configure parallelization backends and logging.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="parallel_params.html">getTileworkParMethod()</a></code> <code><a href="parallel_params.html">setTileworkParMethod()</a></code> </p>
+        </td>
+        <td><p>Parallel Processing Parameters</p></td>
       </tr><tr><td>
           <p><code><a href="tilework_management.html">getTileworkLogDir()</a></code> <code><a href="tilework_management.html">setTileworkLogDir()</a></code> <code><a href="tilework_management.html">getTileworkJobID()</a></code> </p>
         </td>
         <td><p>tilework management</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="tilework-extension">tilework Extension <a href="#tilework-extension" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Developer API for extending tilework to new data types.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="extending_tilework.html">extending_tilework</a></code> </p>
+        </td>
+        <td><p>Extending {tilework}</p></td>
+      </tr><tr><td>
+          <p><code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;freeTilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;ANY&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;character&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatVector&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;ANY&gt;</i>,<i>&lt;tileGroup&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;character&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatVector&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;ANY&gt;</i>,<i>&lt;tileIterator&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;character&gt;</i>,<i>&lt;tilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatVector&gt;</i>,<i>&lt;spatialTilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;spatialTilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;pixelTilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;pointTilePlan&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;character&gt;</i>,<i>&lt;tileSelection&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatVector&gt;</i>,<i>&lt;tileSelection&gt;</i>)</a></code> <code><a href="redispatch_tileapply.html">redispatch_tileapply(<i>&lt;SpatRaster&gt;</i>,<i>&lt;tileSelection&gt;</i>)</a></code> </p>
+        </td>
+        <td><p><em>Developer API</em> Redispatch for <code><a href="../reference/tileApply.html">tileApply()</a></code></p></td>
       </tr><tr><td>
           <p><code><a href="token-class.html">`[`(<i>&lt;token&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> </p>
         </td>

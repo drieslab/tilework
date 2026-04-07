@@ -114,7 +114,7 @@
 <h2 id="spatial-tiling">Spatial Tiling<a class="anchor" aria-label="anchor" href="#spatial-tiling"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://drieslab.github.io/tilework/" class="external-link">tilework</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://drieslab.github.io/tilework/">tilework</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/" class="external-link">terra</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Load a raster</span></span>
@@ -199,7 +199,7 @@
 <span><span class="va">pti</span><span class="op">$</span><span class="va">ncols</span> <span class="op">&lt;-</span> <span class="fl">250</span>             <span class="co"># Pixels per tile (width)</span></span>
 <span><span class="va">pti</span><span class="op">$</span><span class="va">nrows</span> <span class="op">&lt;-</span> <span class="fl">250</span>             <span class="co"># Pixels per tile (height)</span></span></code></pre></div>
 <p><strong><code>pointTilePlan</code></strong></p>
-<p>For tiling centered on arbitrary (x, y) coordinates with uniform tile dimensions. Tile placement is driven by supplied point locations rather than a grid. Supports spatial (CRS units) or pixel coordinate modes via <code>input</code> / <code>output</code> toggles; cross-mode conversion is resolved automatically at extraction time when a raster is provided. See the <a href="https://drieslab.github.io/tilework/articles/tile-plans.html" class="external-link">tile plans vignette</a> for full coverage of coordinate modes.</p>
+<p>For tiling centered on arbitrary (x, y) coordinates with uniform tile dimensions. Tile placement is driven by supplied point locations rather than a grid. Supports spatial (CRS units) or pixel coordinate modes via <code>input</code> / <code>output</code> toggles; cross-mode conversion is resolved automatically at extraction time when a raster is provided. See the <a href="https://drieslab.github.io/tilework/articles/tile-plans.html">tile plans vignette</a> for full coverage of coordinate modes.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tp</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pointTilePlan-class.html">pointTilePlan</a></span><span class="op">(</span><span class="st">"spatial"</span><span class="op">)</span></span>
 <span><span class="va">tp</span><span class="op">$</span><span class="va">coords</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">50</span>, <span class="fl">90</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">50</span>, <span class="fl">90</span><span class="op">)</span><span class="op">)</span></span>
@@ -246,7 +246,7 @@
 <span><span class="fu"><a href="reference/dim.html">length</a></span><span class="op">(</span><span class="va">tg</span><span class="op">)</span>  <span class="co"># Returns length of active group</span></span>
 <span><span class="va">tg</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>     <span class="co"># Second tile from active group</span></span></code></pre></div>
 <p><strong><code>tileIterator</code></strong></p>
-<p>Stateful iterator for streaming processing. Created on top of <code>tilePlan</code> or <code>tileGroup</code> (with <code>$active</code> set). Use with <code><a href="reference/tileApply.html">tileApply()</a></code> for distribution of batches across parallelized {future} workers. A <code>setup_FUN</code> argument initializes per-worker state (e.g. loading a model) once before batch processing begins — see the <a href="https://drieslab.github.io/tilework/articles/patch-feature-extraction.html" class="external-link">ML vignette</a> for a worked example.</p>
+<p>Stateful iterator for streaming processing. Created on top of <code>tilePlan</code> or <code>tileGroup</code> (with <code>$active</code> set). Use with <code><a href="reference/tileApply.html">tileApply()</a></code> for distribution of batches across parallelized {future} workers. A <code>setup_FUN</code> argument initializes per-worker state (e.g. loading a model) once before batch processing begins — see the <a href="https://drieslab.github.io/tilework/articles/patch-feature-extraction.html">ML vignette</a> for a worked example.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create iterator for batch processing</span></span>
 <span><span class="va">iter</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tileIterator.html">tileIterator</a></span><span class="op">(</span><span class="va">tp</span>, batch_size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
@@ -425,7 +425,7 @@
 <ol style="list-style-type: decimal">
 <li>Memory Management: Use appropriate tile sizes to balance memory usage and processing efficiency</li>
 <li>Pad Planning: Consider padding requirements for spatial operations to avoid edge effects</li>
-<li>Parallel Strategy: Choose between parallelizing across groups vs. within groups based on your workflow — see the <a href="https://drieslab.github.io/tilework/articles/tile-orchestration.html#choosing-between-them" class="external-link">decision table</a> in the orchestration vignette</li>
+<li>Parallel Strategy: Choose between parallelizing across groups vs. within groups based on your workflow — see the <a href="https://drieslab.github.io/tilework/articles/tile-orchestration.html#choosing-between-them">decision table</a> in the orchestration vignette</li>
 <li>Metadata Usage: Leverage metadata for complex processing logic and file organization</li>
 <li>Iterator Patterns: Use stateful iterators for streaming large datasets that don’t fit in memory</li>
 </ol>
@@ -502,11 +502,11 @@
 </h1>
 <ul>
 <li>
-<a href="https://drieslab.github.io/tilework/articles/tile-plans.html" class="external-link">Choosing and Creating a Tile Plan</a> — when to use <code>spatialTilePlan</code>, <code>pixelTilePlan</code>, <code>pointTilePlan</code>, or <code>freeTilePlan</code>; adaptive quadtree decomposition; coordinate modes; padding</li>
+<a href="https://drieslab.github.io/tilework/articles/tile-plans.html">Choosing and Creating a Tile Plan</a> — when to use <code>spatialTilePlan</code>, <code>pixelTilePlan</code>, <code>pointTilePlan</code>, or <code>freeTilePlan</code>; adaptive quadtree decomposition; coordinate modes; padding</li>
 <li>
-<a href="https://drieslab.github.io/tilework/articles/tile-orchestration.html" class="external-link">Selecting, Grouping, and Iterating Tiles</a> — <code>tileSelection</code>, <code>tileGroup</code> parallelization strategies, <code>tileIterator</code> streaming and per-worker setup</li>
+<a href="https://drieslab.github.io/tilework/articles/tile-orchestration.html">Selecting, Grouping, and Iterating Tiles</a> — <code>tileSelection</code>, <code>tileGroup</code> parallelization strategies, <code>tileIterator</code> streaming and per-worker setup</li>
 <li>
-<a href="https://drieslab.github.io/tilework/articles/patch-feature-extraction.html" class="external-link">Patch-Based Feature Extraction for Machine Learning</a> — end-to-end ML inference pipeline using <code>tileGroup</code>, <code>tileIterator</code>, and <code>setup_FUN</code>
+<a href="https://drieslab.github.io/tilework/articles/patch-feature-extraction.html">Patch-Based Feature Extraction for Machine Learning</a> — end-to-end ML inference pipeline using <code>tileGroup</code>, <code>tileIterator</code>, and <code>setup_FUN</code>
 </li>
 </ul>
 </div>
