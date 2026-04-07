@@ -6,9 +6,7 @@ inst/doc
 .git_old
 .vscode/*
 .Rprofile
-docs
 codecov.yml
-pkgdown
 
 /.quarto/
 **/*.quarto_ipynb

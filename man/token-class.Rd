@@ -6,11 +6,7 @@
 \alias{[,token,missing,missing,missing-method}
 \title{\code{token} Class}
 \usage{
-# Flag as being ready for processing
-x <- as(letters, "token")
-
-# Retrieve wrapped data
-x[]
+\S4method{[}{token,missing,missing,missing}(x, i, j, ..., drop = TRUE)
 }
 \description{
 Utility class for flagging a piece of data as being ready for processing.
@@ -27,3 +23,10 @@ extending methods for \code{tileApply()} where this utility class is used.
 \item{\code{data}}{ANY. The wrapped data object.}
 }}
 
+\examples{
+# Flag as being ready for processing
+x <- as(letters, "token")
+
+# Retrieve wrapped data
+x[]
+}
