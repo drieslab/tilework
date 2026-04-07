@@ -5,6 +5,7 @@
 
 #' @name getTile
 #' @title Get Tile
+#' @family tile processing
 #' @description
 #' Get specific tile(s) from the data based on a `tile*` object. Indexing via
 #' `i` and `j` params is used to select the tile(s) to get, in a manner similar

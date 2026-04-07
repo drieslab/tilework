@@ -2,6 +2,7 @@
 
 #' @title Stateful Tile Iterator
 #' @name tileIterator
+#' @family tile orchestration
 #' @description
 #' Create a stateful iterator that maintains an internal position and yields batches
 #' of tiles on demand. Uses closures for serializable stateful behavior without
@@ -474,6 +475,7 @@ tileIterator <- function(tiles = NULL, position = 0, bound = NULL, batch_size = 
 
 #' @name iterSplit
 #' @title Create multiple walkers from a single iterator
+#' @family tile orchestration
 #' @description
 #' Utility function to create multiple independent walkers for parallel processing.
 #' Each iterator will have the same underlying iterator but independent state.

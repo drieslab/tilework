@@ -1,5 +1,6 @@
 #' @name tileGroup
 #' @title Create a Tile Group
+#' @family tile orchestration
 #' @description
 #' Organize tiles from a tilePlan into hierarchical groups for batch processing.
 #' Groups can represent spatial regions, processing stages, or any logical

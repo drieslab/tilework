@@ -12,6 +12,7 @@ NULL
 
 #' @title Get Tile Centroids
 #' @name centroids
+#' @family tile* methods
 #' @description
 #' Get the centroids of the tiles. For spatialTilePlan, these will be returned
 #' as `SpatVector` centroids. For non-spatial plans like pixelTileGrid, this
@@ -33,6 +34,7 @@ NULL
 
 #' @title Get and Set Tile Metadata and Params
 #' @name dollar
+#' @family tile* methods
 #' @description
 #' Get and set tile metadata. Some params can also be modified with
 #' this operator, for example the `$pad` value or `$pxdims`, `$ncols`, or
@@ -57,6 +59,7 @@ NULL
 
 #' @name plot
 #' @title Plot a `tilePlan`
+#' @family tile* methods
 #' @description
 #' Plot and preview the tile plan. This is likely to be very slow if there are
 #' a lot of tiles (in the neighborhood of >10,000)
@@ -80,6 +83,7 @@ NULL
 #' @name dim
 #' @title Tile Plan Array Characteristics
 #' @aliases nrow ncol length length<-
+#' @family tile* methods
 #' @description
 #' Get dimension characteristics of the `tilePlan` tiling plan. These
 #' produce information on how the tiles are arrayed in rows `nrow()`, cols `ncol()`,
@@ -104,6 +108,7 @@ NULL
 #' @name bracket
 #' @aliases `[`
 #' @title Extract Bounds from Tile Object
+#' @family tile* methods
 #' @description
 #' Get a set of tile bounds from a `tile*` object. Values are always returned as
 #' a `list`, even when length one to reduce surprises with `lapply()` usage.
@@ -142,6 +147,7 @@ NULL
 #' @name double_bracket
 #' @aliases `[[`
 #' @title Get and set metadata
+#' @family tile* methods
 #' @description
 #' `[[` can be used to get the table of metadata for a specific tile.
 #' @param x `tilePlan`
@@ -166,6 +172,7 @@ setMethod("centroids", signature("tilePlan"), function(x, fun = function(x) x, o
 
 #' @name arith
 #' @title Tile Pads
+#' @family tile* methods
 #' @description
 #' Tile padding extends the bounds of the tile beyond the region that
 #' they are initially planned for by an equal amount on all 4 sides. This can
@@ -208,6 +215,7 @@ NULL
 #' @name ext
 #' @title Get and Set Spatial Extent
 #' @aliases ext<-
+#' @family tile* methods
 #' @description
 #' Get and set a spatial extent.
 #' @param x `tilePlan`
@@ -218,6 +226,7 @@ NULL
 
 #' @name tilePlan
 #' @title Create a Tiling Plan
+#' @family tile plans
 #' @param type character. One of `"spatial"`, `"pixel"`. Type of plan to create.
 #' @param ... additional params to pass to `new()` call.
 #' @examples

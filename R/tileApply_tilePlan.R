@@ -4,6 +4,7 @@
 
 #' @name tileApply-plan
 #' @title Basic Tile Processing
+#' @family tile processing
 #' @description
 #' Apply functions across `tilePlan`-inheriting objects.
 #'

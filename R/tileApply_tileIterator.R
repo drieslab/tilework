@@ -2,6 +2,7 @@
 
 #' @name tileApply-iterator
 #' @title Streaming Tile Processing with Iterators
+#' @family tile processing
 #' @description
 #' Apply functions using tileIterator objects for memory-constrained batch
 #' processing. Ideal for very large datasets or when you need fine control

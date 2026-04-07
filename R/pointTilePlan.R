@@ -8,6 +8,7 @@
 #' @name pointTilePlan-class
 #' @title Point Tile Plan
 #' @aliases pointTilePlan
+#' @family tile plans
 #' @description
 #' Utility class for tiling centered on arbitrary (x, y) coordinates with a
 #' uniform tile size. Unlike grid-based tile plans, tile placement is driven

@@ -1,5 +1,6 @@
 #' @name tilework_management
 #' @title tilework management
+#' @family parallel settings
 #' @description
 #' A set of utilities to control the location and naming of automated tilework
 #' outputs. These are mostly to do with logging information right now.
@@ -38,7 +39,7 @@ getTileworkJobID <- function(advance = FALSE) {
 }
 
 # Create an active file connection object to the logfile to
-#' write to. Opens it in mode "a+" which allows both appending and reading.
+# write to. Opens it in mode "a+" which allows both appending and reading.
 .log_conn <- function(log_dir = getTileworkLogDir(), job_id) {
     checkmate::assert_character(job_id)
     pid <- Sys.getpid()

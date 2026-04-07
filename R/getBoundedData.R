@@ -4,6 +4,7 @@
 
 #' @name getBoundedData
 #' @title Get Data Within Bounds
+#' @family tile processing
 #' @description
 #' Subset or otherwise make available only the data that is within the provided
 #' bounds. Accepted bounds types depends on the data.
