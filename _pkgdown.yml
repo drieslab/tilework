@@ -4,6 +4,7 @@ reference:
   - title: Tile Plans
     desc: Classes and constructors for planning how data is divided into tiles.
     contents:
+      - tilework-class
       - tilePlan
       - tilePlan-class
       - spatialTilePlan-class
