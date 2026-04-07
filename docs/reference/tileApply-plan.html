@@ -198,7 +198,13 @@ spatial context of <code>y</code></p></dd>
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p><a href="tileApply.html">tileApply</a>, <code><a href="tilePlan.html">tilePlan()</a></code>, <a href="spatialTilePlan-class.html">spatialTilePlan</a>, <a href="pixelTilePlan-class.html">pixelTilePlan</a></p></div>
+    <div class="dont-index"><p><a href="tileApply.html">tileApply</a>, <code><a href="tilePlan.html">tilePlan()</a></code>, <a href="spatialTilePlan-class.html">spatialTilePlan</a>, <a href="pixelTilePlan-class.html">pixelTilePlan</a></p>
+<p>Other tile processing:
+<code><a href="getBoundedData.html">getBoundedData()</a></code>,
+<code><a href="getTile.html">getTile()</a></code>,
+<code><a href="tileApply.html">tileApply()</a></code>,
+<code><a href="tileApply-group.html">tileApply-group</a></code>,
+<code><a href="tileApply-iterator.html">tileApply-iterator</a></code></p></div>
     </div>
 
     <div id="ref-examples">
@@ -289,16 +295,16 @@ spatial context of <code>y</code></p></dd>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span>   options("tilework.bpparam" = BiocParallel::SnowParam())</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span>   To silence this warning, set options("tilework.warn_sequential" = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//Rtmpg6bHDT/tiles/tile_001.tif"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmprJIqn6/tiles/tile_001.tif"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//Rtmpg6bHDT/tiles/tile_002.tif"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmprJIqn6/tiles/tile_002.tif"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//Rtmpg6bHDT/tiles/tile_003.tif"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmprJIqn6/tiles/tile_003.tif"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//Rtmpg6bHDT/tiles/tile_004.tif"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmprJIqn6/tiles/tile_004.tif"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">outdir</span><span class="op">)</span></span></span>
