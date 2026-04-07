@@ -76,5 +76,13 @@ filter accordingly.
 }
 \seealso{
 \link{tileApply-plan}, \link{tileApply-group}, \link{tileApply-iterator}
+
+Other tile processing: 
+\code{\link{getBoundedData}()},
+\code{\link{getTile}()},
+\code{\link{tileApply-group}},
+\code{\link{tileApply-iterator}},
+\code{\link{tileApply-plan}}
 }
+\concept{tile processing}
 \keyword{internal}

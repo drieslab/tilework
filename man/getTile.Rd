@@ -99,4 +99,12 @@ b2 <- getTile(r, iter) # get second batch of 3...
 }
 \seealso{
 \code{\link[=getBoundedData]{getBoundedData()}}
+
+Other tile processing: 
+\code{\link{getBoundedData}()},
+\code{\link{tileApply}()},
+\code{\link{tileApply-group}},
+\code{\link{tileApply-iterator}},
+\code{\link{tileApply-plan}}
 }
+\concept{tile processing}

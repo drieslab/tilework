@@ -20,4 +20,14 @@ tilePlan("pixel")
 }
 \seealso{
 \link{spatialTilePlan} and \link{pixelTilePlan} classes
+
+Other tile plans: 
+\code{\link{freeTilePlan}},
+\code{\link{freeTilePlan-class}},
+\code{\link{pixelTilePlan-class}},
+\code{\link{pointTilePlan-class}},
+\code{\link{quadtreePlan}()},
+\code{\link{spatialTilePlan-class}},
+\code{\link{tilePlan-class}}
 }
+\concept{tile plans}

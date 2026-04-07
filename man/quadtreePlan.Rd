@@ -63,3 +63,14 @@ plot(fp)
 # plot with items per tile
 plot(fp, values = "n_records")
 }
+\seealso{
+Other tile plans: 
+\code{\link{freeTilePlan}},
+\code{\link{freeTilePlan-class}},
+\code{\link{pixelTilePlan-class}},
+\code{\link{pointTilePlan-class}},
+\code{\link{spatialTilePlan-class}},
+\code{\link{tilePlan}},
+\code{\link{tilePlan-class}}
+}
+\concept{tile plans}

@@ -48,4 +48,14 @@ spat[[1]]
 }
 \seealso{
 \link{dollar}
+
+Other tile* methods: 
+\code{\link{arith}},
+\code{\link{bracket}},
+\code{\link{centroids}()},
+\code{\link{dim}()},
+\code{\link{dollar}},
+\code{\link{ext}()},
+\code{\link{plot}()}
 }
+\concept{tile* methods}

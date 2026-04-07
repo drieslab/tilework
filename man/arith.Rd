@@ -76,3 +76,14 @@ px <- px + 5
 plot(px)
 px[1:3]
 }
+\seealso{
+Other tile* methods: 
+\code{\link{bracket}},
+\code{\link{centroids}()},
+\code{\link{dim}()},
+\code{\link{dollar}},
+\code{\link{double_bracket}},
+\code{\link{ext}()},
+\code{\link{plot}()}
+}
+\concept{tile* methods}

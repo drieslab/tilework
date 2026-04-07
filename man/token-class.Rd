@@ -30,3 +30,9 @@ x <- as(letters, "token")
 # Retrieve wrapped data
 x[]
 }
+\seealso{
+Other tilework extension:
+\code{\link{extending_tilework}},
+\code{\link{redispatch_tileapply,SpatRaster,freeTilePlan-method}}
+}
+\concept{tilework extension}

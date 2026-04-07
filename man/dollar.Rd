@@ -62,3 +62,14 @@ x$test
 tile_ext <- x[5][[1]]
 attr(tile_ext, "test")
 }
+\seealso{
+Other tile* methods: 
+\code{\link{arith}},
+\code{\link{bracket}},
+\code{\link{centroids}()},
+\code{\link{dim}()},
+\code{\link{double_bracket}},
+\code{\link{ext}()},
+\code{\link{plot}()}
+}
+\concept{tile* methods}

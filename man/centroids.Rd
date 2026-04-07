@@ -45,3 +45,14 @@ ext(x) <- c(0, 100, 0, 100)
 length(x) <- 9
 centroids(x)
 }
+\seealso{
+Other tile* methods: 
+\code{\link{arith}},
+\code{\link{bracket}},
+\code{\link{dim}()},
+\code{\link{dollar}},
+\code{\link{double_bracket}},
+\code{\link{ext}()},
+\code{\link{plot}()}
+}
+\concept{tile* methods}

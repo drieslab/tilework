@@ -31,4 +31,14 @@ plan parameters, avoiding overhead with large amounts of tiles.
 \linkS4class{spatialTilePlan} and \linkS4class{pixelTilePlan} for
 concrete classes dealing with spatial and pixel-exact tiling respectively.
 \code{\link[=tilePlan]{tilePlan()}} for creation of these objects.
+
+Other tile plans: 
+\code{\link{freeTilePlan}},
+\code{\link{freeTilePlan-class}},
+\code{\link{pixelTilePlan-class}},
+\code{\link{pointTilePlan-class}},
+\code{\link{quadtreePlan}()},
+\code{\link{spatialTilePlan-class}},
+\code{\link{tilePlan}}
 }
+\concept{tile plans}

@@ -58,3 +58,11 @@ iter$next_batch() # no more items
 
 tg$active <- NULL # Clear active group by setting NULL
 }
+\seealso{
+Other tile orchestration: 
+\code{\link{iterSplit}()},
+\code{\link{tileGroup-class}},
+\code{\link{tileIterator}},
+\code{\link{tileIterator-class}}
+}
+\concept{tile orchestration}

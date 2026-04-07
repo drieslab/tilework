@@ -89,4 +89,12 @@ plot(extent_selection)
 }
 \seealso{
 \code{\link[=getTile]{getTile()}}
+
+Other tile processing: 
+\code{\link{getTile}()},
+\code{\link{tileApply}()},
+\code{\link{tileApply-group}},
+\code{\link{tileApply-iterator}},
+\code{\link{tileApply-plan}}
 }
+\concept{tile processing}

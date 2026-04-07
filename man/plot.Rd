@@ -43,3 +43,14 @@ plot(x)
 x$new_meta <- rev(head(letters, 9))
 plot(x, value = "new_meta")
 }
+\seealso{
+Other tile* methods: 
+\code{\link{arith}},
+\code{\link{bracket}},
+\code{\link{centroids}()},
+\code{\link{dim}()},
+\code{\link{dollar}},
+\code{\link{double_bracket}},
+\code{\link{ext}()}
+}
+\concept{tile* methods}

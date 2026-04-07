@@ -134,3 +134,23 @@ tp2$coords <- cbind(x = c(10, 20), y = c(5, 15))
 tp2$width  <- 100
 tp2$height <- 100
 }
+\seealso{
+Other tile plans: 
+\code{\link{freeTilePlan}},
+\code{\link{freeTilePlan-class}},
+\code{\link{pixelTilePlan-class}},
+\code{\link{quadtreePlan}()},
+\code{\link{spatialTilePlan-class}},
+\code{\link{tilePlan}},
+\code{\link{tilePlan-class}}
+
+Other tile plans: 
+\code{\link{freeTilePlan}},
+\code{\link{freeTilePlan-class}},
+\code{\link{pixelTilePlan-class}},
+\code{\link{quadtreePlan}()},
+\code{\link{spatialTilePlan-class}},
+\code{\link{tilePlan}},
+\code{\link{tilePlan-class}}
+}
+\concept{tile plans}

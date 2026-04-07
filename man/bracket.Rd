@@ -124,3 +124,14 @@ px[1]
 px[2, 2:3]
 px[]
 }
+\seealso{
+Other tile* methods: 
+\code{\link{arith}},
+\code{\link{centroids}()},
+\code{\link{dim}()},
+\code{\link{dollar}},
+\code{\link{double_bracket}},
+\code{\link{ext}()},
+\code{\link{plot}()}
+}
+\concept{tile* methods}

@@ -125,3 +125,14 @@ x[[1:3]]$fname
 attr(x[4][[1]], "tile")
 attr(x[4][[1]], "fname")
 }
+\seealso{
+Other tile plans: 
+\code{\link{freeTilePlan}},
+\code{\link{freeTilePlan-class}},
+\code{\link{pixelTilePlan-class}},
+\code{\link{pointTilePlan-class}},
+\code{\link{quadtreePlan}()},
+\code{\link{tilePlan}},
+\code{\link{tilePlan-class}}
+}
+\concept{tile plans}

@@ -180,4 +180,12 @@ while (large_iter$has_next) {
 }
 \seealso{
 \link{tileApply}, \code{\link[=tileIterator]{tileIterator()}}, \linkS4class{tileIterator}
+
+Other tile processing: 
+\code{\link{getBoundedData}()},
+\code{\link{getTile}()},
+\code{\link{tileApply}()},
+\code{\link{tileApply-group}},
+\code{\link{tileApply-plan}}
 }
+\concept{tile processing}
