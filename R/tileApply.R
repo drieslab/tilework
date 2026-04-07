@@ -257,7 +257,7 @@ setAs("ANY", "token", function(from) {
 })
 
 #' @rdname token-class
-#' @usage
+#' @examples
 #' # Flag as being ready for processing
 #' x <- as(letters, "token")
 #'
