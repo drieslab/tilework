@@ -279,10 +279,13 @@ The more common workflow is to let `quadtreePlan()` build the `freeTilePlan`
 automatically. It starts from a coarse `tilePlan`, applies `FUN` to each tile,
 and recursively splits tiles whose value exceeds `threshold`. Splitting
 continues until all tiles are below the threshold, smaller than
-`min_tile_size`, or `max_depth` is reached.
+`min_tile_size`, or `max_depth` is reached. After splitting, neighboring leaf
+tiles whose combined `FUN` value stays ≤ `threshold` are merged back into a
+single rectangle, reducing tile count in sparse regions.
 
 `FUN` must return a single numeric scalar per tile — typically a count,
-density, or variance.
+density, or variance. The last measured value for each leaf is stored in the
+`n_records` metadata column.
 
 ```{r quadtree-setup}
 # Synthetic two-cluster point cloud
@@ -323,8 +326,19 @@ plot(fp)
 ```
 
 High-density regions are subdivided into many small tiles; sparse regions
-remain as large tiles. The resulting `freeTilePlan` is a standard `tilePlan`
-and works with `tileApply()`, `tileIterator`, and `tileGroup` like any other.
+remain as large tiles (or are merged back if neighbors are also sparse).
+`n_records` records the point count for each leaf:
+
+```{r quadtree-nrecords}
+summary(fp$n_records)
+```
+
+```{r quadtree-nrecords-plot, fig.width=5, fig.height=5}
+plot(fp, values = "n_records")
+```
+
+The resulting `freeTilePlan` is a standard `tilePlan` and works with
+`tileApply()`, `tileIterator`, and `tileGroup` like any other.
 
 **When to use:**
 

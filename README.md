@@ -155,7 +155,9 @@ plot(tp)
 ```
 
 `quadtreePlan()` builds a `freeTilePlan` automatically by iteratively
-subdividing tiles whose `FUN` value exceeds a threshold:
+subdividing tiles whose `FUN` value exceeds a threshold, then merging
+neighboring leaf tiles back together when their combined value stays ≤
+`threshold`. The last `FUN` value per leaf is stored in `$n_records`.
 
 ```r
 # Points on disk (required for tileApply dispatch)
@@ -173,6 +175,7 @@ fp <- quadtreePlan(
     min_tile_size = 1
 )
 plot(fp)
+fp$n_records  # point count per leaf tile
 ```
 
 **`tileGroup`**

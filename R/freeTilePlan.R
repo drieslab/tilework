@@ -215,11 +215,12 @@ setMethod(
 #'   Tiles below this size are kept as leaves regardless of density.
 #' @param max_depth integer (default `10L`). Maximum subdivision depth.
 #' @param ... additional params passed to `tileApply()`.
-#' @returns A `freeTilePlan`.
+#' @returns A `freeTilePlan` with an `n_records` metadata column containing
+#'   the last `FUN` value for each leaf tile.
 #' @examples
 #' # dummy data
 #' pts <- terra::vect(cbind(x = rnorm(1000, 0, 100), y = rnorm(1000, 0, 100)))
-#' pts <- rbind(pts, terra::shift(pts, dx = 400, dy = 400))
+#' pts <- rbind(pts, terra::shift(pts, dx = 1000, dy = 1000))
 #' plot(pts)
 #' # data must exist on disk
 #' f <- tempfile(fileext = "shp")
@@ -239,6 +240,8 @@ setMethod(
 #'     min_tile_size = 1
 #' )
 #' plot(fp)
+#' # plot with items per tile
+#' plot(fp, values = "n_records")
 #' @export
 quadtreePlan <- function(x, tiles, FUN, threshold, min_tile_size = NULL,
                           max_depth = 10L, ...) {
@@ -249,6 +252,7 @@ quadtreePlan <- function(x, tiles, FUN, threshold, min_tile_size = NULL,
     # collect starting extents
     pending <- tiles[]
     leaves  <- list()
+    leaf_measures <- numeric(0L)
     depth   <- 0L
 
     while (length(pending) > 0L && depth < max_depth) {
@@ -270,6 +274,7 @@ quadtreePlan <- function(x, tiles, FUN, threshold, min_tile_size = NULL,
 
             if (measures[[i]] <= threshold || too_small) {
                 leaves <- c(leaves, list(e))
+                leaf_measures <- c(leaf_measures, measures[[i]])
             } else {
                 next_pending <- c(next_pending, .subdivide_extent(e))
             }
@@ -277,13 +282,24 @@ quadtreePlan <- function(x, tiles, FUN, threshold, min_tile_size = NULL,
         pending <- next_pending
     }
 
-    # remaining pending hit max_depth — keep as leaves
-    leaves <- c(leaves, pending)
+    # remaining pending hit max_depth — measure once more then keep as leaves
+    if (length(pending) > 0L) {
+        bounds_mat <- do.call(rbind, lapply(pending, .ext_to_num_vec))
+        fp <- freeTilePlan()
+        fp$bounds <- bounds_mat
+        pending_measures <- unlist(tileApply(x, tiles = fp, FUN = FUN, ...))
+        leaves <- c(leaves, pending)
+        leaf_measures <- c(leaf_measures, pending_measures)
+    }
 
     bounds_mat <- do.call(rbind, lapply(leaves, .ext_to_num_vec))
 
+    # merge neighboring leaf tiles whose combined count stays <= threshold
+    merged <- .merge_rect_tiles(bounds_mat, leaf_measures, threshold)
+
     fp <- freeTilePlan()
-    fp$bounds <- bounds_mat
+    fp$bounds <- merged$bounds
+    fp$n_records <- merged$measures
     fp
 }
 
@@ -311,4 +327,48 @@ quadtreePlan <- function(x, tiles, FUN, threshold, min_tile_size = NULL,
 .tile_ext_dims <- function(e) {
     c(terra::xmax(e) - terra::xmin(e),
       terra::ymax(e) - terra::ymin(e))
+}
+
+# Greedily merge pairs of tiles that share a full edge and whose combined
+# measure stays <= threshold. Repeats until no further merges are possible.
+# bounds_mat: n x 4 (xmin, xmax, ymin, ymax); measures: length-n numeric.
+.merge_rect_tiles <- function(bounds_mat, measures, threshold) {
+    repeat {
+        n <- nrow(bounds_mat)
+        merged <- FALSE
+        for (i in seq_len(n - 1L)) {
+            for (j in seq(i + 1L, n)) {
+                if (measures[i] + measures[j] > threshold) next
+                b <- .try_merge_bounds(bounds_mat[i, ], bounds_mat[j, ])
+                if (is.null(b)) next
+                bounds_mat[i, ]   <- b
+                measures[i]       <- measures[i] + measures[j]
+                bounds_mat        <- bounds_mat[-j, , drop = FALSE]
+                measures          <- measures[-j]
+                merged <- TRUE
+                break
+            }
+            if (merged) break
+        }
+        if (!merged) break
+    }
+    list(bounds = bounds_mat, measures = measures)
+}
+
+# Returns the merged bounding vector if a and b share a complete edge and
+# together form a rectangle, otherwise NULL.
+# a, b: c(xmin, xmax, ymin, ymax)
+.try_merge_bounds <- function(a, b) {
+    tol <- .Machine$double.eps^0.5
+    # horizontal neighbours: same y range, touching x edges
+    if (abs(a[3L] - b[3L]) < tol && abs(a[4L] - b[4L]) < tol) {
+        if (abs(a[2L] - b[1L]) < tol) return(c(a[1L], b[2L], a[3L], a[4L]))
+        if (abs(b[2L] - a[1L]) < tol) return(c(b[1L], a[2L], a[3L], a[4L]))
+    }
+    # vertical neighbours: same x range, touching y edges
+    if (abs(a[1L] - b[1L]) < tol && abs(a[2L] - b[2L]) < tol) {
+        if (abs(a[4L] - b[3L]) < tol) return(c(a[1L], a[2L], a[3L], b[4L]))
+        if (abs(b[4L] - a[3L]) < tol) return(c(a[1L], a[2L], b[3L], a[4L]))
+    }
+    NULL
 }

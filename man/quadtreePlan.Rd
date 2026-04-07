@@ -31,7 +31,8 @@ Tiles below this size are kept as leaves regardless of density.}
 \item{...}{additional params passed to \code{tileApply()}.}
 }
 \value{
-A \code{freeTilePlan}.
+A \code{freeTilePlan} with an \code{n_records} metadata column containing
+the last \code{FUN} value for each leaf tile.
 }
 \description{
 Iteratively subdivides a spatial extent into a \code{freeTilePlan} by running
@@ -47,7 +48,7 @@ quadrants until all tiles are either below \code{threshold} or smaller than
 \examples{
 # dummy data
 pts <- terra::vect(cbind(x = rnorm(1000, 0, 100), y = rnorm(1000, 0, 100)))
-pts <- rbind(pts, terra::shift(pts, dx = 400, dy = 400))
+pts <- rbind(pts, terra::shift(pts, dx = 1000, dy = 1000))
 plot(pts)
 # data must exist on disk
 f <- tempfile(fileext = "shp")
@@ -67,4 +68,6 @@ fp <- quadtreePlan(
     min_tile_size = 1
 )
 plot(fp)
+# plot with items per tile
+plot(fp, values = "n_records")
 }
