@@ -1,0 +1,58 @@
+url: https://drieslab.github.io/tilework/
+
+reference:
+  - title: Tile Plans
+    desc: Classes and constructors for planning how data is divided into tiles.
+    contents:
+      - tilePlan
+      - tilePlan-class
+      - spatialTilePlan-class
+      - pixelTilePlan-class
+      - pointTilePlan-class
+      - freeTilePlan-class
+      - freeTilePlan
+      - quadtreePlan
+
+  - title: "tile* Methods"
+    desc: Common accessors and operators that work across all tile* objects.
+    contents:
+      - bracket
+      - double_bracket
+      - dollar
+      - arith
+      - ext
+      - dim
+      - plot
+      - centroids
+
+  - title: Tile Orchestration
+    desc: Tools for grouping, selecting, and iterating over tiles.
+    contents:
+      - tileGroup-class
+      - tileGroup
+      - tileIterator-class
+      - tileIterator
+      - iterSplit
+
+  - title: Tile Processing
+    desc: Apply functions across tiles and extract data by bounds.
+    contents:
+      - tileApply
+      - tileApply-plan
+      - tileApply-group
+      - tileApply-iterator
+      - getTile
+      - getBoundedData
+
+  - title: Parallel Settings
+    desc: Configure parallelization backends and logging.
+    contents:
+      - parallel_params
+      - tilework_management
+
+  - title: tilework Extension
+    desc: Developer API for extending tilework to new data types.
+    contents:
+      - extending_tilework
+      - redispatch_tileapply
+      - token-class
