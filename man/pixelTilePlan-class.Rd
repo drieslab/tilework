@@ -5,9 +5,21 @@
 \alias{pixelTilePlan-class}
 \alias{pixelTilePlan}
 \title{Pixel Tile Plan}
+\usage{
+pixelTilePlan(pxdims = NULL, ncols = NULL, nrows = NULL, ...)
+}
+\arguments{
+\item{pxdims}{numeric of length 2. Pixel dimensions \code{c(nrow, ncol)} of the
+image to iterate across. Equivalent to \code{x$pxdims <- value}.}
+
+\item{ncols}{numeric. Tile width in pixels. Equivalent to \code{x$ncols <- value}.}
+
+\item{nrows}{numeric. Tile height in pixels. Equivalent to \code{x$nrows <- value}.}
+
+\item{...}{additional params passed to \code{new()}.}
+}
 \description{
-Utility class for defining pixel-exact tiles of images in a format that is
-easy to setup and manipulate using \code{$} and \verb{$<-} generics.
+Utility class for defining pixel-exact tiles of images.
 }
 \section{Slots}{
 
@@ -24,6 +36,16 @@ easy to setup and manipulate using \code{$} and \verb{$<-} generics.
 
 \item{\code{metadata}}{data.frame. Metadata per tile}
 }}
+
+\section{Setup}{
+
+\itemize{
+\item \code{pixelTilePlan(pxdims, ncols, nrows)} creates an instance.
+All three params can also be set after construction via \verb{$pxdims<-},
+\verb{$ncols<-}, and \verb{$nrows<-}.
+\item \code{length()}, \code{dim()}, \code{nrow()}, \code{ncol()} report tile counts and layout.
+}
+}
 
 \section{Getting tile pixel indices}{
 
@@ -61,9 +83,7 @@ selected tiles.
 }
 
 \examples{
-x <- tilePlan("pixel")
-x$pxdims <- c(100, 100) # 100 px rows x 100 px cols to iterate across
-x$ncols <- 20 # 20 px
+x <- pixelTilePlan(pxdims = c(100, 100), ncols = 20)
 
 length(x) # check how many tiles there are
 dim(x)

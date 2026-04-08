@@ -6,7 +6,14 @@
 \alias{pointTilePlan}
 \title{Point Tile Plan}
 \usage{
-pointTilePlan(input = c("spatial", "pixel"), output = input, ...)
+pointTilePlan(
+  input = c("spatial", "pixel"),
+  output = input,
+  coords = NULL,
+  width = NULL,
+  height = NULL,
+  ...
+)
 }
 \arguments{
 \item{input}{character. Coordinate space of coords, dims, and padding:
@@ -15,6 +22,16 @@ pointTilePlan(input = c("spatial", "pixel"), output = input, ...)
 \item{output}{character. Bound type returned by \code{\link[=getTile]{getTile()}}. Defaults to
 \code{input}. Cross-mode conversion requires a \code{SpatRaster} at \code{\link[=getTile]{getTile()}} time
 (or \verb{@rast_dims}/\verb{@extent} set on the plan for standalone use).}
+
+\item{coords}{n x 2 matrix or data frame of tile center coordinates (columns:
+x, y). Data frames are coerced via \code{as.matrix()}. Equivalent to
+\code{x$coords <- value} after construction.}
+
+\item{width}{numeric. Uniform tile width in input coordinate units. Equivalent
+to \code{x$width <- value} after construction.}
+
+\item{height}{numeric. Uniform tile height in input coordinate units.
+Equivalent to \code{x$height <- value} after construction.}
 }
 \description{
 Tile plan where each tile is centered on a user-supplied (x, y) coordinate
@@ -67,6 +84,7 @@ and \code{"y"} columns.}
 \item \code{pointTilePlan()} creates an instance. \code{input} defaults to \code{"spatial"};
 \code{output} defaults to \code{input}.
 \item \verb{$coords<-} sets the n x 2 center coordinate matrix (columns: x, y).
+Data frames are also accepted and coerced via \code{as.matrix()}.
 \item \verb{$width<-} / \verb{$height<-} set the uniform tile width and height in input
 coordinate units.
 \item \verb{$input<-} / \verb{$output<-} change the coordinate / output mode.

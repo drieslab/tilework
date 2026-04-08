@@ -17,10 +17,10 @@
 #' A `spatialTilePlan` needs both a spatial extent to tile across and also a
 #' request for a certain number of tiles.
 #'
-#' * `spatialTilePlan()` is used to create a `spatialTilePlan` instance.
-#' * `ext()<-` can be used to set up the spatial extent.
+#' * `spatialTilePlan(ext, n)` is used to create a `spatialTilePlan` instance.
+#'   `ext` and `n` can also be supplied after construction via `ext()<-` and
+#'   `length()<-`.
 #' * `ext()` is used to check extent.
-#' * `length()<-` is used to request a number of tiles.
 #' * `length()` can be used to find out how many tiles there are.
 #' * `dim()`/`nrow()`/`ncol()` basic generics are implemented and return
 #' information about how the tiles are arranged.
@@ -58,13 +58,10 @@
 #' selected tiles.
 #'
 #' @examples
-#' x <- tilePlan()
-#' force(x)
-#' ext(x) <- c(0, 100, 0, 100)
-#' length(x) <- 8 # generated tiles will be AT LEAST this value
+#' x <- spatialTilePlan(ext = c(0, 100, 0, 100), n = 8)
 #' force(x)
 #'
-#' length(x) # how many were actually generated?
+#' length(x) # how many were actually generated? AT LEAST n
 #' dim(x)
 #' nrow(x)
 #' ncol(x)
@@ -207,6 +204,21 @@ setMethod(
         do.call(callNextMethod, a)
     }
 )
+
+
+#' @rdname spatialTilePlan-class
+#' @param ext numeric or `SpatExtent`. Spatial extent to tile across. Equivalent
+#'   to calling `ext(x) <- value` after construction.
+#' @param n numeric. Desired number of tiles. Equivalent to calling
+#'   `length(x) <- value` after construction.
+#' @param ... additional params passed to `new()`.
+#' @export
+spatialTilePlan <- function(ext = NULL, n = NULL, ...) {
+    x <- new("spatialTilePlan", ...)
+    if (!is.null(ext)) terra::ext(x) <- ext
+    if (!is.null(n)) length(x) <- n
+    x
+}
 
 
 # helpers ####

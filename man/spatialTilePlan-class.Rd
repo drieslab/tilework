@@ -5,6 +5,18 @@
 \alias{spatialTilePlan-class}
 \alias{spatialTilePlan}
 \title{Spatial Tile Plan}
+\usage{
+spatialTilePlan(ext = NULL, n = NULL, ...)
+}
+\arguments{
+\item{ext}{numeric or \code{SpatExtent}. Spatial extent to tile across. Equivalent
+to calling \code{ext(x) <- value} after construction.}
+
+\item{n}{numeric. Desired number of tiles. Equivalent to calling
+\code{length(x) <- value} after construction.}
+
+\item{...}{additional params passed to \code{new()}.}
+}
 \description{
 Utility class that simplifies the setup of tiles across a spatial extent.
 Tiles are stored in a lightweight format safe to be passed to child
@@ -31,10 +43,10 @@ processes. Tile \code{SpatExtent} objects can be extracted on-demand.
 A \code{spatialTilePlan} needs both a spatial extent to tile across and also a
 request for a certain number of tiles.
 \itemize{
-\item \code{spatialTilePlan()} is used to create a \code{spatialTilePlan} instance.
-\item \verb{ext()<-} can be used to set up the spatial extent.
+\item \code{spatialTilePlan(ext, n)} is used to create a \code{spatialTilePlan} instance.
+\code{ext} and \code{n} can also be supplied after construction via \verb{ext()<-} and
+\verb{length()<-}.
 \item \code{ext()} is used to check extent.
-\item \verb{length()<-} is used to request a number of tiles.
 \item \code{length()} can be used to find out how many tiles there are.
 \item \code{dim()}/\code{nrow()}/\code{ncol()} basic generics are implemented and return
 information about how the tiles are arranged.
@@ -82,13 +94,10 @@ selected tiles.
 }
 
 \examples{
-x <- tilePlan()
-force(x)
-ext(x) <- c(0, 100, 0, 100)
-length(x) <- 8 # generated tiles will be AT LEAST this value
+x <- spatialTilePlan(ext = c(0, 100, 0, 100), n = 8)
 force(x)
 
-length(x) # how many were actually generated?
+length(x) # how many were actually generated? AT LEAST n
 dim(x)
 nrow(x)
 ncol(x)

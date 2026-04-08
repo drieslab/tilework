@@ -54,9 +54,7 @@ of tiles generated will be at least the requested number, arranged as squarely
 as possible given the extent's aspect ratio.
 
 ```{r spat-setup}
-tp_spat <- tilePlan("spatial")
-ext(tp_spat) <- c(0, 1000, 0, 600)
-length(tp_spat) <- 12
+tp_spat <- spatialTilePlan(ext = c(0, 1000, 0, 600), n = 12)
 
 tp_spat
 dim(tp_spat)   # nrow x ncol of the tile grid
@@ -94,14 +92,11 @@ same coordinate system as the data — georeferenced rasters, `sf` geometries,
 Bounds are returned as `integer[4]` vectors `c(xmin, xmax, ymin, ymax)` in
 pixel index space, routing into array/matrix subsetting operations downstream.
 
-Three things are required: the image's pixel dimensions (`$pxdims`), and the
-tile height and width in pixels (`$nrows`, `$ncols`).
+Three things are required: the image's pixel dimensions (`pxdims`), and the
+tile height and width in pixels (`nrows`, `ncols`).
 
 ```{r px-setup}
-tp_px <- tilePlan("pixel")
-tp_px$pxdims <- c(500, 800)  # 500 rows x 800 cols
-tp_px$nrows  <- 100
-tp_px$ncols  <- 100
+tp_px <- pixelTilePlan(pxdims = c(500, 800), nrows = 100, ncols = 100)
 
 tp_px
 dim(tp_px)
@@ -140,13 +135,11 @@ cell nuclei, tissue landmarks, sampling sites, feature centroids — rather than
 when you want to exhaust a spatial extent.
 
 ```{r pt-setup}
-tp_pt <- pointTilePlan("spatial")
-tp_pt$coords <- cbind(
-    x = c(100, 250, 400, 550),
-    y = c(80,  200, 150, 300)
+tp_pt <- pointTilePlan("spatial",
+    coords = cbind(x = c(100, 250, 400, 550), y = c(80, 200, 150, 300)),
+    width  = 80,
+    height = 80
 )
-tp_pt$width  <- 80
-tp_pt$height <- 80
 
 tp_pt
 length(tp_pt)
@@ -183,10 +176,11 @@ The most common case. Coordinates, tile dims, and padding are all in CRS
 units. No raster metadata needed.
 
 ```{r pt-s2s}
-tp_s2s <- pointTilePlan(input = "spatial", output = "spatial")
-tp_s2s$coords <- cbind(x = c(200, 500), y = c(150, 400))
-tp_s2s$width  <- 100
-tp_s2s$height <- 100
+tp_s2s <- pointTilePlan(input = "spatial", output = "spatial",
+    coords = cbind(x = c(200, 500), y = c(150, 400)),
+    width  = 100,
+    height = 100
+)
 
 tp_s2s[1]  # SpatExtent
 ```
@@ -197,10 +191,11 @@ Coordinates and tile dims are in pixel indices. Useful when sampling locations
 come from image analysis (e.g. detected cell positions in pixel space).
 
 ```{r pt-p2p}
-tp_p2p <- pointTilePlan(input = "pixel", output = "pixel")
-tp_p2p$coords <- cbind(x = c(120L, 340L, 560L), y = c(80L, 200L, 310L))
-tp_p2p$width  <- 51L   # odd dims give unambiguous center pixel
-tp_p2p$height <- 51L
+tp_p2p <- pointTilePlan(input = "pixel", output = "pixel",
+    coords = cbind(x = c(120L, 340L, 560L), y = c(80L, 200L, 310L)),
+    width  = 51L,   # odd dims give unambiguous center pixel
+    height = 51L
+)
 
 tp_p2p[2]  # integer[4]: col_min, col_max, row_min, row_max
 ```
@@ -223,13 +218,11 @@ f <- system.file("ex/elev.tif", package = "terra")
 r <- rast(f)
 
 # spatial input, pixel output
-tp_s2p <- pointTilePlan(input = "spatial", output = "pixel")
-tp_s2p$coords <- cbind(
-    x = c(5.8, 6.0, 6.2),
-    y = c(49.9, 50.0, 50.1)
+tp_s2p <- pointTilePlan(input = "spatial", output = "pixel",
+    coords = cbind(x = c(5.8, 6.0, 6.2), y = c(49.9, 50.0, 50.1)),
+    width  = 0.1,
+    height = 0.1
 )
-tp_s2p$width  <- 0.1
-tp_s2p$height <- 0.1
 
 # Standalone [i] requires rast_dims and extent:
 tp_s2p$rast_dims <- dim(r)[1:2]
@@ -303,9 +296,7 @@ terra::writeVector(pts, f_pts)
 pts_proxy <- terra::vect(f_pts, proxy = TRUE)
 
 # Coarse 2×2 starting grid
-tp_start <- tilePlan("spatial")
-ext(tp_start) <- ext(pts)
-length(tp_start) <- 4L
+tp_start <- spatialTilePlan(ext = ext(pts), n = 4L)
 tp_start
 ```
 
@@ -373,9 +364,7 @@ spatial plans it extends beyond the plan extent, so shrink the plan extent
 inward by the pad amount if you want tiles to stay within the data boundary.
 
 ```{r padding-demo, fig.width=5, fig.height=3}
-tp_demo <- tilePlan("spatial")
-ext(tp_demo) <- c(0, 100, 0, 100)
-length(tp_demo) <- 9
+tp_demo <- spatialTilePlan(ext = c(0, 100, 0, 100), n = 9)
 
 # shrink extent inward by pad so padded tiles stay within data
 pad <- 3

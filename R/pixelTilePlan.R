@@ -7,8 +7,13 @@
 #' @aliases pixelTilePlan
 #' @family tile plans
 #' @description
-#' Utility class for defining pixel-exact tiles of images in a format that is
-#' easy to setup and manipulate using `$` and `$<-` generics.
+#' Utility class for defining pixel-exact tiles of images.
+#'
+#' @section Setup:
+#' * `pixelTilePlan(pxdims, ncols, nrows)` creates an instance.
+#'   All three params can also be set after construction via `$pxdims<-`,
+#'   `$ncols<-`, and `$nrows<-`.
+#' * `length()`, `dim()`, `nrow()`, `ncol()` report tile counts and layout.
 #'
 #' @section Getting tile pixel indices:
 #' `[i]` and `[i, j]` indexing can be used to select tiles, similarly to a
@@ -36,9 +41,7 @@
 #' * `[[i]]` selection will pull specific metadata rows corresponding to the
 #' selected tiles.
 #' @examples
-#' x <- tilePlan("pixel")
-#' x$pxdims <- c(100, 100) # 100 px rows x 100 px cols to iterate across
-#' x$ncols <- 20 # 20 px
+#' x <- pixelTilePlan(pxdims = c(100, 100), ncols = 20)
 #'
 #' length(x) # check how many tiles there are
 #' dim(x)
@@ -203,6 +206,22 @@ setMethod("centroids", signature("pixelTilePlan"), function(x, fun = function(x)
     a$offset <- c(0, 0)
     do.call(callNextMethod, a)
 })
+
+
+#' @rdname pixelTilePlan-class
+#' @param pxdims numeric of length 2. Pixel dimensions `c(nrow, ncol)` of the
+#'   image to iterate across. Equivalent to `x$pxdims <- value`.
+#' @param ncols numeric. Tile width in pixels. Equivalent to `x$ncols <- value`.
+#' @param nrows numeric. Tile height in pixels. Equivalent to `x$nrows <- value`.
+#' @param ... additional params passed to `new()`.
+#' @export
+pixelTilePlan <- function(pxdims = NULL, ncols = NULL, nrows = NULL, ...) {
+    x <- new("pixelTilePlan", ...)
+    if (!is.null(pxdims)) x$pxdims <- pxdims
+    if (!is.null(ncols))  x$ncols  <- ncols
+    if (!is.null(nrows))  x$nrows  <- nrows
+    x
+}
 
 
 # helpers ####

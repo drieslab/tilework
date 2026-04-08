@@ -46,6 +46,11 @@ less obvious.
 Padding can be added either via \code{\link[=dollar]{$pad}} or \code{+} and \code{-} operators.
 The + and - operators specifically modify the padding value based on the
 arithmetic ops. This is similar to their usage in \link[terra:arith-generic]{terra::Arith-methods}
+
+\verb{$stride<-} is an alternative way to set padding via the stride between
+tile starts: \code{pad = (tile_dim - stride) / 2}. Requires \code{tile_dims} to be
+set (i.e. not \code{freeTilePlan}). \verb{$stride} returns the effective stride given
+the current pad.
 }
 \section{spatial and pixel differences}{
 

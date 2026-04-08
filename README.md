@@ -34,9 +34,7 @@ f <- system.file("ex/elev.tif", package = "terra")
 r <- rast(f)
 
 # Create a spatial tile iterator
-tp <- tilePlan("spatial")
-ext(tp) <- ext(r)          # Set spatial extent
-length(tp) <- 16           # Request 16 tiles (actual number may be higher)
+tp <- spatialTilePlan(ext = ext(r), n = 16)
 
 # Check tile layout
 tp
@@ -58,10 +56,7 @@ tileApply(r, tiles = tp, FUN = function(x, .I) {
 
 ```r
 # Create a pixel-based tile iterator
-px <- tilePlan("pixel")
-px$pxdims <- c(500, 500)  # 500x500 pixel raster
-px$ncols <- 100           # 100 pixel tiles
-px$nrows <- 100           # 100 pixel tiles
+px <- pixelTilePlan(pxdims = c(500, 500), ncols = 100, nrows = 100)
 
 # Check dimensions
 dim(px)     # Grid dimensions
@@ -95,10 +90,8 @@ For spatial extent-based tiling:
 - {terra} `SpatExtent` integration
 
 ```r
-tp <- tilePlan("spatial")
-ext(tp) <- c(0, 100, 0, 100)  # xmin, xmax, ymin, ymax
-length(tp) <- 9               # Request 9 tiles
-dim(tp)                       # Returns [3, 3] - actual grid layout
+tp <- spatialTilePlan(ext = c(0, 100, 0, 100), n = 9)
+dim(tp)  # Returns [3, 3] - actual grid layout
 ```
 
 **`pixelTilePlan`**
@@ -110,10 +103,7 @@ For pixel-exact tiling:
 - Ideal for image processing workflows
 
 ```r
-pti <- tilePlan("pixel")
-pti$pxdims <- c(1000, 1000)  # Total image dimensions
-pti$ncols <- 250             # Pixels per tile (width)
-pti$nrows <- 250             # Pixels per tile (height)
+pti <- pixelTilePlan(pxdims = c(1000, 1000), ncols = 250, nrows = 250)
 ```
 
 **`pointTilePlan`**
@@ -127,10 +117,11 @@ a raster is provided. See the
 for full coverage of coordinate modes.
 
 ```r
-tp <- pointTilePlan("spatial")
-tp$coords <- cbind(x = c(10, 50, 90), y = c(10, 50, 90))
-tp$width  <- 20
-tp$height <- 20
+tp <- pointTilePlan("spatial",
+    coords = cbind(x = c(10, 50, 90), y = c(10, 50, 90)),
+    width  = 20,
+    height = 20
+)
 ```
 
 **`freeTilePlan`**
@@ -241,10 +232,7 @@ f <- system.file("ex/elev.tif", package="terra")
 r <- terra::rast(f)
 
 # Create tile plan matching raster
-tp <- tilePlan("pixel")
-tp$pxdims <- dim(r)[1:2]
-tp$nrows <- 100
-tp$ncols <- 100
+tp <- pixelTilePlan(pxdims = dim(r)[1:2], nrows = 100, ncols = 100)
 
 # Extract tiles
 tiles <- getTile(r, tp, i = 1:4)  # Get first 4 tiles
@@ -395,9 +383,7 @@ Processing Large Satellite Images
 large_raster <- rast("large_satellite_image.tif")
 
 # Create efficient tiling scheme
-tp <- tilePlan("spatial")
-ext(tp) <- ext(large_raster)
-length(tp) <- 100  # 100+ tiles for manageable processing
+tp <- spatialTilePlan(ext = ext(large_raster), n = 100)
 
 # Add padding for edge effects
 tp <- tp + 50  # 50-unit padding
@@ -427,10 +413,7 @@ results <- tileApply(large_raster, tiles = tp,
 image <- rast("high_res_image.tif")
 
 # Create pixel-exact tiles
-pti <- tilePlan("pixel")
-pti$pxdims <- c(nrow(image), ncol(image))
-pti$ncols <- 512    # 512x512 pixel tiles
-pti$nrows <- 512
+pti <- pixelTilePlan(pxdims = c(nrow(image), ncol(image)), ncols = 512, nrows = 512)
 
 # Process each tile
 texture_metrics <- tileApply(image, tiles = pti,

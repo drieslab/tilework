@@ -4,3 +4,5 @@
 ^doc$
 ^Meta$
 ^CLAUDE\.md$
+.claude
+_pkgdown.yml
