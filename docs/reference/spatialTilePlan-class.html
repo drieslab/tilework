@@ -69,7 +69,28 @@ Tiles are stored in a lightweight format safe to be passed to child
 processes. Tile <code>SpatExtent</code> objects can be extracted on-demand.</p>
     </div>
 
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spatialTilePlan</span><span class="op">(</span>ext <span class="op">=</span> <span class="cn">NULL</span>, n <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    </div>
 
+    <div id="arguments">
+    <h2>Arguments</h2>
+
+
+<dl><dt id="arg-ext">ext<a class="anchor" aria-label="anchor" href="#arg-ext"></a></dt>
+<dd><p>numeric or <code>SpatExtent</code>. Spatial extent to tile across. Equivalent
+to calling <code>ext(x) &lt;- value</code> after construction.</p></dd>
+
+
+<dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
+<dd><p>numeric. Desired number of tiles. Equivalent to calling
+<code>length(x) &lt;- value</code> after construction.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>additional params passed to <code><a href="https://rdrr.io/r/methods/new.html" class="external-link">new()</a></code>.</p></dd>
+
+</dl></div>
     <div id="slots">
     <h2>Slots</h2>
 
@@ -104,10 +125,10 @@ processes. Tile <code>SpatExtent</code> objects can be extracted on-demand.</p>
 
 
 <p>A <code>spatialTilePlan</code> needs both a spatial extent to tile across and also a
-request for a certain number of tiles.</p><ul><li><p><code>spatialTilePlan()</code> is used to create a <code>spatialTilePlan</code> instance.</p></li>
-<li><p><code>ext()&lt;-</code> can be used to set up the spatial extent.</p></li>
+request for a certain number of tiles.</p><ul><li><p><code>spatialTilePlan(ext, n)</code> is used to create a <code>spatialTilePlan</code> instance.
+<code>ext</code> and <code>n</code> can also be supplied after construction via <code>ext()&lt;-</code> and
+<code>length()&lt;-</code>.</p></li>
 <li><p><code><a href="ext.html">ext()</a></code> is used to check extent.</p></li>
-<li><p><code>length()&lt;-</code> is used to request a number of tiles.</p></li>
 <li><p><code><a href="dim.html">length()</a></code> can be used to find out how many tiles there are.</p></li>
 <li><p><code><a href="dim.html">dim()</a></code>/<code><a href="dim.html">nrow()</a></code>/<code><a href="dim.html">ncol()</a></code> basic generics are implemented and return
 information about how the tiles are arranged.</p></li>
@@ -167,19 +188,14 @@ selected tiles.</p></li>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="tilePlan.html">tilePlan</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/force.html" class="external-link">force</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Object of class spatialTilePlan </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;empty&gt;</span>
-<span class="r-in"><span><span class="fu"><a href="ext.html">ext</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="dim.html">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fl">8</span> <span class="co"># generated tiles will be AT LEAST this value</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">spatialTilePlan</span><span class="op">(</span>ext <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/force.html" class="external-link">force</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Object of class spatialTilePlan </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> extent : 0, 100, 0, 100 (xmin, xmax, ymin, ymax)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> dim    : 3 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> pad    : 0</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="dim.html">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="co"># how many were actually generated?</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="dim.html">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="co"># how many were actually generated? AT LEAST n</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 9</span>
 <span class="r-in"><span><span class="fu"><a href="dim.html">dim</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 3</span>

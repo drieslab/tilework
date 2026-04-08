@@ -86,7 +86,14 @@ controlled by <code>$output</code> and resolved at extraction time.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pointTilePlan</span><span class="op">(</span>input <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"spatial"</span>, <span class="st">"pixel"</span><span class="op">)</span>, output <span class="op">=</span> <span class="va">input</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pointTilePlan</span><span class="op">(</span></span>
+<span>  input <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"spatial"</span>, <span class="st">"pixel"</span><span class="op">)</span>,</span>
+<span>  output <span class="op">=</span> <span class="va">input</span>,</span>
+<span>  coords <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  height <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -102,6 +109,22 @@ controlled by <code>$output</code> and resolved at extraction time.</p>
 <dd><p>character. Bound type returned by <code><a href="getTile.html">getTile()</a></code>. Defaults to
 <code>input</code>. Cross-mode conversion requires a <code>SpatRaster</code> at <code><a href="getTile.html">getTile()</a></code> time
 (or <code>@rast_dims</code>/<code>@extent</code> set on the plan for standalone use).</p></dd>
+
+
+<dt id="arg-coords">coords<a class="anchor" aria-label="anchor" href="#arg-coords"></a></dt>
+<dd><p>n x 2 matrix or data frame of tile center coordinates (columns:
+x, y). Data frames are coerced via <code><a href="https://rspatial.github.io/terra/reference/coerce.html" class="external-link">as.matrix()</a></code>. Equivalent to
+<code>x$coords &lt;- value</code> after construction.</p></dd>
+
+
+<dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
+<dd><p>numeric. Uniform tile width in input coordinate units. Equivalent
+to <code>x$width &lt;- value</code> after construction.</p></dd>
+
+
+<dt id="arg-height">height<a class="anchor" aria-label="anchor" href="#arg-height"></a></dt>
+<dd><p>numeric. Uniform tile height in input coordinate units.
+Equivalent to <code>x$height &lt;- value</code> after construction.</p></dd>
 
 </dl></div>
     <div id="slots">
@@ -161,7 +184,8 @@ and <code>"y"</code> columns.</p></dd>
 
 <ul><li><p><code>pointTilePlan()</code> creates an instance. <code>input</code> defaults to <code>"spatial"</code>;
 <code>output</code> defaults to <code>input</code>.</p></li>
-<li><p><code>$coords&lt;-</code> sets the n x 2 center coordinate matrix (columns: x, y).</p></li>
+<li><p><code>$coords&lt;-</code> sets the n x 2 center coordinate matrix (columns: x, y).
+Data frames are also accepted and coerced via <code><a href="https://rspatial.github.io/terra/reference/coerce.html" class="external-link">as.matrix()</a></code>.</p></li>
 <li><p><code>$width&lt;-</code> / <code>$height&lt;-</code> set the uniform tile width and height in input
 coordinate units.</p></li>
 <li><p><code>$input&lt;-</code> / <code>$output&lt;-</code> change the coordinate / output mode.</p></li>

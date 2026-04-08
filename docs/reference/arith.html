@@ -5,7 +5,11 @@ help with things like spatial contiguity, so that artificial borders are
 less obvious.
 Padding can be added either via $pad or + and - operators.
 The + and - operators specifically modify the padding value based on the
-arithmetic ops. This is similar to their usage in terra::Arith-methods"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
+arithmetic ops. This is similar to their usage in terra::Arith-methods
+$stride&amp;lt;- is an alternative way to set padding via the stride between
+tile starts: pad = (tile_dim - stride) / 2. Requires tile_dims to be
+set (i.e. not freeTilePlan). $stride returns the effective stride given
+the current pad."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
@@ -75,6 +79,10 @@ less obvious.</p>
 <p>Padding can be added either via <code><a href="dollar.html">$pad</a></code> or <code>+</code> and <code>-</code> operators.
 The + and - operators specifically modify the padding value based on the
 arithmetic ops. This is similar to their usage in terra::Arith-methods</p>
+<p><code>$stride&lt;-</code> is an alternative way to set padding via the stride between
+tile starts: <code>pad = (tile_dim - stride) / 2</code>. Requires <code>tile_dims</code> to be
+set (i.e. not <code>freeTilePlan</code>). <code>$stride</code> returns the effective stride given
+the current pad.</p>
     </div>
 
     <div id="ref-usage">

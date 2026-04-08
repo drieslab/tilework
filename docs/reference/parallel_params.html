@@ -148,7 +148,9 @@ automatically use a specific BPPARAM, analogous to setting a
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Or override per-call</span></span></span>
 <span class="r-in"><span><span class="fu">setTileworkParMethod</span><span class="op">(</span><span class="st">"future"</span><span class="op">)</span>  <span class="co"># global default is future</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="tileApply.html">tileApply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tiles</span>, <span class="va">fun</span>, parallel_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"biocparallel"</span><span class="op">)</span><span class="op">)</span>  <span class="co"># but use BiocParallel here</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="tileApply.html">tileApply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tiles</span>, <span class="va">fun</span>, </span></span>
+<span class="r-in"><span>    parallel_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"biocparallel"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span> <span class="co"># but use BiocParallel here</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Suppress sequential warnings</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>tilework.warn_sequential <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>

@@ -98,10 +98,7 @@
 <span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"ex/elev.tif"</span>, package <span class="op">=</span> <span class="st">"terra"</span><span class="op">)</span></span>
 <span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">tp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tilePlan.html">tilePlan</a></span><span class="op">(</span><span class="st">"pixel"</span><span class="op">)</span></span>
-<span><span class="va">tp</span><span class="op">$</span><span class="va">pxdims</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dim.html">dim</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span>
-<span><span class="va">tp</span><span class="op">$</span><span class="va">nrows</span>   <span class="op">&lt;-</span> <span class="fl">20L</span></span>
-<span><span class="va">tp</span><span class="op">$</span><span class="va">ncols</span>   <span class="op">&lt;-</span> <span class="fl">20L</span></span></code></pre></div>
+<span><span class="va">tp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pixelTilePlan-class.html">pixelTilePlan</a></span><span class="op">(</span>pxdims <span class="op">=</span> <span class="fu"><a href="../reference/dim.html">dim</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, nrows <span class="op">=</span> <span class="fl">20L</span>, ncols <span class="op">=</span> <span class="fl">20L</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>

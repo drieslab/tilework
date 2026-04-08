@@ -131,11 +131,8 @@ derived automatically.</p>
 <span><span class="va">tile_size</span> <span class="op">&lt;-</span> <span class="fl">10L</span>  <span class="co"># pixels per tile side</span></span>
 <span><span class="va">pad</span>       <span class="op">&lt;-</span> <span class="fl">2L</span>   <span class="co"># overlap on each side</span></span>
 <span></span>
-<span><span class="va">tp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tilePlan.html">tilePlan</a></span><span class="op">(</span><span class="st">"pixel"</span><span class="op">)</span></span>
-<span><span class="va">tp</span><span class="op">$</span><span class="va">pxdims</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dim.html">dim</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span>
-<span><span class="va">tp</span><span class="op">$</span><span class="va">nrows</span>  <span class="op">&lt;-</span> <span class="va">tile_size</span></span>
-<span><span class="va">tp</span><span class="op">$</span><span class="va">ncols</span>  <span class="op">&lt;-</span> <span class="va">tile_size</span></span>
-<span><span class="va">tp</span><span class="op">$</span><span class="va">pad</span>    <span class="op">&lt;-</span> <span class="va">pad</span></span>
+<span><span class="va">tp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pixelTilePlan-class.html">pixelTilePlan</a></span><span class="op">(</span>pxdims <span class="op">=</span> <span class="fu"><a href="../reference/dim.html">dim</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, nrows <span class="op">=</span> <span class="va">tile_size</span>, ncols <span class="op">=</span> <span class="va">tile_size</span><span class="op">)</span></span>
+<span><span class="va">tp</span><span class="op">$</span><span class="va">pad</span> <span class="op">&lt;-</span> <span class="va">pad</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/dim.html">dim</a></span><span class="op">(</span><span class="va">tp</span><span class="op">)</span>    <span class="co"># rows x cols of the tile grid</span></span>
 <span><span class="co">#&gt; [1]  9 10</span></span>
