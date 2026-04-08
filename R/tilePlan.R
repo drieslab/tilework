@@ -184,6 +184,11 @@ setMethod("centroids", signature("tilePlan"), function(x, fun = function(x) x, o
 #' The + and - operators specifically modify the padding value based on the
 #' arithmetic ops. This is similar to their usage in [terra::Arith-methods]
 #'
+#' `$stride<-` is an alternative way to set padding via the stride between
+#' tile starts: `pad = (tile_dim - stride) / 2`. Requires `tile_dims` to be
+#' set (i.e. not `freeTilePlan`). `$stride` returns the effective stride given
+#' the current pad.
+#'
 #' @section spatial and pixel differences:
 #'
 #' * Padding for spatial tile plans is added without any further changes.
@@ -271,6 +276,15 @@ setMethod("$<-", signature("tilePlan", "ANY"), function(x, name, value) {
         x@pad <- value
         return(initialize(x))
     }
+    if (name == "stride") {
+        checkmate::assert_numeric(value, min.len = 1L, max.len = 2L)
+        if (length(x@tile_dims) == 0L)
+            stop("$stride requires tile_dims to be set", call. = FALSE)
+        dims <- rep_len(x@tile_dims, 2L)
+        stride <- rep_len(value, 2L)
+        x@pad <- mean((dims - stride) / 2)
+        return(initialize(x))
+    }
     x@metadata[[name]] <- value
     x
 })
@@ -280,6 +294,10 @@ setMethod("$<-", signature("tilePlan", "ANY"), function(x, name, value) {
 setMethod("$", signature("tilePlan"), function(x, name) {
     if (name == "pad") {
         return(x@pad)
+    }
+    if (name == "stride") {
+        if (length(x@tile_dims) == 0L) return(NULL)
+        return(x@tile_dims - 2 * x@pad)
     }
     x@metadata[[name]]
 })
@@ -497,7 +515,7 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
 # helpers ####
 
 .DollarNames.tilePlan <- function(x, pattern) {
-    c(colnames(x@metadata), "pad")
+    c(colnames(x@metadata), "pad", "stride")
 }
 
 # x: the extent array
