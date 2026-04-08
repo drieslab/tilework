@@ -23,6 +23,7 @@
 #' * `pointTilePlan()` creates an instance. `input` defaults to `"spatial"`;
 #'   `output` defaults to `input`.
 #' * `$coords<-` sets the n x 2 center coordinate matrix (columns: x, y).
+#'   Data frames are also accepted and coerced via `as.matrix()`.
 #' * `$width<-` / `$height<-` set the uniform tile width and height in input
 #'   coordinate units.
 #' * `$input<-` / `$output<-` change the coordinate / output mode.

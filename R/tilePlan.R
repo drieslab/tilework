@@ -233,12 +233,18 @@ NULL
 #' @name tilePlan
 #' @title Create a Tiling Plan
 #' @family tile plans
-#' @param type character. One of `"spatial"`, `"pixel"`. Type of plan to create.
-#' @param ... additional params to pass to `new()` call.
+#' @param type character. One of `"spatial"`, `"pixel"`, `"point"`, `"free"`.
+#'   Type of plan to create.
+#' @param ... additional params passed to the specific constructor:
+#'   [spatialTilePlan()], [pixelTilePlan()], [pointTilePlan()], or
+#'   [freeTilePlan()].
 #' @examples
 #' tilePlan("spatial")
 #' tilePlan("pixel")
-#' @seealso [spatialTilePlan] and [pixelTilePlan] classes
+#' tilePlan("point")
+#' tilePlan("free")
+#' @seealso [spatialTilePlan-class], [pixelTilePlan-class],
+#'   [pointTilePlan-class], [freeTilePlan-class]
 NULL
 
 
@@ -246,11 +252,13 @@ NULL
 
 #' @rdname tilePlan
 #' @export
-tilePlan <- function(type = c("spatial", "pixel"), ...) {
-    type <- match.arg(type, choices = c("spatial", "pixel"))
+tilePlan <- function(type = c("spatial", "pixel", "point", "free"), ...) {
+    type <- match.arg(type)
     switch(type,
-        "spatial" = new("spatialTilePlan", ...),
-        "pixel" = new("pixelTilePlan", ...)
+        "spatial" = spatialTilePlan(...),
+        "pixel"   = pixelTilePlan(...),
+        "point"   = pointTilePlan(...),
+        "free"    = freeTilePlan(...)
     )
 }
 
@@ -260,13 +268,27 @@ tilePlan <- function(type = c("spatial", "pixel"), ...) {
 #' @param output character. Bound type returned by [getTile()]. Defaults to
 #'   `input`. Cross-mode conversion requires a `SpatRaster` at [getTile()] time
 #'   (or `@rast_dims`/`@extent` set on the plan for standalone use).
+#' @param coords n x 2 matrix or data frame of tile center coordinates (columns:
+#'   x, y). Data frames are coerced via `as.matrix()`. Equivalent to
+#'   `x$coords <- value` after construction.
+#' @param width numeric. Uniform tile width in input coordinate units. Equivalent
+#'   to `x$width <- value` after construction.
+#' @param height numeric. Uniform tile height in input coordinate units.
+#'   Equivalent to `x$height <- value` after construction.
 #' @export
 pointTilePlan <- function(input = c("spatial", "pixel"),
                           output = input,
+                          coords = NULL,
+                          width = NULL,
+                          height = NULL,
                           ...) {
     input  <- match.arg(input)
     output <- match.arg(output, c("spatial", "pixel"))
-    new("pointTilePlan", input = input, output = output, ...)
+    x <- new("pointTilePlan", input = input, output = output, ...)
+    if (!is.null(coords)) x$coords <- coords
+    if (!is.null(width))  x$width  <- width
+    if (!is.null(height)) x$height <- height
+    x
 }
 
 #' @rdname dollar

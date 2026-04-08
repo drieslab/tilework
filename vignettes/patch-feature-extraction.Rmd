@@ -49,11 +49,8 @@ r <- rast(f)
 tile_size <- 10L  # pixels per tile side
 pad       <- 2L   # overlap on each side
 
-tp <- tilePlan("pixel")
-tp$pxdims <- dim(r)[1:2]
-tp$nrows  <- tile_size
-tp$ncols  <- tile_size
-tp$pad    <- pad
+tp <- pixelTilePlan(pxdims = dim(r)[1:2], nrows = tile_size, ncols = tile_size)
+tp$pad <- pad
 
 dim(tp)    # rows x cols of the tile grid
 length(tp) # total number of tiles

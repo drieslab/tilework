@@ -4,12 +4,15 @@
 \alias{tilePlan}
 \title{Create a Tiling Plan}
 \usage{
-tilePlan(type = c("spatial", "pixel"), ...)
+tilePlan(type = c("spatial", "pixel", "point", "free"), ...)
 }
 \arguments{
-\item{type}{character. One of \code{"spatial"}, \code{"pixel"}. Type of plan to create.}
+\item{type}{character. One of \code{"spatial"}, \code{"pixel"}, \code{"point"}, \code{"free"}.
+Type of plan to create.}
 
-\item{...}{additional params to pass to \code{new()} call.}
+\item{...}{additional params passed to the specific constructor:
+\code{\link[=spatialTilePlan]{spatialTilePlan()}}, \code{\link[=pixelTilePlan]{pixelTilePlan()}}, \code{\link[=pointTilePlan]{pointTilePlan()}}, or
+\code{\link[=freeTilePlan]{freeTilePlan()}}.}
 }
 \description{
 Create a Tiling Plan
@@ -17,9 +20,12 @@ Create a Tiling Plan
 \examples{
 tilePlan("spatial")
 tilePlan("pixel")
+tilePlan("point")
+tilePlan("free")
 }
 \seealso{
-\link{spatialTilePlan} and \link{pixelTilePlan} classes
+\linkS4class{spatialTilePlan}, \linkS4class{pixelTilePlan},
+\linkS4class{pointTilePlan}, \linkS4class{freeTilePlan}
 
 Other tile plans: 
 \code{\link{freeTilePlan}},

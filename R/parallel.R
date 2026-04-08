@@ -51,7 +51,9 @@
 #'
 #' # Or override per-call
 #' setTileworkParMethod("future")  # global default is future
-#' tileApply(x, tiles, fun, parallel_params = list(method = "biocparallel"))  # but use BiocParallel here
+#' tileApply(x, tiles, fun, 
+#'     parallel_params = list(method = "biocparallel")
+#' ) # but use BiocParallel here
 #'
 #' # Suppress sequential warnings
 #' options(tilework.warn_sequential = FALSE)

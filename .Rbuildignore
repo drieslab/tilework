@@ -3,3 +3,5 @@
 .github
 ^doc$
 ^Meta$
+.claude
+_pkgdown.yml

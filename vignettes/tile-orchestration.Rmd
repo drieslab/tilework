@@ -21,10 +21,7 @@ library(terra)
 f <- system.file("ex/elev.tif", package = "terra")
 r <- rast(f)
 
-tp <- tilePlan("pixel")
-tp$pxdims <- dim(r)[1:2]
-tp$nrows   <- 20L
-tp$ncols   <- 20L
+tp <- pixelTilePlan(pxdims = dim(r)[1:2], nrows = 20L, ncols = 20L)
 ```
 
 ## Overview
