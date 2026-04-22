@@ -221,6 +221,26 @@ spatialTilePlan <- function(ext = NULL, n = NULL, ...) {
 }
 
 
+# * as.polygons ####
+
+#' @rdname as.polygons
+#' @export
+setMethod("as.polygons", signature("spatialTilePlan"), function(x, ...) {
+    if (length(x) == 0L) return(terra::vect())
+    nr <- nrow(x); nc <- ncol(x)
+    w  <- x@tile_dims[[2L]]; h <- x@tile_dims[[1L]]
+    p  <- x@pad; e <- x@extent
+    j_idx <- rep(seq_len(nc), nr)
+    i_idx <- rep(seq_len(nr), each = nc)
+    bounds <- cbind(
+        e[[1L]] + (j_idx - 1L) * w - p,
+        e[[1L]] +  j_idx       * w + p,
+        e[[3L]] + (i_idx - 1L) * h - p,
+        e[[3L]] +  i_idx       * h + p
+    )
+    .tile_bounds_to_sv(bounds)
+})
+
 # helpers ####
 
 .get_dim_n_chunks <- function(n, e) {

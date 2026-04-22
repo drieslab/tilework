@@ -31,6 +31,19 @@
     do.call(terra::vect, c(list(x), vect_params))
 }
 
+# Build a SpatVector of rectangle polygons from an n x 4 bounds matrix
+# (xmin, xmax, ymin, ymax). Each rectangle is a closed 5-point ring.
+# Constructs the 5-column geom matrix (geom, part, x, y, hole) required
+# by terra::vect() for polygon input.
+.tile_bounds_to_sv <- function(bounds, ids = seq_len(nrow(bounds))) {
+    xmin <- bounds[, 1L]; xmax <- bounds[, 2L]
+    ymin <- bounds[, 3L]; ymax <- bounds[, 4L]
+    xs <- c(rbind(xmin, xmax, xmax, xmin, xmin))
+    ys <- c(rbind(ymin, ymin, ymax, ymax, ymin))
+    g <- cbind(rep(ids, each = 5L), 1L, xs, ys, 0L)
+    terra::vect(g, type = "polygons", atts = data.frame(tile = ids))
+}
+
 # convert SpatExtent to unnamed numeric vector
 .ext_to_num_vec <- function(x) {
     out <- x[]

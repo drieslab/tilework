@@ -48,6 +48,7 @@ centroids(x)
 \seealso{
 Other tile* methods: 
 \code{\link{arith}},
+\code{\link{as.polygons}()},
 \code{\link{bracket}},
 \code{\link{dim}()},
 \code{\link{dollar}},

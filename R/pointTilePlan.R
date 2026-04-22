@@ -266,6 +266,51 @@ setMethod("plot", signature("pointTilePlan", "missing"), function(x, ...) {
     }
 })
 
+# * as.polygons ####
+
+#' @rdname as.polygons
+#' @export
+setMethod("as.polygons", signature("pointTilePlan"), function(x, ...) {
+    .guard_tile_dims(x)
+    if (nrow(x@coords) == 0L) return(terra::vect())
+    p <- x@pad
+
+    if (x@output == "spatial") {
+        if (x@input == "spatial") {
+            cx <- x@coords[, 1L]; cy <- x@coords[, 2L]
+            hw <- x@tile_dims[[2L]] / 2 + p
+            hh <- x@tile_dims[[1L]] / 2 + p
+            bounds <- cbind(cx - hw, cx + hw, cy - hh, cy + hh)
+        } else {
+            # pixel input, spatial output -- convert via extent + rast_dims
+            .guard_rast_dims(x); .guard_ext(x)
+            e <- x@extent; d <- x@rast_dims
+            xres <- (e[[2L]] - e[[1L]]) / d[[2L]]
+            yres <- (e[[4L]] - e[[3L]]) / d[[1L]]
+            w <- as.integer(x@tile_dims[[2L]])
+            h <- as.integer(x@tile_dims[[1L]])
+            col <- as.integer(x@coords[, 1L])
+            row <- as.integer(x@coords[, 2L])
+            col_min <- col - (w - 1L) %/% 2L; col_max <- col_min + w - 1L
+            row_min <- row - (h - 1L) %/% 2L; row_max <- row_min + h - 1L
+            px <- p * c(xres, yres)  # pad in CRS units
+            bounds <- cbind(
+                e[[1L]] + (col_min - 1L) * xres - px[[1L]],
+                e[[1L]] +  col_max       * xres + px[[1L]],
+                e[[4L]] -  row_max       * yres - px[[2L]],
+                e[[4L]] - (row_min - 1L) * yres + px[[2L]]
+            )
+        }
+    } else {
+        # pixel output (spatial or pixel input)
+        cx <- x@coords[, 1L]; cy <- x@coords[, 2L]
+        hw <- x@tile_dims[[2L]] / 2 + p
+        hh <- x@tile_dims[[1L]] / 2 + p
+        bounds <- cbind(cx - hw, cx + hw, cy - hh, cy + hh)
+    }
+    .tile_bounds_to_sv(bounds)
+})
+
 # * centroids ####
 
 #' @rdname centroids

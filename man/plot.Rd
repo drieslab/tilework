@@ -46,6 +46,7 @@ plot(x, value = "new_meta")
 \seealso{
 Other tile* methods: 
 \code{\link{arith}},
+\code{\link{as.polygons}()},
 \code{\link{bracket}},
 \code{\link{centroids}()},
 \code{\link{dim}()},
