@@ -1,5 +1,8 @@
 url: https://drieslab.github.io/tilework/
 
+template:
+  bootstrap: 5
+
 articles:
   - title: "User Guides"
     navbar: ~
@@ -37,6 +40,8 @@ reference:
       - dim
       - plot
       - centroids
+      - as.polygons
+      - intersect
 
   - title: Tile Orchestration
     desc: Tools for grouping, selecting, and iterating over tiles.
