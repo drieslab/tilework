@@ -40,9 +40,12 @@ other \code{tilePlan} subclasses fall back to building polygons via \code{as.pol
 \examples{
 # spatialTilePlan -- axis-aligned query
 tp <- spatialTilePlan(ext = c(0, 100, 0, 100), n = 16)
-sel <- intersect(tp, terra::ext(20, 60, 20, 60))
+e <- ext(20, 60, 20, 60)
+sel <- intersect(tp, e)
 sel$tile          # indices of intersecting tiles
 length(sel)       # number of tiles hit
+plot(sel)
+plot(e, add = T, border = "cyan")
 
 # with padding -- tiles near the border are included
 tp_pad <- tp + 5
@@ -64,6 +67,8 @@ corners <- rbind(c(30, 10), c(70, 10), c(90, 50), c(10, 50), c(30, 10))
 poly <- terra::vect(corners, type = "polygons")
 sel_poly <- intersect(tp, poly)
 sel_poly$tile
+plot(sel_poly)
+plot(poly, add = T, border = "cyan")
 }
 \seealso{
 Other tile* methods: 
