@@ -244,16 +244,16 @@ tileApply(r, tiles = tp_pixel, FUN = function(tile, .I) {
 #>   options("tilework.bpparam" = BiocParallel::SnowParam())
 #>   To silence this warning, set options("tilework.warn_sequential" = FALSE)
 #> [[1]]
-#> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmpdFQtBi/tiles/tile_001.tif"
+#> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmpBdqglv/tiles/tile_001.tif"
 #> 
 #> [[2]]
-#> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmpdFQtBi/tiles/tile_002.tif"
+#> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmpBdqglv/tiles/tile_002.tif"
 #> 
 #> [[3]]
-#> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmpdFQtBi/tiles/tile_003.tif"
+#> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmpBdqglv/tiles/tile_003.tif"
 #> 
 #> [[4]]
-#> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmpdFQtBi/tiles/tile_004.tif"
+#> [1] "/var/folders/1q/p0kr6d017wv4d6_39pcpt18w0000gn/T//RtmpBdqglv/tiles/tile_004.tif"
 #> 
 
 list.files(outdir)

@@ -1,6 +1,8 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://drieslab.github.io/tilework/404.html</loc></url>
+<url><loc>https://drieslab.github.io/tilework/CLAUDE.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/LICENSE-text.html</loc></url>
+<url><loc>https://drieslab.github.io/tilework/articles/design.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/articles/index.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/articles/patch-feature-extraction.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/articles/tile-orchestration.html</loc></url>
@@ -8,6 +10,7 @@
 <url><loc>https://drieslab.github.io/tilework/authors.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/index.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/reference/arith.html</loc></url>
+<url><loc>https://drieslab.github.io/tilework/reference/as.polygons.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/reference/bracket.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/reference/centroids.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/reference/dim.html</loc></url>
@@ -22,6 +25,7 @@
 <url><loc>https://drieslab.github.io/tilework/reference/getTile.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/reference/hidden_docs.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/reference/index.html</loc></url>
+<url><loc>https://drieslab.github.io/tilework/reference/intersect.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/reference/iterSplit.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/reference/parallel_params.html</loc></url>
 <url><loc>https://drieslab.github.io/tilework/reference/pixelTilePlan-class.html</loc></url>
