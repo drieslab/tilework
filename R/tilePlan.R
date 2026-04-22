@@ -230,6 +230,30 @@ NULL
 #' @returns tilePlan if `ext<-()` and `SpatExtent` if `ext()`
 NULL
 
+#' @name as.polygons
+#' @title Coerce a tile plan to polygons
+#' @description
+#' Convert a `tilePlan`-inheriting object to a `SpatVector` of rectangle
+#' polygons, one per tile, with a `tile` attribute column holding the tile
+#' index. Padding is included in the polygon bounds.
+#'
+#' Accelerated vectorized methods are provided for `spatialTilePlan`,
+#' `freeTilePlan`, and `pointTilePlan`. All other `tilePlan` subclasses fall
+#' back to extracting bounds via `x[]`.
+#' @param x `tilePlan`-inheriting object
+#' @param ... additional arguments (ignored)
+#' @returns `SpatVector` of polygons
+#' @family tile* methods
+NULL
+
+#' @rdname as.polygons
+#' @export
+setMethod("as.polygons", signature("tilePlan"), function(x, ...) {
+    extents <- x[]
+    bounds <- do.call(rbind, lapply(extents, .ext_to_num_vec))
+    .tile_bounds_to_sv(bounds)
+})
+
 #' @name tilePlan
 #' @title Create a Tiling Plan
 #' @family tile plans

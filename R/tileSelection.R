@@ -19,6 +19,19 @@ setMethod("[", signature("tileSelection", "numeric", "missing", "logical"), func
 
 setMethod("length", signature("tileSelection"), function(x) length(x@indices))
 
+#' @rdname dollar
+#' @export
+setMethod("$", signature("tileSelection"), function(x, name) {
+    x@tp[[x@indices]][[name]]
+})
+
+#' @rdname dollar
+#' @export
+setMethod("$<-", signature("tileSelection", "ANY"), function(x, name, value) {
+    x@tp@metadata[[name]][x@indices] <- value
+    x
+})
+
 setMethod("c", signature("tileSelection"), function(x, ...) {
     dots <- list(...)
     y <- dots[[1]]

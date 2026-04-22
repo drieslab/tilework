@@ -1,5 +1,17 @@
 url: https://drieslab.github.io/tilework/
 
+articles:
+  - title: "User Guides"
+    navbar: ~
+    contents:
+      - tile-plans
+      - tile-orchestration
+      - patch-feature-extraction
+  - title: "Developer"
+    navbar: Developer
+    contents:
+      - articles/design
+
 reference:
   - title: Tile Plans
     desc: Classes and constructors for planning how data is divided into tiles.

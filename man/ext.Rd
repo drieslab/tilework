@@ -34,11 +34,13 @@ Get and set a spatial extent.
 \seealso{
 Other tile* methods: 
 \code{\link{arith}},
+\code{\link{as.polygons}()},
 \code{\link{bracket}},
 \code{\link{centroids}()},
 \code{\link{dim}()},
 \code{\link{dollar}},
 \code{\link{double_bracket}},
+\code{\link{intersect}()},
 \code{\link{plot}()}
 }
 \concept{tile* methods}

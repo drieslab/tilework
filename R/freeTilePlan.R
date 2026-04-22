@@ -136,6 +136,22 @@ setMethod(
 )
 
 
+# * as.polygons ####
+
+#' @rdname as.polygons
+#' @export
+setMethod("as.polygons", signature("freeTilePlan"), function(x, ...) {
+    if (nrow(x@bounds) == 0L) return(terra::vect())
+    p <- x@pad
+    bounds <- cbind(
+        x@bounds[, 1L] - p,
+        x@bounds[, 2L] + p,
+        x@bounds[, 3L] - p,
+        x@bounds[, 4L] + p
+    )
+    .tile_bounds_to_sv(bounds)
+})
+
 # * plot ####
 
 #' @rdname plot
