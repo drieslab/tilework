@@ -1,0 +1,634 @@
+# Package Design
+
+This document describes the internal architecture of tilework for
+contributors and downstream developers. User-facing material lives in
+the other vignettes.
+
+------------------------------------------------------------------------
+
+## Design Philosophy
+
+**Tiles are lazy.** Bounds are computed on demand from a small set of
+stored parameters — never materialized as a list. A `spatialTilePlan`
+covering a 100k × 100k raster with 1M tiles stores only an extent and
+two dimensions. The n-th tile’s bounds are derived arithmetically from
+those values; no loop or list pre-allocation is needed.
+
+**Processing control is separate from geometry.** A `tilePlan` describes
+only *where* tiles are. `tileSelection`, `tileGroup`, and `tileIterator`
+describe *which* tiles to process and *how* to parallelise the work.
+These layers compose rather than couple.
+
+**Dispatch on bound type drives the data layer.** `[i]` on a spatial
+plan returns a `SpatExtent`; on a pixel plan it returns `integer[4]`.
+The `getBoundedData` methods dispatch on this type, routing to spatial
+windowing or pixel indexing as appropriate. A new plan type only needs
+to return the right bound class — the data layer needs no changes.
+
+------------------------------------------------------------------------
+
+## Class Hierarchy
+
+    tilework (virtual)
+    ├── tilePlan (virtual)
+    │   ├── spatialTilePlan
+    │   ├── pixelTilePlan
+    │   ├── pointTilePlan
+    │   └── freeTilePlan
+    ├── tileGroup
+    ├── tileIterator
+    └── tileSelection
+
+`token` is an internal sentinel class used during the
+`redispatch_tileapply` chain. It is not part of the `tilework`
+hierarchy.
+
+------------------------------------------------------------------------
+
+## tilePlan Base Slots
+
+All concrete plan classes inherit these slots.
+
+| Slot | Type | Meaning |
+|----|----|----|
+| `@n` | numeric | Total tile count |
+| `@dims` | integer\[2\] | `c(nrows, ncols)` of the tile grid |
+| `@tile_dims` | numeric\[2\] | Per-tile `c(height, width)` in the plan’s coordinate units |
+| `@pad` | numeric | Uniform boundary expansion applied at extraction time |
+| `@metadata` | data.frame | Per-tile metadata; always contains a `"tile"` column |
+
+`$stride<-` is a computed setter available on any plan with `@tile_dims`
+populated. It sets `@pad = mean((tile_dims - stride) / 2)` and reads
+back as `tile_dims - 2 * pad`. It is not defined on `freeTilePlan`,
+which has no uniform `@tile_dims`.
+
+------------------------------------------------------------------------
+
+## Concrete tilePlan Classes
+
+### spatialTilePlan
+
+Uniform grid tiling of a rectangular spatial extent. The grid is
+computed to produce **at least** n tiles at the closest aspect ratio to
+square.
+
+**Extra slot**: `@extent` (numeric\[4\], `c(xmin, xmax, ymin, ymax)`).
+
+**`[i]` returns**: `SpatExtent`.
+
+**`$<-` setters that trigger
+[`initialize()`](https://rdrr.io/r/methods/new.html)**: none (use
+`ext(x)<-` and `length(x)<-`).
+
+[`as.polygons()`](https://drieslab.github.io/tilework/reference/as.polygons.md)
+uses a vectorized formula — bounds for all n tiles are built in one
+matrix operation before a single
+[`terra::vect()`](https://rspatial.github.io/terra/reference/vect.html)
+call.
+
+[`intersect()`](https://drieslab.github.io/tilework/reference/intersect.md)
+uses an analytic range formula (see [Spatial
+Selection](#spatial-selection)).
+
+------------------------------------------------------------------------
+
+### pixelTilePlan
+
+Uniform grid tiling in pixel-index space. Tiles are defined by
+row/column ranges, not CRS coordinates.
+
+**Extra slot**: `@pxdims` (numeric\[2\], `c(nrow, ncol)` of source
+image).
+
+**`[i]` returns**: `integer[4]`
+(`c(col_min, col_max, row_min, row_max)`). The `zero = TRUE` flag in
+`.extract_ij_tile()` prevents padded bounds from going below pixel 1
+(see [Padding](#padding)).
+
+**`$<-` setters**: `$pxdims<-`, `$ncols<-`, `$nrows<-` all trigger
+[`initialize()`](https://rdrr.io/r/methods/new.html).
+
+------------------------------------------------------------------------
+
+### pointTilePlan
+
+Tiling centered on arbitrary (x, y) coordinates with a uniform tile
+size. Tile placement is driven entirely by supplied points rather than a
+grid formula.
+
+**Extra slots**:
+
+| Slot | Type | Meaning |
+|----|----|----|
+| `@coords` | matrix (n×2) | Center coordinates (columns: x, y) |
+| `@input` | character | Coordinate space of `@coords`, `@tile_dims`, `@pad` |
+| `@output` | character | Coordinate space returned by `[i]`; resolved at `getTile` time |
+| `@rast_dims` | numeric\[2\] | `c(nrow, ncol)` of reference raster (cross-mode only) |
+| `@extent` | numeric\[4\] | Spatial extent of reference raster (pixel→spatial only) |
+
+`@dims` is always `c(n, 1L)` — tiles are in a list, not a grid.
+
+**`[i]` returns**: bounds in the **input** coordinate space
+(`SpatExtent` for `input = "spatial"`, `integer[4]` for
+`input = "pixel"`). `$output` is not consulted at `[i]` time; it is only
+applied by
+[`getTile()`](https://drieslab.github.io/tilework/reference/getTile.md).
+
+When
+[`getTile()`](https://drieslab.github.io/tilework/reference/getTile.md)
+is called with a `SpatRaster`, the raster’s own `@rast_dims` and
+`@extent` are injected before `[i]` runs, so users do not need to set
+those slots manually in the common case.
+
+**Four tile-bound helpers** map each `(input, output)` combination:
+
+| Scenario          | Helper                     |
+|-------------------|----------------------------|
+| spatial → spatial | `.point_tile_bounds_s2s()` |
+| spatial → pixel   | `.point_tile_bounds_s2p()` |
+| pixel → pixel     | `.point_tile_bounds_p2p()` |
+| pixel → spatial   | `.point_tile_bounds_p2s()` |
+
+After `$coords<-`, metadata is auto-populated with `"tile"`, `"x"`,
+`"y"`.
+
+------------------------------------------------------------------------
+
+### freeTilePlan
+
+Explicit per-tile bounds with no uniformity requirement. The canonical
+representation for adaptive spatial decomposition such as quadtrees.
+
+**Extra slot**: `@bounds` (matrix, n×4, `c(xmin, xmax, ymin, ymax)` per
+row).
+
+`@tile_dims` is intentionally empty.
+
+`$bounds<-` triggers
+[`initialize()`](https://rdrr.io/r/methods/new.html) to recompute `@n`,
+`@dims`, and `@metadata`.
+[`nrow()`](https://drieslab.github.io/tilework/reference/dim.md) and
+[`length()`](https://drieslab.github.io/tilework/reference/dim.md) both
+return `n`;
+[`ncol()`](https://drieslab.github.io/tilework/reference/dim.md) returns
+1.
+
+**`[i]` returns**: `SpatExtent`.
+
+[`as.polygons()`](https://drieslab.github.io/tilework/reference/as.polygons.md)
+applies padding vectorized across all rows of `@bounds`.
+
+[`intersect()`](https://drieslab.github.io/tilework/reference/intersect.md)
+uses a vectorized AABB comparison across all rows (see [Spatial
+Selection](#spatial-selection)).
+
+#### quadtreePlan workflow
+
+1.  Start from a coarse `tilePlan`; collect its tile extents as
+    `pending`.
+2.  Each iteration: build a `freeTilePlan` from `pending`; run
+    `tileApply(x, fp, FUN, ...)`; classify each tile as leaf (value ≤
+    threshold or tile too small to split) or non-leaf.
+3.  Non-leaf tiles are split into four equal quadrants and added back to
+    `pending`. Repeat until `max_depth` is reached.
+4.  At `max_depth`, remaining pending tiles receive one final
+    `tileApply` pass.
+5.  **Merge pass**: greedily merge pairs of leaf tiles that share a
+    complete edge and whose combined `FUN` value stays ≤ threshold.
+    Repeats until no further merges are possible.
+6.  Return a `freeTilePlan` with `$n_records` set to the last measured
+    `FUN` value per leaf tile.
+
+The merge pass reduces tile count in sparse regions where sibling
+quadrants all fall below the threshold — they collapse back toward their
+parent rectangle.
+
+------------------------------------------------------------------------
+
+## How Tile Bounds Are Computed
+
+### Entry Points
+
+Three `[` signatures on `tilePlan`:
+
+| Signature | Behaviour |
+|----|----|
+| `[i]` (numeric flat index) | Converts flat → (row, col) via `.tile_idx_to_ij()`, then dispatches to `[i, j]` |
+| `[i, j]` (row/col) | Calls `.extract_ij_tile()` with subclass-specific hooks |
+| `[]` (missing both) | Returns all tiles via `[seq_len(length(x))]` |
+
+### `.extract_ij_tile()`
+
+The shared core that all concrete `[i, j]` methods dispatch to.
+
+``` r
+.extract_ij_tile(x, i, j,
+    expand_grid = TRUE,   # expand.grid(j, i) before computing
+    tile_fun,             # function(x, i, j) → c(xmin, xmax, ymin, ymax)
+    fun,                  # post-processor: ext or as.integer
+    zero = FALSE)         # apply .tile_pad_zero() after padding
+```
+
+Steps:
+
+1.  If `expand_grid = TRUE`, call `expand.grid(j, i)` to materialize all
+    (row, col) pairs. Note the j-first argument order, which is how
+    `expand.grid` produces row-major output when j is the fast axis.
+2.  `mapply(tile_fun, i, j)` → list of `c(xmin, xmax, ymin, ymax)`
+    vectors.
+3.  `.do_tile_pad(bounds, pad)` → expand each bound by `@pad`.
+4.  If `zero = TRUE`, apply `.tile_pad_zero()` — see
+    [Padding](#padding).
+5.  Apply `fun()` (either
+    [`ext()`](https://drieslab.github.io/tilework/reference/ext.md) or
+    [`as.integer()`](https://rdrr.io/r/base/integer.html)) to each
+    result.
+6.  Attach relevant metadata columns as attributes on each bound object.
+
+Subclass dispatch:
+
+| Class             | `tile_fun`             | `fun`                 | `zero`  |
+|-------------------|------------------------|-----------------------|---------|
+| `spatialTilePlan` | `.spat_tile_bounds`    | `ext`                 | `FALSE` |
+| `pixelTilePlan`   | `.px_tile_bounds`      | `as.integer`          | `TRUE`  |
+| `pointTilePlan`   | `.point_tile_bounds_*` | `ext` or `as.integer` | `FALSE` |
+| `freeTilePlan`    | `.free_tile_bounds`    | `ext`                 | `FALSE` |
+
+------------------------------------------------------------------------
+
+## Padding
+
+Padding (`@pad`) is a uniform boundary expansion applied after tile
+bounds computation. A tile with nominal bounds
+`(xmin, xmax, ymin, ymax)` and `pad = p` is extracted as
+`(xmin−p, xmax+p, ymin−p, ymax+p)`.
+
+### `.do_tile_pad(bounds, pad)`
+
+Expands all four sides: `xmin -= p`, `xmax += p`, `ymin -= p`,
+`ymax += p`.
+
+### `.tile_pad_zero(bounds, pad)` — pixel plans only
+
+After `.do_tile_pad()`, a padded pixel tile for the first row/column of
+a raster would produce indices below 1, which is invalid.
+`.tile_pad_zero()` shifts the bounds back so the minimum index is 1,
+preserving tile size but anchoring it to the raster edge:
+
+    xmin += p; xmax += p; ymin += p; ymax += p
+
+The result is that edge tiles silently drop the out-of-bounds pad region
+rather than requesting pixels outside the image.
+
+------------------------------------------------------------------------
+
+## Spatial Selection
+
+`intersect(x, y)` finds all tiles whose padded bounds overlap a query
+region `y` (a `SpatExtent` or `SpatVector`). It returns a
+`tileSelection`.
+
+### spatialTilePlan — analytic formula
+
+For an axis-aligned query `[qxmin, qxmax, qymin, qymax]` the
+intersecting column range `[j_min, j_max]` and row range
+`[i_min, i_max]` are computed in O(1):
+
+``` r
+j_min <- max(1L, ceiling((qxmin - xmin_e - pad) / tile_w))
+j_max <- min(ncol(x), floor((qxmax - xmin_e + pad) / tile_w) + 1L)
+i_min <- max(1L, ceiling((qymin - ymin_e - pad) / tile_h))
+i_max <- min(nrow(x), floor((qymax - ymin_e + pad) / tile_h) + 1L)
+```
+
+Touching edges count as intersection (inclusive `>=`/`<=`). If either
+range is empty, an empty `tileSelection` is returned. Otherwise
+`.ij_to_tile_idx()` converts the grid range to flat indices.
+
+For a `SpatVector` query: the AABB of `y` is used for the analytic
+pre-cull, then `terra::relate(..., "intersects")` is applied to the
+candidate tile polygons for exact intersection.
+
+### freeTilePlan — vectorized AABB
+
+``` r
+idx <- which(
+    b[, 1L] - p <= q[[2L]] &
+    b[, 2L] + p >= q[[1L]] &
+    b[, 3L] - p <= q[[4L]] &
+    b[, 4L] + p >= q[[3L]]
+)
+```
+
+The same AABB pre-cull + exact polygon refinement pattern applies for
+`SpatVector` queries.
+
+### Default fallback (tilePlan base)
+
+For plan classes without a specialized method: materialize all tiles via
+[`as.polygons()`](https://drieslab.github.io/tilework/reference/as.polygons.md),
+convert the query to a polygon, then call
+`terra::relate(..., "intersects")`. This is O(n) polygon construction —
+correct but slower than the analytic paths.
+
+------------------------------------------------------------------------
+
+## as.polygons()
+
+Converts a tile plan to a `SpatVector` of padded rectangles (one per
+tile). The `tile` attribute column in the returned vector carries flat
+tile indices.
+
+### `.tile_bounds_to_sv(bounds, ids)`
+
+The shared internal constructor. Given an n×4 bounds matrix it builds a
+5-point closed-ring polygon for each row in a single `rbind` pass, then
+calls
+[`terra::vect()`](https://rspatial.github.io/terra/reference/vect.html)
+once for all polygons:
+
+``` r
+xs <- c(rbind(xmin, xmax, xmax, xmin, xmin))  # 5 x-coords per polygon
+ys <- c(rbind(ymin, ymin, ymax, ymax, ymin))   # 5 y-coords per polygon
+g  <- cbind(rep(ids, each = 5L), 1L, xs, ys, 0L)  # (geom, part, x, y, hole)
+terra::vect(g, type = "polygons", atts = data.frame(tile = ids))
+```
+
+### Subclass strategies
+
+| Class | Strategy |
+|----|----|
+| `spatialTilePlan` | Vectorized grid formula → bounds matrix → `.tile_bounds_to_sv()` |
+| `freeTilePlan` | Apply padding to `@bounds` rows → `.tile_bounds_to_sv()` |
+| `pointTilePlan` | Center ± half-dims in output space → bounds matrix → `.tile_bounds_to_sv()` |
+| `pixelTilePlan` / base | `x[]` to extract all bounds, then convert individually |
+
+------------------------------------------------------------------------
+
+## tileSelection
+
+A lazy wrapper around a subset of a tile plan. Stores an index vector
+into the underlying `tilePlan` rather than materializing tile bounds.
+
+    tileSelection
+      @tp       tilePlan
+      @indices  integer
+
+Construction: `tp[i, drop = FALSE]`.
+
+[`length()`](https://drieslab.github.io/tilework/reference/dim.md)
+returns the number of selected tiles. `[i]` on a selection returns the
+actual bounds: `tp[indices[i]]`. `$name` reads from
+`tp@metadata[indices, name]`.
+
+Arithmetic delegates to the underlying plan: `sel + 5` sets `@pad` on
+`sel@tp`.
+
+------------------------------------------------------------------------
+
+## tileGroup
+
+Groups tiles into named subsets for structured parallel processing.
+
+    tileGroup
+      @tp       tilePlan
+      @groups   named list  # each element: integer vector or ij pair list(rows, cols)
+      @active   character   # name of currently active group
+      @metadata data.frame
+
+An ij pair group (`list(c(i_range), c(j_range))`) is detected by
+`.is_ij_group()` and indexes into the grid; a flat-vector group lists
+tile indices directly.
+
+### Parallelisation strategies for tileApply
+
+- **`parallel_strategy = "groups"`** (default): groups run in parallel,
+  tiles within each group run sequentially. `setup_FUN` and post-group
+  callbacks fire once per group per worker.
+- **`parallel_strategy = "tiles"`**: groups run sequentially, tiles
+  within each group run in parallel. No per-group setup/callbacks.
+
+------------------------------------------------------------------------
+
+## tileIterator
+
+A closure-based stateful iterator for streaming or memory-constrained
+processing.
+
+    tileIterator
+      @tp         tilePlan (or tileGroup)
+      @position   integer   # index of last completed tile; starts at min(bound) - 1
+      @bound      integer[2]  # [first_tile, last_tile] to iterate
+      @batch_size integer
+
+State is captured in closures, making the iterator fully serializable
+(`saveRDS`/`readRDS`). Key public methods via `$`:
+
+- `$next_batch()` / `$next_indices()` — advance position and return next
+  batch
+- `$has_next` — `position < bound[2]`
+- `$remaining` — tiles left
+- `$reset()` — restore position to `min(bound) - 1`
+
+### iterSplit()
+
+``` r
+iterSplit(tiles, n, batch_size = NULL, distribute = TRUE)
+```
+
+Divides the remaining tile range across n independent iterators (one per
+parallel worker). When `distribute = TRUE` the range is partitioned
+evenly; when `FALSE` each iterator covers the same range (useful for
+replicate evaluation).
+
+------------------------------------------------------------------------
+
+## tileApply Data Flow
+
+    tileApply(x, tiles, FUN, ...)
+      └─ redispatch_tileapply(x, tiles, param_xy = "x", ...)
+           └─ redispatch_tileapply(y, tiles, param_xy = "y", x = token, ...)
+                └─ tileApply(token, token, tiles, ...)
+                     └─ for each tile i:
+                          bounds  <- tiles[i]
+                          data    <- getTile(x, tiles, i = i, ...)
+                          result  <- FUN(data, .I = i, .R = row, .C = col, .TILE = bounds)
+
+### redispatch_tileapply — token dispatch chain
+
+This chain preprocesses each input datum in the correct order and
+injects `default_get_params` without requiring a combinatorial explosion
+of two-input `tileApply` method signatures.
+
+1.  `tileApply(x, y, tiles, ...)` dispatches to
+    `tileApply(ANY, ANY, ANY)`.
+2.  `redispatch_tileapply(x, tiles, param_xy = "x", y = y)` runs
+    x-specific preprocessing, wraps `x` in a `token`, and re-calls
+    `tileApply(token, y, tiles, ...)`.
+3.  `redispatch_tileapply(y, tiles, param_xy = "y", x = token)` runs
+    y-specific preprocessing and re-calls
+    `tileApply(token, token, tiles, ...)`.
+4.  Evaluation proceeds at `tileApply(token, token, tiles)`.
+
+`default_get_params` injected per input type:
+
+| Input type | Injected params |
+|----|----|
+| `SpatRaster` | `prefer = "raster"`, `ext = .ext_to_num_vec(ext(sig))` |
+| `character` (file path) | Read via `.terra_read()`, then redispatch |
+
+### getTile — param routing
+
+``` r
+getTile(x, tiles, i = NULL, j, pad = NULL, sel_params = list(), ...)
+```
+
+`get_params_x` and `get_params_y` are spread as **flat named arguments**
+in the `getTile` call, not wrapped in a list. Each dispatch level
+consumes the params it understands:
+
+| Method                          | Params consumed         |
+|---------------------------------|-------------------------|
+| `getTile(character, tilePlan)`  | `prefer`, `ext`         |
+| `getTile(SpatRaster, tilePlan)` | `lyr`, `extend`, `fill` |
+| `getBoundedData(...)`           | remainder in `...`      |
+
+`sel_params` is a separate named list for `[` selection parameters (e.g.
+`expand_grid`). It does not flow into `getBoundedData`.
+
+`getTile(SpatRaster, pointTilePlan)` is the only concrete specialization
+that differs from the base — it injects `@rast_dims` and `@extent` from
+the raster before delegating to the parent so users do not need to
+populate those slots manually.
+
+### getBoundedData dispatch
+
+Bound type drives data-layer dispatch:
+
+| `x` type | `bound` type | Action |
+|----|----|----|
+| `SpatRaster` | `integer[4]` | `r[rows, cols, ...]` pixel indexing; optionally extend to full bound |
+| `SpatRaster` | `SpatExtent` | [`terra::window()`](https://rspatial.github.io/terra/reference/window.html) spatial crop; optionally extend |
+| `SpatVectorProxy` | `SpatExtent` | `terra::query(x, extent = bound)` |
+
+When `extend = TRUE`, the tile data is padded to the full requested
+bounds using `fill` (default `NA`), ensuring downstream code always
+receives a consistently sized array even at raster edges.
+
+### Special FUN parameters
+
+The following parameter names are reserved for injection into `FUN` if
+they appear in `formals(FUN)`:
+
+| Param | Value | Context |
+|----|----|----|
+| `.I` | Flat tile index | All |
+| `.R` | Tile row | All |
+| `.C` | Tile column | All |
+| `.TILE` | Bound object (`SpatExtent` or `integer[4]`) | All |
+| `.GROUP` | Group name | `tileGroup` |
+| `.POSITION` | Batch range `c(start, end)` | `tileIterator` |
+| `.BATCH` | Batch number | `tileIterator` |
+| `.SETUP_OUT` | Output of `setup_FUN` | `tileGroup`, `tileIterator` |
+
+------------------------------------------------------------------------
+
+## Debugging Dispatch
+
+The `"tilework.verbose"` option controls message output across all
+`tileApply` and `redispatch_tileapply` calls.
+
+| Value            | Effect                                       |
+|------------------|----------------------------------------------|
+| `TRUE` (default) | Normal progress messages via `.vmsg()`       |
+| `FALSE`          | Silent                                       |
+| `"debug"`        | Adds step-level dispatch trace via `.dmsg()` |
+
+Set the option before a `tileApply` call:
+
+``` r
+options("tilework.verbose" = "debug")
+tileApply(x, tiles, FUN)
+options("tilework.verbose" = TRUE)  # restore
+```
+
+Or pass `verbose = "debug"` directly:
+
+``` r
+tileApply(x, tiles, FUN, verbose = "debug")
+```
+
+In debug mode, each stage of the `redispatch_tileapply` chain emits a
+message as it hands off, along with the `...` params it saw. This makes
+it easy to trace which method matched a given input type, what
+`default_get_params` were injected, and which `getTile` signature
+ultimately ran.
+
+Example output (abridged):
+
+    [tileApply] x and y. Start redispatch x...
+    [redispatch] step done. Route as x ...
+      Dot params: prefer, ext
+    [tileApply] x done. Start redispatch y...
+    [redispatch] step done. Route as y ...
+      Dot params: lyr, extend, fill
+    [tileApply] running... Dot params: prefer, ext, lyr, extend, fill
+
+------------------------------------------------------------------------
+
+## Metadata
+
+Every `tilePlan` carries a `@metadata` data.frame with at least a
+`"tile"` column (`seq_len(n)`). Additional columns are added via
+`$name<-`.
+
+**Per-tile metadata attached to bounds**: When `[i]` returns a bound,
+all metadata columns for that tile are attached as named attributes on
+the bound object. Downstream code (e.g., `FUN` inside `tileApply`) can
+read these via `attr(bound, "some_col")`.
+
+**tileSelection metadata passthrough**: `sel$name` reads
+`tp@metadata[indices, name]`. `sel$name <- values` writes back via
+`tp@metadata[indices, name] <- values`.
+
+------------------------------------------------------------------------
+
+## Coordinate Conventions
+
+- **Flat index**: 1-based, row-major. Tile k is at row
+  `ceiling(k / ncol(x))`, column `((k - 1) %% ncol(x)) + 1`.
+- **Row/col indices**: 1-based. `i` = row (y direction), `j` = column (x
+  direction).
+- **Bounds vector**: always `c(xmin, xmax, ymin, ymax)` internally
+  before `fun` post-processing.
+- **Spatial offset convention**: `offset = c(ymin, xmin)` of the plan
+  extent (y component first, matching raster row-first convention).
+- **Raster indexing**: `r[rows, cols]` is row-first; row 1 is the top of
+  the image.
+
+------------------------------------------------------------------------
+
+## Adding a New tilePlan Class
+
+1.  Define the class in `classes.R` extending `"tilePlan"`.
+2.  Create `R/<ClassName>.R` with `@include classes.R` and
+    `@include tilePlan.R`.
+3.  Write `initialize` to populate `@dims`, `@n`, and `@metadata`. Use
+    prototype entries for static defaults; use `if (length(...) == 0L)`
+    checks only where defaults depend on other slots.
+4.  Write a `tile_fun`: `function(x, i, j)` returning
+    `c(xmin, xmax, ymin, ymax)`.
+5.  Implement `[`: dispatch to
+    `callNextMethod(x, i, j, tile_fun = ..., fun = ..., zero = ...)`.
+6.  Implement `show`, `plot`, and any class-specific `$`/`$<-` methods.
+7.  Write a constructor function (e.g. `fooTilePlan()`) that calls
+    [`new()`](https://rdrr.io/r/methods/new.html) then applies setup
+    params via `$<-` setters so validation logic is not duplicated.
+8.  Register the constructor in the
+    [`tilePlan()`](https://drieslab.github.io/tilework/reference/tilePlan.md)
+    factory in `tilePlan.R`.
+
+`getTile` and `tileApply` require no changes as long as `[i]` returns
+`SpatExtent` or `integer[4]`. A dedicated `getTile` method is only
+needed if pre/post-processing is required (as with `pointTilePlan`’s
+raster metadata injection).
