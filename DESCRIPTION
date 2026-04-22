@@ -1,6 +1,6 @@
 Package: tilework
 Title: Data Tiling and Parallelizable Workflows
-Version: 0.0.5
+Version: 0.0.6
 Authors@R: c(
 	person("Ruben", "Dries", email = "rubendries@gmail.com",
 		 role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7650-7754")),
@@ -42,6 +42,7 @@ Collate:
     'getBoundedData.R'
     'pointTilePlan.R'
     'getTile.R'
+    'intersect.R'
     'parallel.R'
     'pixelTilePlan.R'
     'spatialTilePlan.R'

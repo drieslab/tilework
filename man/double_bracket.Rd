@@ -57,6 +57,7 @@ Other tile* methods:
 \code{\link{dim}()},
 \code{\link{dollar}},
 \code{\link{ext}()},
+\code{\link{intersect}()},
 \code{\link{plot}()}
 }
 \concept{tile* methods}

@@ -52,6 +52,7 @@ Other tile* methods:
 \code{\link{dim}()},
 \code{\link{dollar}},
 \code{\link{double_bracket}},
-\code{\link{ext}()}
+\code{\link{ext}()},
+\code{\link{intersect}()}
 }
 \concept{tile* methods}

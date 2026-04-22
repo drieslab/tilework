@@ -43,6 +43,7 @@ Other tile* methods:
 \code{\link{dollar}},
 \code{\link{double_bracket}},
 \code{\link{ext}()},
+\code{\link{intersect}()},
 \code{\link{plot}()}
 }
 \concept{tile* methods}
