@@ -254,17 +254,18 @@ setMethod(
 #' # plot with items per tile
 #' plot(fp, values = "n_records")
 #' @export
-quadtreePlan <- function(x, 
-    tiles = NULL, 
-    FUN = nrow, 
+quadtreePlan <- function(x,
+    tiles = NULL,
+    FUN = nrow,
     threshold,
     min_tile_size = NULL,
-    max_depth = 10L, 
+    max_depth = 10L,
+    verbose = NULL,
     ...) {
     checkmate::assert_number(threshold)
     checkmate::assert_number(min_tile_size, null.ok = TRUE)
     checkmate::assert_integerish(max_depth, len = 1L, lower = 1L)
-  
+
     if (is.null(tiles)) {
         # default coarse starting grid
         tiles <- tilePlan("spatial")
@@ -280,8 +281,18 @@ quadtreePlan <- function(x,
     leaf_measures <- numeric(0L)
     depth   <- 0L
 
+    .vmsg(.v = verbose, sprintf(
+        "[quadtreePlan] start: %d seed tiles, threshold = %g, max_depth = %d",
+        length(pending), threshold, max_depth
+    ))
+
     while (length(pending) > 0L && depth < max_depth) {
         depth <- depth + 1L
+
+        .vmsg(.v = verbose, sprintf(
+            "[quadtreePlan] depth %d: measuring %d tile(s)",
+            depth, length(pending)
+        ))
 
         # build a freeTilePlan for this pass
         bounds_mat <- do.call(rbind, lapply(pending, .ext_to_num_vec))
@@ -304,11 +315,21 @@ quadtreePlan <- function(x,
                 next_pending <- c(next_pending, .subdivide_extent(e))
             }
         }
+        .dmsg(.v = verbose, sprintf(
+            "[quadtreePlan] depth %d: %d leaf(ves), %d subdivided",
+            depth,
+            length(pending) - length(next_pending) %/% 4L,
+            length(next_pending) %/% 4L
+        ))
         pending <- next_pending
     }
 
     # remaining pending hit max_depth — measure once more then keep as leaves
     if (length(pending) > 0L) {
+        .vmsg(.v = verbose, sprintf(
+            "[quadtreePlan] max_depth %d reached: keeping %d tile(s) as leaves",
+            max_depth, length(pending)
+        ))
         bounds_mat <- do.call(rbind, lapply(pending, .ext_to_num_vec))
         fp <- freeTilePlan()
         fp$bounds <- bounds_mat
@@ -316,6 +337,11 @@ quadtreePlan <- function(x,
         leaves <- c(leaves, pending)
         leaf_measures <- c(leaf_measures, pending_measures)
     }
+
+    .vmsg(.v = verbose, sprintf(
+        "[quadtreePlan] subdivision complete: %d leaves, merging...",
+        length(leaves)
+    ))
 
     bounds_mat <- do.call(rbind, lapply(leaves, .ext_to_num_vec))
 

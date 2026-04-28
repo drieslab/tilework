@@ -11,6 +11,7 @@ quadtreePlan(
   threshold,
   min_tile_size = NULL,
   max_depth = 10L,
+  verbose = NULL,
   ...
 )
 }
