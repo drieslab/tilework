@@ -1,10 +1,6 @@
 ---
 title: "Package Design"
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Package Design}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
