@@ -1,15 +1,25 @@
 Package: tilework
-Title: Data Tiling and Parallelizable Workflows
+Title: Extensible Tile Planning and Windowed Parallel Processing
 Version: 0.0.6
 Authors@R: c(
+	person("Jiaji", "George Chen", email = "thedrieslab@gmail.com",
+		 role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4565-832X")),
 	person("Ruben", "Dries", email = "rubendries@gmail.com",
-		 role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7650-7754")),
-	person("Jiaji", "George Chen", email = "jiajic@bu.edu",
-		 role = c("aut"))
+		 role = c("aut"), comment = c(ORCID = "0000-0001-7650-7754"))
 	)
-Description: Open source and S4 extensible framework for performing 
-    tile/patch-based processing and analysis.
-License: MIT
+Description: An extensible framework for tile-based processing of large,
+    spatially indexed data. Tile plans are first-class objects describing a
+    set of bounds, which may be regular grids in pixel or coordinate space,
+    tiles centered on supplied points, or adaptive decompositions such as
+    quadtrees. Bounds may carry padding, supplying the overlapping context
+    that neighborhood operations and objects spanning several tiles require.
+    Extraction dispatches on the class of the input, so one plan can window
+    two data sources of differing type together; methods are provided for
+    'terra' rasters and vector proxies, and other packages can register
+    methods for their own formats. Tiles are processed in parallel through
+    'future', or optionally 'BiocParallel', and a per-worker initialization
+    step amortizes expensive setup such as loading a model.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
@@ -21,7 +31,7 @@ Imports:
     future.apply,
     methods,
     progressr,
-    terra (>= 1.8-21),
+    terra (>= 1.8-21)
 Suggests:
     abind,
     BiocParallel,
@@ -30,7 +40,6 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 URL: https://drieslab.github.io/tilework/
-biocViews: Software, Technology, Spatial
 VignetteBuilder: knitr
 BugReports: https://github.com/drieslab/tilework/issues
 Collate: 
