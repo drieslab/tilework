@@ -9,14 +9,14 @@ The \code{tilework} class is a class contained by all tile* classes in the
 \pkg{tilework} package. It is a "virtual" class.
 }
 \seealso{
-Other tile plans: 
-\code{\link{freeTilePlan}},
+Other tile plans:
+\code{\link[=freeTilePlan]{freeTilePlan()}},
 \code{\link{freeTilePlan-class}},
 \code{\link{pixelTilePlan-class}},
 \code{\link{pointTilePlan-class}},
-\code{\link{quadtreePlan}()},
+\code{\link[=quadtreePlan]{quadtreePlan()}},
 \code{\link{spatialTilePlan-class}},
-\code{\link{tilePlan}},
+\code{\link[=tilePlan]{tilePlan()}},
 \code{\link{tilePlan-class}}
 }
 \concept{tile plans}

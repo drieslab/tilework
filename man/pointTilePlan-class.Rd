@@ -89,7 +89,7 @@ Data frames are also accepted and coerced via \code{as.matrix()}.
 coordinate units.
 \item \verb{$input<-} / \verb{$output<-} change the coordinate / output mode.
 \item \verb{$nrows<-} / \verb{$ncols<-} are aliases for \verb{$height<-} / \verb{$width<-} for
-consistency with \linkS4class{pixelTilePlan} when using pixel coordinates.
+consistency with \link[=pixelTilePlan-class]{pixelTilePlan} when using pixel coordinates.
 \item \verb{$rast_dims<-} sets \code{c(nrow, ncol)} of the reference raster — required
 for \code{plot()} when \code{input = "pixel"} and for cross-mode \code{getTile()} calls
 when no raster is provided.
@@ -153,23 +153,13 @@ tp2$width  <- 100
 tp2$height <- 100
 }
 \seealso{
-Other tile plans: 
-\code{\link{freeTilePlan}},
+Other tile plans:
+\code{\link[=freeTilePlan]{freeTilePlan()}},
 \code{\link{freeTilePlan-class}},
 \code{\link{pixelTilePlan-class}},
-\code{\link{quadtreePlan}()},
+\code{\link[=quadtreePlan]{quadtreePlan()}},
 \code{\link{spatialTilePlan-class}},
-\code{\link{tilePlan}},
-\code{\link{tilePlan-class}},
-\code{\link{tilework-class}}
-
-Other tile plans: 
-\code{\link{freeTilePlan}},
-\code{\link{freeTilePlan-class}},
-\code{\link{pixelTilePlan-class}},
-\code{\link{quadtreePlan}()},
-\code{\link{spatialTilePlan-class}},
-\code{\link{tilePlan}},
+\code{\link[=tilePlan]{tilePlan()}},
 \code{\link{tilePlan-class}},
 \code{\link{tilework-class}}
 }

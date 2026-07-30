@@ -88,7 +88,7 @@ options(tilework.warn_sequential = FALSE)
 \seealso{
 \code{\link[=tileApply]{tileApply()}}
 
-Other parallel settings: 
+Other parallel settings:
 \code{\link{tilework_management}}
 }
 \concept{parallel settings}

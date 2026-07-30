@@ -45,7 +45,7 @@ less obvious.
 
 Padding can be added either via \code{\link[=dollar]{$pad}} or \code{+} and \code{-} operators.
 The + and - operators specifically modify the padding value based on the
-arithmetic ops. This is similar to their usage in \link[terra:arith-generic]{terra::Arith-methods}
+arithmetic ops. This is similar to their usage in \link[terra:Arith-methods]{terra::Arith-methods}
 
 \verb{$stride<-} is an alternative way to set padding via the stride between
 tile starts: \code{pad = (tile_dim - stride) / 2}. Requires \code{tile_dims} to be
@@ -82,15 +82,15 @@ plot(px)
 px[1:3]
 }
 \seealso{
-Other tile* methods: 
-\code{\link{as.polygons}()},
+Other tile* methods:
+\code{\link{as.polygons}},
 \code{\link{bracket}},
-\code{\link{centroids}()},
-\code{\link{dim}()},
+\code{\link{centroids}},
+\code{\link{dim}},
 \code{\link{dollar}},
 \code{\link{double_bracket}},
-\code{\link{ext}()},
-\code{\link{intersect}()},
-\code{\link{plot}()}
+\code{\link{ext}},
+\code{\link{intersect}},
+\code{\link{plot}}
 }
 \concept{tile* methods}

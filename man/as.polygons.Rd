@@ -35,15 +35,15 @@ Accelerated vectorized methods are provided for \code{spatialTilePlan},
 back to extracting bounds via \code{x[]}.
 }
 \seealso{
-Other tile* methods: 
+Other tile* methods:
 \code{\link{arith}},
 \code{\link{bracket}},
-\code{\link{centroids}()},
-\code{\link{dim}()},
+\code{\link{centroids}},
+\code{\link{dim}},
 \code{\link{dollar}},
 \code{\link{double_bracket}},
-\code{\link{ext}()},
-\code{\link{intersect}()},
-\code{\link{plot}()}
+\code{\link{ext}},
+\code{\link{intersect}},
+\code{\link{plot}}
 }
 \concept{tile* methods}

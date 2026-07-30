@@ -23,10 +23,10 @@ indexing and \code{length()}.}
 }}
 
 \seealso{
-Other tile orchestration: 
-\code{\link{iterSplit}()},
-\code{\link{tileGroup}},
-\code{\link{tileIterator}},
+Other tile orchestration:
+\code{\link[=iterSplit]{iterSplit()}},
+\code{\link[=tileGroup]{tileGroup()}},
+\code{\link[=tileIterator]{tileIterator()}},
 \code{\link{tileIterator-class}}
 }
 \concept{tile orchestration}

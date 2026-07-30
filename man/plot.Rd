@@ -44,15 +44,15 @@ x$new_meta <- rev(head(letters, 9))
 plot(x, value = "new_meta")
 }
 \seealso{
-Other tile* methods: 
+Other tile* methods:
 \code{\link{arith}},
-\code{\link{as.polygons}()},
+\code{\link{as.polygons}},
 \code{\link{bracket}},
-\code{\link{centroids}()},
-\code{\link{dim}()},
+\code{\link{centroids}},
+\code{\link{dim}},
 \code{\link{dollar}},
 \code{\link{double_bracket}},
-\code{\link{ext}()},
-\code{\link{intersect}()}
+\code{\link{ext}},
+\code{\link{intersect}}
 }
 \concept{tile* methods}

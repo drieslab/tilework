@@ -195,11 +195,11 @@ siter <- iterSplit(iter, n = 2)
 siter
 }
 \seealso{
-\linkS4class{tileIterator}
+\link[=tileIterator-class]{tileIterator}
 
-Other tile orchestration: 
-\code{\link{iterSplit}()},
-\code{\link{tileGroup}},
+Other tile orchestration:
+\code{\link[=iterSplit]{iterSplit()}},
+\code{\link[=tileGroup]{tileGroup()}},
 \code{\link{tileGroup-class}},
 \code{\link{tileIterator-class}}
 }

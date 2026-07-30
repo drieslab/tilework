@@ -22,10 +22,10 @@ Utility function to create multiple independent walkers for parallel processing.
 Each iterator will have the same underlying iterator but independent state.
 }
 \seealso{
-Other tile orchestration: 
-\code{\link{tileGroup}},
+Other tile orchestration:
+\code{\link[=tileGroup]{tileGroup()}},
 \code{\link{tileGroup-class}},
-\code{\link{tileIterator}},
+\code{\link[=tileIterator]{tileIterator()}},
 \code{\link{tileIterator-class}}
 }
 \concept{tile orchestration}

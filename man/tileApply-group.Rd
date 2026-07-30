@@ -172,12 +172,12 @@ results <- tileApply(r,
 str(results)
 }
 \seealso{
-\link{tileApply}, \code{\link[=tileGroup]{tileGroup()}}, \linkS4class{tileGroup}
+\link{tileApply}, \code{\link[=tileGroup]{tileGroup()}}, \link[=tileGroup-class]{tileGroup}
 
-Other tile processing: 
-\code{\link{getBoundedData}()},
-\code{\link{getTile}()},
-\code{\link{tileApply}()},
+Other tile processing:
+\code{\link[=getBoundedData]{getBoundedData()}},
+\code{\link[=getTile]{getTile()}},
+\code{\link[=tileApply]{tileApply()}},
 \code{\link{tileApply-iterator}},
 \code{\link{tileApply-plan}}
 }

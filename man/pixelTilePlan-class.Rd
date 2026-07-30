@@ -114,13 +114,13 @@ x[[5]]
 x[[1:3]]$fname
 }
 \seealso{
-Other tile plans: 
-\code{\link{freeTilePlan}},
+Other tile plans:
+\code{\link[=freeTilePlan]{freeTilePlan()}},
 \code{\link{freeTilePlan-class}},
 \code{\link{pointTilePlan-class}},
-\code{\link{quadtreePlan}()},
+\code{\link[=quadtreePlan]{quadtreePlan()}},
 \code{\link{spatialTilePlan-class}},
-\code{\link{tilePlan}},
+\code{\link[=tilePlan]{tilePlan()}},
 \code{\link{tilePlan-class}},
 \code{\link{tilework-class}}
 }

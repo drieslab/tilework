@@ -31,7 +31,7 @@ x <- as(letters, "token")
 x[]
 }
 \seealso{
-Other tilework extension: 
+Other tilework extension:
 \code{\link{extending_tilework}},
 \code{\link{redispatch_tileapply,SpatRaster,freeTilePlan-method}}
 }

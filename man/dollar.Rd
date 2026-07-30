@@ -69,15 +69,15 @@ tile_ext <- x[5][[1]]
 attr(tile_ext, "test")
 }
 \seealso{
-Other tile* methods: 
+Other tile* methods:
 \code{\link{arith}},
-\code{\link{as.polygons}()},
+\code{\link{as.polygons}},
 \code{\link{bracket}},
-\code{\link{centroids}()},
-\code{\link{dim}()},
+\code{\link{centroids}},
+\code{\link{dim}},
 \code{\link{double_bracket}},
-\code{\link{ext}()},
-\code{\link{intersect}()},
-\code{\link{plot}()}
+\code{\link{ext}},
+\code{\link{intersect}},
+\code{\link{plot}}
 }
 \concept{tile* methods}

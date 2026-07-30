@@ -149,12 +149,12 @@ list.files(outdir)
 unlink(outdir, recursive = TRUE)
 }
 \seealso{
-\link{tileApply}, \code{\link[=tilePlan]{tilePlan()}}, \linkS4class{spatialTilePlan}, \linkS4class{pixelTilePlan}
+\link{tileApply}, \code{\link[=tilePlan]{tilePlan()}}, \link[=spatialTilePlan-class]{spatialTilePlan}, \link[=pixelTilePlan-class]{pixelTilePlan}
 
-Other tile processing: 
-\code{\link{getBoundedData}()},
-\code{\link{getTile}()},
-\code{\link{tileApply}()},
+Other tile processing:
+\code{\link[=getBoundedData]{getBoundedData()}},
+\code{\link[=getTile]{getTile()}},
+\code{\link[=tileApply]{tileApply()}},
 \code{\link{tileApply-group}},
 \code{\link{tileApply-iterator}}
 }

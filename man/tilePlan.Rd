@@ -24,15 +24,15 @@ tilePlan("point")
 tilePlan("free")
 }
 \seealso{
-\linkS4class{spatialTilePlan}, \linkS4class{pixelTilePlan},
-\linkS4class{pointTilePlan}, \linkS4class{freeTilePlan}
+\link[=spatialTilePlan-class]{spatialTilePlan}, \link[=pixelTilePlan-class]{pixelTilePlan},
+\link[=pointTilePlan-class]{pointTilePlan}, \link[=freeTilePlan-class]{freeTilePlan}
 
-Other tile plans: 
-\code{\link{freeTilePlan}},
+Other tile plans:
+\code{\link[=freeTilePlan]{freeTilePlan()}},
 \code{\link{freeTilePlan-class}},
 \code{\link{pixelTilePlan-class}},
 \code{\link{pointTilePlan-class}},
-\code{\link{quadtreePlan}()},
+\code{\link[=quadtreePlan]{quadtreePlan()}},
 \code{\link{spatialTilePlan-class}},
 \code{\link{tilePlan-class}},
 \code{\link{tilework-class}}

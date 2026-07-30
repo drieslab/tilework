@@ -64,7 +64,7 @@ if (FALSE) {
 }
 }
 \seealso{
-Other tilework extension: 
+Other tilework extension:
 \code{\link{redispatch_tileapply,SpatRaster,freeTilePlan-method}},
 \code{\link{token-class}}
 }
