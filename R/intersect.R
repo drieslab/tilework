@@ -30,7 +30,7 @@
 #' sel$tile          # indices of intersecting tiles
 #' length(sel)       # number of tiles hit
 #' plot(sel)
-#' plot(e, add = T, border = "cyan")
+#' plot(e, add = TRUE, border = "cyan")
 #'
 #' # with padding -- tiles near the border are included
 #' tp_pad <- tp + 5
@@ -53,7 +53,7 @@
 #' sel_poly <- intersect(tp, poly)
 #' sel_poly$tile
 #' plot(sel_poly)
-#' plot(poly, add = T, border = "cyan")
+#' plot(poly, add = TRUE, border = "cyan")
 NULL
 
 
