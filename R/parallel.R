@@ -39,7 +39,9 @@
 #' setTileworkParMethod("biocparallel")
 #' getTileworkParMethod()
 #'
-#' \donttest{
+#' \dontrun{
+#' # Example pseudocode for how to use parallelization
+#' 
 #' # Using future backend with multisession
 #' future::plan(future::multisession, workers = 4)
 #' tileApply(x, tiles, fun)
