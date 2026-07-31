@@ -9,7 +9,7 @@
 #' over processing workflow.
 #'
 #' **`token`** is a stand-in for any input data class (e.g. `SpatRaster`,
-#' `SpatExtent`, filpath, etc). See [redispatch_tileapply]
+#' `SpatExtent`, filepath, etc). See [redispatch_tileapply]
 #' and [extending_tilework] for further information.
 #'
 #' @section Worker Distribution:

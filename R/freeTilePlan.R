@@ -218,7 +218,7 @@ setMethod(
 #' @description
 #' Iteratively subdivides a spatial extent into a `freeTilePlan` by running
 #' `FUN` on each tile and splitting any tile whose value exceeds `threshold`.
-#' Uses `tileApply()` internally so each pass can be parallelised via
+#' Uses `tileApply()` internally so each pass can be parallelized via
 #' [future::plan()].
 #'
 #' `FUN` must return a single numeric scalar per tile — typically a point

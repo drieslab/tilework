@@ -2,7 +2,7 @@ Package: tilework
 Title: Extensible Tile Planning and Windowed Parallel Processing
 Version: 1.0.0
 Authors@R: c(
-	person("Jiaji", "George Chen", email = "thedrieslab@gmail.com",
+	person(c("Jiaji", "George"), "Chen", email = "thedrieslab@gmail.com",
 		 role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4565-832X")),
 	person("Ruben", "Dries", email = "rubendries@gmail.com",
 		 role = c("aut"), comment = c(ORCID = "0000-0001-7650-7754"))
@@ -38,7 +38,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-URL: https://drieslab.github.io/tilework/
+URL: https://drieslab.github.io/tilework/, https://github.com/drieslab/tilework
 VignetteBuilder: knitr
 BugReports: https://github.com/drieslab/tilework/issues
 Collate: 

@@ -25,7 +25,7 @@ or list pre-allocation is needed.
 
 **Processing control is separate from geometry.** A `tilePlan` describes only
 *where* tiles are. `tileSelection`, `tileGroup`, and `tileIterator` describe
-*which* tiles to process and *how* to parallelise the work. These layers
+*which* tiles to process and *how* to parallelize the work. These layers
 compose rather than couple.
 
 **Dispatch on bound type drives the data layer.** `[i]` on a spatial plan
@@ -376,7 +376,7 @@ An ij pair group (`list(c(i_range), c(j_range))`) is detected by
 `.is_ij_group()` and indexes into the grid; a flat-vector group lists tile
 indices directly.
 
-### Parallelisation strategies for tileApply
+### Parallelization strategies for tileApply
 
 - **`parallel_strategy = "groups"`** (default): groups run in parallel, tiles
   within each group run sequentially. `setup_FUN` and post-group callbacks

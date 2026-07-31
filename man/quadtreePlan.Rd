@@ -40,7 +40,7 @@ the last \code{FUN} value for each leaf tile.
 \description{
 Iteratively subdivides a spatial extent into a \code{freeTilePlan} by running
 \code{FUN} on each tile and splitting any tile whose value exceeds \code{threshold}.
-Uses \code{tileApply()} internally so each pass can be parallelised via
+Uses \code{tileApply()} internally so each pass can be parallelized via
 \code{\link[future:plan]{future::plan()}}.
 
 \code{FUN} must return a single numeric scalar per tile — typically a point

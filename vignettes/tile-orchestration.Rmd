@@ -106,7 +106,7 @@ and keeps the original tile indices as identifiers.
 
 ## `tileGroup`
 
-`tileGroup` organises tiles from a plan into named groups. Each group is a
+`tileGroup` organizes tiles from a plan into named groups. Each group is a
 logical partition — groups can overlap, and not all tiles need to be assigned
 to a group.
 
