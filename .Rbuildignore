@@ -10,3 +10,4 @@ _pkgdown.yml
 ^AGENTS\.md$
 ^CLAUDE\.md$
 ^vignettes/articles$
+^CRAN-SUBMISSION$
