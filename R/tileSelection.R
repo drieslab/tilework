@@ -1,3 +1,5 @@
+#' @rdname hidden_docs
+#' @export
 setMethod("show", signature("tileSelection"), function(object) {
     cat(sprintf("<%s>: %s\n", class(object), class(object@tp)))
     cat(sprintf("%d tiles", length(object@indices)))
@@ -17,6 +19,8 @@ setMethod("[", signature("tileSelection", "numeric", "missing", "logical"), func
     x
 })
 
+#' @rdname dim
+#' @export
 setMethod("length", signature("tileSelection"), function(x) length(x@indices))
 
 #' @rdname dollar
@@ -32,6 +36,17 @@ setMethod("$<-", signature("tileSelection", "ANY"), function(x, name, value) {
     x
 })
 
+#' @name c
+#' @title Combine tileSelections
+#' @description
+#' Combine `tileSelection`. Should only concatenate `tileSelection`
+#' build off the same plan.
+#' @param x item to concatenate
+#' @param ... addtional items to concatenate to `x`
+NULL
+
+#' @rdname c
+#' @export
 setMethod("c", signature("tileSelection"), function(x, ...) {
     dots <- list(...)
     y <- dots[[1]]
@@ -42,6 +57,9 @@ setMethod("c", signature("tileSelection"), function(x, ...) {
     do.call("c", c(list(x = x), remaining))
 })
 
+#' @rdname plot
+#' @param border **`tileSelection` only** color to outline the selected tiles with
+#' @export
 setMethod("plot", signature("tileSelection", "missing"), function(x, y, border = "red", ...) {
     plot(x@tp, ...)
     for (i in x@indices) {

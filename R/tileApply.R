@@ -161,6 +161,8 @@ NULL
 #'   as `callback_x` or `callback_y` if none has been provided.
 #' @param verbose verbosity. `TRUE`, `FALSE` or `"debug"` for more info on
 #'   stack tracing.
+#' @param parallel_strategy character. `"groups"` to parallelize across groups,
+#'   or `"tiles"` to parallelize within groups
 #' @param ... additional params to pass
 NULL
 
@@ -257,6 +259,7 @@ setAs("ANY", "token", function(from) {
 })
 
 #' @rdname token-class
+#' @param x,i,j,...,drop not used
 #' @examples
 #' # Flag as being ready for processing
 #' x <- as(letters, "token")

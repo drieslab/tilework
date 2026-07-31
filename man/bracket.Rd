@@ -4,7 +4,7 @@
 %   R/tileIterator.R, R/tileSelection.R
 \name{bracket}
 \alias{bracket}
-\alias{`[`}
+\alias{[}
 \alias{[,tilePlan,numeric,missing,missing-method}
 \alias{[,tilePlan,missing,numeric,missing-method}
 \alias{[,tilePlan,numeric,numeric,missing-method}
@@ -42,8 +42,7 @@
   drop
 )
 
-## S4 method for signature 'tilePlan,missing,missing,missing'
-x[]
+\S4method{[}{tilePlan,missing,missing,missing}(x, i, j)
 
 \S4method{[}{tilePlan,numeric,missing,logical}(x, i, j, ..., drop = TRUE)
 
@@ -100,6 +99,8 @@ expected output. Such as \code{ext()} for \code{spatialTilePlan}}
 
 \item{expand_grid}{logical (internal) whether to use \code{expand.grid()} on ij
 indices.}
+
+\item{value}{\code{ANY} value to set}
 }
 \value{
 \code{list} of \code{numeric} or \code{SpatExtent} depending on underlying \code{tilePlan}

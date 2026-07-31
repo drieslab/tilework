@@ -400,6 +400,7 @@ setMethod("$<-", signature("tileIterator"), function(x, name, value) {
 })
 
 #' @rdname hidden_docs
+#' @export
 setMethod("show", signature("tileIterator"), function(object) {
     cat(sprintf("Object of class %s\n", class(object)))
     plist <- list(
@@ -486,6 +487,10 @@ tileIterator <- function(tiles = NULL, position = 0, bound = NULL, batch_size = 
 #'  If not provided, inherits same `batch_size` as source `tiles`.
 #' @param distribute logical (default = `TRUE`). If `TRUE`, distribute tiles
 #' evenly across iterators. Otherwise return multiple true copies.
+#' @param ... additional params to pass (none implemented)
+NULL
+
+#' @rdname iterSplit
 #' @export
 setMethod(
     "iterSplit", signature("tileIterator"),

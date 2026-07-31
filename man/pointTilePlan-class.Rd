@@ -32,16 +32,14 @@ to \code{x$width <- value} after construction.}
 
 \item{height}{numeric. Uniform tile height in input coordinate units.
 Equivalent to \code{x$height <- value} after construction.}
+
+\item{...}{additional params to pass to \code{pointTilePlan} class constructor}
 }
 \description{
 Tile plan where each tile is centered on a user-supplied (x, y) coordinate
 with a uniform tile size. The center coordinates are primary — for use cases
 like survey sampling, object detection patches, or site-centered extractions
 where the point location is semantically meaningful.
-
-Utility class for tiling centered on arbitrary (x, y) coordinates with a
-uniform tile size. Unlike grid-based tile plans, tile placement is driven
-entirely by the supplied point locations.
 
 All coordinates, tile dims, and padding live in one consistent reference
 frame set by \verb{$input} (\code{"spatial"} for CRS units, \code{"pixel"} for pixel

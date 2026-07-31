@@ -107,7 +107,7 @@ NULL
 NULL
 
 #' @name bracket
-#' @aliases `[`
+#' @aliases [
 #' @title Extract Bounds from Tile Object
 #' @family tile* methods
 #' @description
@@ -125,6 +125,7 @@ NULL
 #' `pixelTilePlan`)
 #' @param expand_grid logical (internal) whether to use `expand.grid()` on ij
 #' indices.
+#' @param value `ANY` value to set
 #' @param ... addtional params to pass (not used).
 #' @param drop not used.
 #' @examples
@@ -299,6 +300,7 @@ tilePlan <- function(type = c("spatial", "pixel", "point", "free"), ...) {
 #'   to `x$width <- value` after construction.
 #' @param height numeric. Uniform tile height in input coordinate units.
 #'   Equivalent to `x$height <- value` after construction.
+#' @param ... additional params to pass to `pointTilePlan` class constructor
 #' @export
 pointTilePlan <- function(input = c("spatial", "pixel"),
                           output = input,
@@ -432,9 +434,6 @@ setMethod(
 )
 
 #' @rdname bracket
-#' @usage
-#' ## S4 method for signature 'tilePlan,missing,missing,missing'
-#' x[]
 #' @export
 setMethod("[", signature(x = "tilePlan", i = "missing", j = "missing", drop = "missing"), function(x, i, j) {
     x[seq_len(length(x))] # pass to numeric/missing method

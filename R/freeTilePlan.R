@@ -233,6 +233,7 @@ setMethod(
 #' @param min_tile_size numeric. Minimum tile side length (in CRS units).
 #'   Tiles below this size are kept as leaves regardless of density.
 #' @param max_depth integer (default `10L`). Maximum subdivision depth.
+#' @param verbose logical. Whether to be verbose.
 #' @param ... additional params passed to `tileApply()`.
 #' @returns A `freeTilePlan` with an `n_records` metadata column containing
 #'   the last `FUN` value for each leaf tile.

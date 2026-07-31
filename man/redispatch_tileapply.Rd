@@ -113,6 +113,9 @@ dispatch on}
 \item{verbose}{verbosity. \code{TRUE}, \code{FALSE} or \code{"debug"} for more info on
 stack tracing.}
 
+\item{parallel_strategy}{character. \code{"groups"} to parallelize across groups,
+or \code{"tiles"} to parallelize within groups}
+
 \item{default_callback}{internal use: Default callback function passed from an
 upstream (likely more specific) \code{redispatch_tileapply()} method to use
 as \code{callback_x} or \code{callback_y} if none has been provided.}

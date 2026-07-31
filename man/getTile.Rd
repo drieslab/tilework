@@ -7,6 +7,7 @@
 \alias{getTile,character,tilePlan-method}
 \alias{getTile,SpatRaster,tilePlan-method}
 \alias{getTile,SpatRaster,pointTilePlan-method}
+\alias{getTile,SpatRaster,tileGroup-method}
 \alias{getTile,ANY,tileGroup-method}
 \alias{getTile,ANY,tileIterator-method}
 \title{Get Tile}
@@ -20,6 +21,8 @@
 \S4method{getTile}{SpatRaster,tilePlan}(x, tiles, lyr = NULL, extend = FALSE, fill = NA, ...)
 
 \S4method{getTile}{SpatRaster,pointTilePlan}(x, tiles, lyr = NULL, extend = FALSE, fill = NA, ...)
+
+\S4method{getTile}{SpatRaster,tileGroup}(x, tiles, i, j, lyr = NULL, ...)
 
 \S4method{getTile}{ANY,tileGroup}(x, tiles, i, j, ...)
 

@@ -143,6 +143,8 @@ setMethod(
 
 ## tileGroup ####
 
+#' @rdname getTile
+#' @export
 setMethod(
     "getTile", signature("SpatRaster", "tileGroup"),
     function(x, tiles, i, j, lyr = NULL, ...) {

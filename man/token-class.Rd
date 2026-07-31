@@ -8,6 +8,9 @@
 \usage{
 \S4method{[}{token,missing,missing,missing}(x, i, j, ..., drop = TRUE)
 }
+\arguments{
+\item{x, i, j, ..., drop}{not used}
+}
 \description{
 Utility class for flagging a piece of data as being ready for processing.
 This is internal machinery that is mainly useful for forcing S4 dispatch to

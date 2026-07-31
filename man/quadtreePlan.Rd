@@ -29,6 +29,8 @@ Tiles below this size are kept as leaves regardless of density.}
 
 \item{max_depth}{integer (default \code{10L}). Maximum subdivision depth.}
 
+\item{verbose}{logical. Whether to be verbose.}
+
 \item{...}{additional params passed to \code{tileApply()}.}
 }
 \value{

@@ -10,9 +10,10 @@
 #' @aliases pointTilePlan
 #' @family tile plans
 #' @description
-#' Utility class for tiling centered on arbitrary (x, y) coordinates with a
-#' uniform tile size. Unlike grid-based tile plans, tile placement is driven
-#' entirely by the supplied point locations.
+#' Tile plan where each tile is centered on a user-supplied (x, y) coordinate
+#' with a uniform tile size. The center coordinates are primary — for use cases
+#' like survey sampling, object detection patches, or site-centered extractions
+#' where the point location is semantically meaningful.
 #'
 #' All coordinates, tile dims, and padding live in one consistent reference
 #' frame set by `$input` (`"spatial"` for CRS units, `"pixel"` for pixel

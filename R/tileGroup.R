@@ -51,8 +51,8 @@ NULL
 
 #' @rdname tileGroup
 #' @export
-tileGroup <- function(tp, groups = list()) {
-    new("tileGroup", tp = tp, groups = groups)
+tileGroup <- function(tp, groups = list(), metadata = data.frame()) {
+    new("tileGroup", tp = tp, groups = groups, metadata = metadata)
 }
 
 setMethod("initialize", signature("tileGroup"), function(.Object, ...) {
@@ -68,6 +68,8 @@ setMethod("initialize", signature("tileGroup"), function(.Object, ...) {
     x
 })
 
+#' @rdname hidden_docs
+#' @export
 setMethod("show", signature("tileGroup"), function(object) {
     cat(sprintf("<%s>: %s\n", class(object), class(object@tp)))
     if (.has_active(object)) {
@@ -107,6 +109,8 @@ setMethod("$", signature("tileGroup"), function(x, name) {
     x@metadata[[name]]
 })
 
+#' @rdname hidden_docs
+#' @export
 setMethod("names", signature("tileGroup"), function(x) {
     names(x@groups)
 })
@@ -156,6 +160,8 @@ setMethod("[", signature("tileGroup", "numeric", ".index", "missing"), function(
     x@tp[i = ij[[1L]], j = ij[[2L]], expand_grid = FALSE]
 })
 
+#' @rdname dim
+#' @export
 setMethod("length", signature("tileGroup"), function(x) {
     if (length(x@active) > 0) {
         g <- x@groups[[x@active]]

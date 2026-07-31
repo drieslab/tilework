@@ -71,14 +71,7 @@ setClass(
     )
 )
 
-#' @name pointTilePlan-class
-#' @title Point Tile Plan
-#' @family tile plans
-#' @description
-#' Tile plan where each tile is centered on a user-supplied (x, y) coordinate
-#' with a uniform tile size. The center coordinates are primary — for use cases
-#' like survey sampling, object detection patches, or site-centered extractions
-#' where the point location is semantically meaningful.
+#' @rdname pointTilePlan-class
 #' @slot coords matrix. n x 2 matrix of tile center coordinates (columns: x, y).
 #' @slot input character. Coordinate space of coords, dims, and padding:
 #' `"spatial"` for CRS units, `"pixel"` for pixel indices.

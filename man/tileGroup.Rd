@@ -4,7 +4,7 @@
 \alias{tileGroup}
 \title{Create a Tile Group}
 \usage{
-tileGroup(tp, groups = list())
+tileGroup(tp, groups = list(), metadata = data.frame())
 }
 \arguments{
 \item{tp}{A tilePlan object}

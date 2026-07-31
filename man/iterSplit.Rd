@@ -2,6 +2,7 @@
 % Please edit documentation in R/tileIterator.R
 \name{iterSplit}
 \alias{iterSplit}
+\alias{iterSplit,tileIterator-method}
 \title{Create multiple walkers from a single iterator}
 \usage{
 \S4method{iterSplit}{tileIterator}(tiles, n, batch_size = NULL, distribute = TRUE, ...)
@@ -16,6 +17,8 @@ If not provided, inherits same \code{batch_size} as source \code{tiles}.}
 
 \item{distribute}{logical (default = \code{TRUE}). If \code{TRUE}, distribute tiles
 evenly across iterators. Otherwise return multiple true copies.}
+
+\item{...}{additional params to pass (none implemented)}
 }
 \description{
 Utility function to create multiple independent walkers for parallel processing.
