@@ -39,7 +39,7 @@
 #' setTileworkParMethod("biocparallel")
 #' getTileworkParMethod()
 #'
-#' \dontrun{
+#' \donttest{
 #' # Using future backend with multisession
 #' future::plan(future::multisession, workers = 4)
 #' tileApply(x, tiles, fun)

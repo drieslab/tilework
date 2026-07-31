@@ -1,6 +1,6 @@
 Package: tilework
 Title: Extensible Tile Planning and Windowed Parallel Processing
-Version: 1.0
+Version: 1.0.0
 Authors@R: c(
 	person("Jiaji", "George Chen", email = "thedrieslab@gmail.com",
 		 role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4565-832X")),

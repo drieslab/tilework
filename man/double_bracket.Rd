@@ -2,7 +2,7 @@
 % Please edit documentation in R/tilePlan.R
 \name{double_bracket}
 \alias{double_bracket}
-\alias{`[[`}
+\alias{[[}
 \alias{[[,tilePlan,numeric,missing-method}
 \alias{[[,tilePlan,missing,missing-method}
 \alias{[[,tilePlan,missing,character-method}

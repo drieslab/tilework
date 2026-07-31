@@ -147,7 +147,7 @@ NULL
 NULL
 
 #' @name double_bracket
-#' @aliases `[[`
+#' @aliases [[
 #' @title Get and set metadata
 #' @family tile* methods
 #' @description
