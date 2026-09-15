@@ -1,3 +1,26 @@
+# GDAL accepts connection strings that are not filesystem paths: subdataset
+# selectors such as "GTIFF_DIR:2:/path.tif" (how terra::sources() reports a
+# multi-page TIFF) or 'NETCDF:"f.nc":var', and virtual filesystems such as
+# /vsicurl/, /vsizip/, /vsis3/. checkmate::assert_file_exists() rejects all of
+# them, which made multi-page rasters unusable even though terra reads them
+# happily. Accept anything that is either a real file or looks like a GDAL
+# connection string, and let .terra_read() be the real arbiter -- it already
+# errors clearly when terra cannot open the source.
+.is_gdal_connection <- function(x) {
+    grepl("^/vsi[a-z0-9_]+/", x) | grepl("^[A-Za-z0-9_]+:.+:", x)
+}
+
+.assert_terra_source <- function(x) {
+    checkmate::assert_character(x, min.len = 1L, any.missing = FALSE)
+    ok <- file.exists(x) | .is_gdal_connection(x)
+    if (!all(ok)) {
+        stop(call. = FALSE,
+            "[getTile] not a readable file or GDAL connection string:\n  ",
+            paste(x[!ok], collapse = "\n  "))
+    }
+    invisible(TRUE)
+}
+
 .terra_read <- function(x, prefer = NULL, vect_params = list(), rast_params = list()) {
     rast_params$noflip <- rast_params$noflip %||% TRUE # expect no CRS
     vect_params$proxy <- vect_params$proxy %||% TRUE # read as SpatVectorProxy
