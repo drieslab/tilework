@@ -105,7 +105,7 @@ setMethod(
 setMethod(
     "getTile", signature("character", "tilePlan"),
     function(x, tiles, prefer = NULL, ext = NULL, ...) {
-        checkmate::assert_file_exists(x)
+        .assert_terra_source(x)
         x <- .terra_read(x, prefer = prefer)
         if (!is.null(ext)) ext(x) <- ext
         getTile(x, tiles, ...)
