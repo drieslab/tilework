@@ -122,6 +122,40 @@ describe("Numerical precision", {
         }
     })
 
+    test_that("outer tile edges equal the plan extent", {
+        e <- c(49.208676022545937, 12744.945055484759,
+               -8635.3878374359883, 167.30772669320746)
+        for (n in c(4, 16, 64, 400)) {
+            tp <- tilePlan("spatial")
+            ext(tp) <- e
+            length(tp) <- n
+            b <- do.call(rbind, lapply(tp[], as.vector))
+            expect_identical(min(b[, 1]), e[[1]])
+            expect_identical(max(b[, 2]), e[[2]])
+            expect_identical(min(b[, 3]), e[[3]])
+            expect_identical(max(b[, 4]), e[[4]])
+        }
+    })
+
+    test_that("points on the plan extent fall inside a tile", {
+        e <- c(49.208676022545937, 12744.945055484759,
+               -8635.3878374359883, 167.30772669320746)
+        pts <- rbind(c(e[[1]], e[[3]]), c(e[[2]], e[[3]]),
+                     c(e[[1]], e[[4]]), c(e[[2]], e[[4]]),
+                     c(3699.0297396362271, e[[4]]))
+        for (n in c(4, 16, 64, 400)) {
+            tp <- tilePlan("spatial")
+            ext(tp) <- e
+            length(tp) <- n
+            b <- do.call(rbind, lapply(tp[], as.vector))
+            inside <- vapply(seq_len(nrow(pts)), function(k) {
+                any(pts[k, 1] >= b[, 1] & pts[k, 1] <= b[, 2] &
+                    pts[k, 2] >= b[, 3] & pts[k, 2] <= b[, 4])
+            }, logical(1L))
+            expect_true(all(inside))
+        }
+    })
+
     test_that("handles negative coordinates", {
         tp <- tilePlan("spatial")
 
