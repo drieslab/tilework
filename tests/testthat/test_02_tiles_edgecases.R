@@ -122,6 +122,53 @@ describe("Numerical precision", {
         }
     })
 
+    # extent whose n * tile_dims misses xmax/ymax by floating-point rounding
+    edge_e <- c(49.208676022545937, 12744.945055484759,
+                -8635.3878374359883, 167.30772669320746)
+    edge_plan <- function(n) {
+        tp <- tilePlan("spatial")
+        ext(tp) <- edge_e
+        length(tp) <- n
+        tp
+    }
+    edge_ns <- c(4, 16, 64, 400)
+
+    test_that("outer tile edges equal the plan extent", {
+        for (n in edge_ns) {
+            b <- do.call(rbind, lapply(edge_plan(n)[], as.vector))
+            expect_identical(min(b[, 1]), edge_e[[1]])
+            expect_identical(max(b[, 2]), edge_e[[2]])
+            expect_identical(min(b[, 3]), edge_e[[3]])
+            expect_identical(max(b[, 4]), edge_e[[4]])
+        }
+    })
+
+    test_that("points on the plan extent fall inside a tile", {
+        pts <- rbind(c(edge_e[[1]], edge_e[[3]]), c(edge_e[[2]], edge_e[[3]]),
+                     c(edge_e[[1]], edge_e[[4]]), c(edge_e[[2]], edge_e[[4]]),
+                     c(3699.0297396362271, edge_e[[4]]))
+        for (n in edge_ns) {
+            b <- do.call(rbind, lapply(edge_plan(n)[], as.vector))
+            inside <- vapply(seq_len(nrow(pts)), function(k) {
+                any(pts[k, 1] >= b[, 1] & pts[k, 1] <= b[, 2] &
+                    pts[k, 2] >= b[, 3] & pts[k, 2] <= b[, 4])
+            }, logical(1L))
+            expect_true(all(inside))
+        }
+    })
+
+    test_that("as.polygons tile bounds match tile extraction", {
+        for (n in edge_ns) {
+            tp <- edge_plan(n)
+            b <- do.call(rbind, lapply(tp[], as.vector))
+            expect_identical(terra::ext(as.polygons(tp))[], terra::ext(edge_e)[])
+            pb <- t(vapply(seq_len(length(tp)), function(k) {
+                as.vector(terra::ext(as.polygons(tp)[k]))
+            }, numeric(4L)))
+            expect_equal(unname(pb), unname(b), tolerance = 0)
+        }
+    })
+
     test_that("handles negative coordinates", {
         tp <- tilePlan("spatial")
 

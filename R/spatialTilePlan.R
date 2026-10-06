@@ -238,6 +238,9 @@ setMethod("as.polygons", signature("spatialTilePlan"), function(x, ...) {
         e[[3L]] + (i_idx - 1L) * h - p,
         e[[3L]] +  i_idx       * h + p
     )
+    # match .spat_tile_bounds(): outer edges are the extent max, not n * w
+    bounds[j_idx == nc, 2L] <- e[[2L]] + p
+    bounds[i_idx == nr, 4L] <- e[[4L]] + p
     .tile_bounds_to_sv(bounds)
 })
 
