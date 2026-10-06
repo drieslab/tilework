@@ -7,9 +7,9 @@
 \alias{getBoundedData,SpatVectorProxy,SpatExtent-method}
 \title{Get Data Within Bounds}
 \usage{
-\S4method{getBoundedData}{SpatRaster,numeric}(x, bound, tiles, extend = FALSE, fill = NA)
+\S4method{getBoundedData}{SpatRaster,numeric}(x, bound, extend = FALSE, fill = NA)
 
-\S4method{getBoundedData}{SpatRaster,SpatExtent}(x, bound)
+\S4method{getBoundedData}{SpatRaster,SpatExtent}(x, bound, extend = FALSE, fill = NA)
 
 \S4method{getBoundedData}{SpatVectorProxy,SpatExtent}(x, bound)
 }
@@ -17,9 +17,6 @@
 \item{x}{data}
 
 \item{bound}{bounds to filter with}
-
-\item{tiles}{\verb{tile*} object. Only needed if \code{extend = TRUE} for the contained
-tiledims and padding information.}
 
 \item{extend}{logical (default = \code{FALSE}) whether to extend tile data to reach
 expected tile dimensions}
@@ -61,6 +58,24 @@ patterns are:
 }
 }
 
+\section{Boundary Inclusivity}{
+
+
+Adjacent tiles share exact boundaries. Since \{tilework\} does not know the
+format or representation of the underlying data, it does not enforce whether
+those boundaries are inclusive or exclusive. It is up to the
+\code{getBoundedData()} implementation to decide how features on shared edges are
+handled.
+
+The existing \{terra\} methods do not implement inclusive/exclusive boundary
+control because raster pixel snapping and padding make exact boundary
+behavior largely irrelevant for that format. For point or tabular data,
+features on a shared boundary may appear in multiple tiles unless the
+implementation applies its own filtering (e.g. \code{>=} vs \code{>} comparisons).
+The tile's grid position can be passed via \code{get_params} from \code{\link[=getTile]{getTile()}} to
+inform which edges are interior.
+}
+
 \examples{
 f <- system.file("ex/elev.tif", package = "terra")
 r <- terra::rast(f)
@@ -74,4 +89,12 @@ plot(extent_selection)
 }
 \seealso{
 \code{\link[=getTile]{getTile()}}
+
+Other tile processing:
+\code{\link[=getTile]{getTile()}},
+\code{\link[=tileApply]{tileApply()}},
+\code{\link{tileApply-group}},
+\code{\link{tileApply-iterator}},
+\code{\link{tileApply-plan}}
 }
+\concept{tile processing}

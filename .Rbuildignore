@@ -1,3 +1,13 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 .github
+^doc$
+^docs$
+^Meta$
+.claude
+_pkgdown.yml
+^LICENSE\.md$
+^AGENTS\.md$
+^CLAUDE\.md$
+^vignettes/articles$
+^CRAN-SUBMISSION$

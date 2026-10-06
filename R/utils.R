@@ -1,6 +1,29 @@
+# GDAL accepts connection strings that are not filesystem paths: subdataset
+# selectors such as "GTIFF_DIR:2:/path.tif" (how terra::sources() reports a
+# multi-page TIFF) or 'NETCDF:"f.nc":var', and virtual filesystems such as
+# /vsicurl/, /vsizip/, /vsis3/. checkmate::assert_file_exists() rejects all of
+# them, which made multi-page rasters unusable even though terra reads them
+# happily. Accept anything that is either a real file or looks like a GDAL
+# connection string, and let .terra_read() be the real arbiter -- it already
+# errors clearly when terra cannot open the source.
+.is_gdal_connection <- function(x) {
+    grepl("^/vsi[a-z0-9_]+/", x) | grepl("^[A-Za-z0-9_]+:.+:", x)
+}
+
+.assert_terra_source <- function(x) {
+    checkmate::assert_character(x, min.len = 1L, any.missing = FALSE)
+    ok <- file.exists(x) | .is_gdal_connection(x)
+    if (!all(ok)) {
+        stop(call. = FALSE,
+            "[getTile] not a readable file or GDAL connection string:\n  ",
+            paste(x[!ok], collapse = "\n  "))
+    }
+    invisible(TRUE)
+}
+
 .terra_read <- function(x, prefer = NULL, vect_params = list(), rast_params = list()) {
-    rast_params$noflip <- rast_params$noflip %null% TRUE # expect no CRS
-    vect_params$proxy <- vect_params$proxy %null% TRUE # read as SpatVectorProxy
+    rast_params$noflip <- rast_params$noflip %||% TRUE # expect no CRS
+    vect_params$proxy <- vect_params$proxy %||% TRUE # read as SpatVectorProxy
 
     # if expected type
     if (!is.null(prefer)) {
@@ -31,6 +54,19 @@
     do.call(terra::vect, c(list(x), vect_params))
 }
 
+# Build a SpatVector of rectangle polygons from an n x 4 bounds matrix
+# (xmin, xmax, ymin, ymax). Each rectangle is a closed 5-point ring.
+# Constructs the 5-column geom matrix (geom, part, x, y, hole) required
+# by terra::vect() for polygon input.
+.tile_bounds_to_sv <- function(bounds, ids = seq_len(nrow(bounds))) {
+    xmin <- bounds[, 1L]; xmax <- bounds[, 2L]
+    ymin <- bounds[, 3L]; ymax <- bounds[, 4L]
+    xs <- c(rbind(xmin, xmax, xmax, xmin, xmin))
+    ys <- c(rbind(ymin, ymin, ymax, ymax, ymin))
+    g <- cbind(rep(ids, each = 5L), 1L, xs, ys, 0L)
+    terra::vect(g, type = "polygons", atts = data.frame(tile = ids))
+}
+
 # convert SpatExtent to unnamed numeric vector
 .ext_to_num_vec <- function(x) {
     out <- x[]
@@ -55,11 +91,89 @@
 # j: col index
 # returns: tile index as a numeric
 .ij_to_tile_idx <- function(x, i, j) {
-    if (i > nrow(x)) {
+    if (any(i > nrow(x))) {
         stop("[.ij_to_tile_idx] not that many rows", call. = FALSE)
     }
-    if (j > ncol(x)) {
+    if (any(j > ncol(x))) {
         stop("[.ij_to_tile_idx] not that many cols", call. = FALSE)
     }
     ((i - 1) * ncol(x)) + j
 }
+
+# convenience for getting all the args supplied to the function as a list
+# `keep` - character, names of input args to keep
+# `toplevel` - numeric number of levels to go up the callstack
+#  ... additional params to capture
+.get_args_list <- function (toplevel = 1L, keep = NULL, ...) {
+    a <- as.list(as.environment(parent.frame(toplevel)))
+    if (!is.null(keep)) {
+        a <- a[names(a) %in% keep]
+    }
+    c(a, list(...))
+}
+
+# ID random across nodes and workers
+.random_id <- function(len = 12L) {
+    sampleset <- c(LETTERS, letters, seq(from = 0, to = 9))
+    paste0(sample(sampleset, size = len, replace = TRUE), collapse = "")
+}
+
+# consistent timestamping
+.timestamp <- function () {
+    format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+}
+
+.check_package <- function(x) {
+    if (length(x) > 1L) {
+        lapply(x, function(x_i) .check_package(x_i))
+        return(invisible())
+    }
+
+    if (requireNamespace(x, quietly = TRUE)) return(invisible())
+    stop(sprintf("{%s} is not installed yet.", x), call. = FALSE)
+    invisible()
+}
+
+.color_yellow <- function(x) {
+    if (isatty(stdout())) paste0("\033[33m", x, "\033[0m") else x
+}
+
+.print_list <- function(x, pre = "") {
+    if (length(x) == 0) {
+        cat("<empty>\n")
+    }
+    ns <- names(x)
+    if (length(ns) != length(x)) {
+        stop("all elements must be named")
+    }
+    x <- lapply(x, function(i) {
+        if (is.character(i) || is.logical(i) || is.factor(i) ||
+            is.numeric(i)) {
+            return(as.character(i))
+        }
+        .print_fallback(i)
+    })
+    cat(sprintf("%s%s : %s", pre, format(ns), x), sep = "\n")
+    invisible(x)
+}
+
+.print_fallback <- function(x) {
+    sprintf("<%s> length %d", class(x), length(x))
+}
+
+.handle_warnings <- function(expr) {
+    warnings <- character(0)
+    result <- withCallingHandlers(expr, warning = function(w) {
+        warnings <<- c(warnings, conditionMessage(w))
+        invokeRestart("muffleWarning")
+    })
+    list(result = result, warnings = warnings)
+}
+
+# backwards compat
+if (getRversion() < "4.4.0") {
+    `%||%` <- function(x, y) {
+        if (is.null(x)) y else x
+    }
+}
+

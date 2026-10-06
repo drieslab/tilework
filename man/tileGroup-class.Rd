@@ -22,3 +22,11 @@ indexing and \code{length()}.}
 \item{\code{metadata}}{data.frame. Metadata about each group}
 }}
 
+\seealso{
+Other tile orchestration:
+\code{\link[=iterSplit]{iterSplit()}},
+\code{\link[=tileGroup]{tileGroup()}},
+\code{\link[=tileIterator]{tileIterator()}},
+\code{\link{tileIterator-class}}
+}
+\concept{tile orchestration}

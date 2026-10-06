@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(GiottoTile)
+library(tilework)
 
-test_check("GiottoTile")
+test_check("tilework")

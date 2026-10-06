@@ -4,7 +4,7 @@
 \alias{tileGroup}
 \title{Create a Tile Group}
 \usage{
-tileGroup(tp, groups = list())
+tileGroup(tp, groups = list(), metadata = data.frame())
 }
 \arguments{
 \item{tp}{A tilePlan object}
@@ -58,3 +58,11 @@ iter$next_batch() # no more items
 
 tg$active <- NULL # Clear active group by setting NULL
 }
+\seealso{
+Other tile orchestration:
+\code{\link[=iterSplit]{iterSplit()}},
+\code{\link{tileGroup-class}},
+\code{\link[=tileIterator]{tileIterator()}},
+\code{\link{tileIterator-class}}
+}
+\concept{tile orchestration}

@@ -16,9 +16,9 @@
   group_FUN = NULL,
   callback_x = NULL,
   log = FALSE,
-  logpath = tempdir(),
+  logpath = getTileworkLogDir(),
   simplify = FALSE,
-  future_params = list(future.seed = TRUE),
+  parallel_params = list(),
   verbose = NULL,
   ...
 )
@@ -37,9 +37,9 @@
   callback_x = NULL,
   callback_y = NULL,
   log = FALSE,
-  logpath = tempdir(),
+  logpath = getTileworkLogDir(),
   simplify = FALSE,
-  future_params = list(future.seed = TRUE),
+  parallel_params = list(),
   verbose = NULL,
   ...
 )
@@ -73,6 +73,11 @@ worker when \code{parallel_strategy = "groups"}}
 \item{simplify}{logical. Whether to flatten group results into single list.
 Group names will not be retained.}
 
+\item{parallel_params}{named param list. See \link{parallel_params}}
+
+\item{verbose}{verbosity. \code{TRUE}, \code{FALSE} or \code{"debug"} for more info on
+stack tracing.}
+
 \item{\dots}{additional params to pass to \code{\link[=bracket]{[}}}
 
 \item{y}{input data 2 (optional)}
@@ -85,10 +90,6 @@ full spatial context of \code{y}}
 
 \item{callback_y}{function. Optional preprocessing function for \code{y} per
 worker when \code{parallel_strategy = "groups"}}
-
-\item{lyr}{numeric. Layer number(s) to use (optional)}
-
-\item{future.seed}{logical. Enable reproducible random seeds}
 }
 \description{
 Apply functions across tileGroup objects with control over parallelization
@@ -96,8 +97,8 @@ strategy. Useful when tiles are organized into logical groups that need
 different processing or aggregation.
 
 \strong{\code{token}} is a stand-in for any input data class (e.g. \code{SpatRaster},
-\code{SpatExtent}, filpath, etc). See \link{redispatch_tileapply}
-and \link{extending_giottotile} for further information.
+\code{SpatExtent}, filepath, etc). See \link{redispatch_tileapply}
+and \link{extending_tilework} for further information.
 }
 \section{Parallelization Strategies}{
 
@@ -171,5 +172,13 @@ results <- tileApply(r,
 str(results)
 }
 \seealso{
-\link{tileApply}, \code{\link[=tileGroup]{tileGroup()}}, \linkS4class{tileGroup}
+\link{tileApply}, \code{\link[=tileGroup]{tileGroup()}}, \link[=tileGroup-class]{tileGroup}
+
+Other tile processing:
+\code{\link[=getBoundedData]{getBoundedData()}},
+\code{\link[=getTile]{getTile()}},
+\code{\link[=tileApply]{tileApply()}},
+\code{\link{tileApply-iterator}},
+\code{\link{tileApply-plan}}
 }
+\concept{tile processing}

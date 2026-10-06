@@ -4,6 +4,7 @@
 
 #' @name getBoundedData
 #' @title Get Data Within Bounds
+#' @family tile processing
 #' @description
 #' Subset or otherwise make available only the data that is within the provided
 #' bounds. Accepted bounds types depends on the data.
@@ -31,6 +32,22 @@
 #' - Add padding with `tiles + pad_value` to ensure spatial context
 #' - Use [terra::crop()] directly if you need `snap = "out"` or `snap = "in"`
 #'
+#' @section Boundary Inclusivity:
+#'
+#' Adjacent tiles share exact boundaries. Since \{tilework\} does not know the
+#' format or representation of the underlying data, it does not enforce whether
+#' those boundaries are inclusive or exclusive. It is up to the
+#' `getBoundedData()` implementation to decide how features on shared edges are
+#' handled.
+#'
+#' The existing \{terra\} methods do not implement inclusive/exclusive boundary
+#' control because raster pixel snapping and padding make exact boundary
+#' behavior largely irrelevant for that format. For point or tabular data,
+#' features on a shared boundary may appear in multiple tiles unless the
+#' implementation applies its own filtering (e.g. `>=` vs `>` comparisons).
+#' The tile's grid position can be passed via `get_params` from [getTile()] to
+#' inform which edges are interior.
+#'
 #' @param x data
 #' @param bound bounds to filter with
 #' @param extend logical (default = `FALSE`) whether to extend tile data to reach
@@ -50,36 +67,35 @@
 NULL
 
 #' @rdname getBoundedData
-#' @param tiles `tile*` object. Only needed if `extend = TRUE` for the contained
-#' tiledims and padding information.
 #' @export
 setMethod(
     "getBoundedData", signature("SpatRaster", "numeric"),
-    function(x, bound, tiles, extend = FALSE, fill = NA) {
+    function(x, bound, extend = FALSE, fill = NA) {
+        b <- c(
+            max(bound[[1L]], 1L),
+            min(bound[[2L]], ncol(x)),
+            max(bound[[3L]], 1L),
+            min(bound[[4L]], nrow(x))
+        )
+      
         # get px tile from x as r
-        r <- x[bound[[3]]:min(nrow(x), bound[[4]]), # rows (y)
-            bound[[1]]:min(ncol(x), bound[[2]]), # cols (x)
-            drop = FALSE
-        ]
+        r <- x[b[[3L]]:b[[4L]], b[[1L]]:b[[2L]], drop = FALSE]
+      
         if (!extend) {
             return(r)
-        } # return early if not extend
-
-        # handle extend and masking
-        pad <- 2 * tiles@pad # since padding is added on both sides
-        expected_dim <- c(tiles@tile_dims[[1L]] + pad, tiles@tile_dims[[2L]] + pad)
-        if (nrow(r) != expected_dim[[1L]] ||
-            ncol(r) != expected_dim[[2L]]) {
-            if (extend) {
-                bottom_rows <- expected_dim[[1L]] - nrow(r)
-                right_cols <- expected_dim[[2L]] - ncol(r)
-                r <- terra::extend(r,
-                    # left, right, bottom, top
-                    c(0, right_cols, bottom_rows, 0),
-                    fill = fill
-                )
-            }
         }
+      
+        bdiff <- c(
+            b[[1L]] - bound[[1L]],
+            bound[[2L]] - b[[2L]],
+            b[[3L]] - bound[[3L]],
+            bound[[4L]] - b[[4L]]
+        )
+
+        if (all(bdiff == c(0L, 0L, 0L, 0L))) return(r)
+
+        # `bdiff` extend order: left, right, bottom, top
+        r <- terra::extend(r, bdiff, fill = fill)
         r
     }
 )
@@ -88,8 +104,13 @@ setMethod(
 #' @export
 setMethod(
     "getBoundedData", signature("SpatRaster", "SpatExtent"),
-    function(x, bound) {
+    function(x, bound, extend = FALSE, fill = NA) {
         terra::window(x) <- bound
+        if (!extend) {
+           return(x)
+        }
+      
+        x <- terra::extend(x, bound, fill = fill)
         x
     }
 )

@@ -242,7 +242,7 @@ describe("tileApply with terra objects", {
             }
         })
 
-        expect_length(results, 4)
+        expect_length(results, length(tp))
         total_features <- sum(sapply(results, function(x) x$n_features))
         expect_equal(total_features, nrow(v))
 

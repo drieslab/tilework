@@ -2,6 +2,7 @@
 
 #' @title Stateful Tile Iterator
 #' @name tileIterator
+#' @family tile orchestration
 #' @description
 #' Create a stateful iterator that maintains an internal position and yields batches
 #' of tiles on demand. Uses closures for serializable stateful behavior without
@@ -150,7 +151,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
     prefix <- "tileIterator: "
 
     .guard_pos_bound <- function(x = NULL) {
-        x <- x %null% position
+        x <- x %||% position
         if (x < (bound[1L] - 1) || x > bound[2L]) {
             stop(sprintf(
                 "%s `position` (%d) must be within `bound` (between %d and %d)\n",
@@ -160,7 +161,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
     }
 
     .guard_tp <- function(x = NULL) {
-        x <- x %null% tp
+        x <- x %||% tp
         if (is.null(x)) {
             stop(prefix, "No underlying `tilePlan`. Assign one with `[]`<-\n", call. = FALSE)
         }
@@ -173,7 +174,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
     }
 
     .guard_batch_size <- function(x = NULL) {
-        x <- x %null% batch_size
+        x <- x %||% batch_size
         if (x < 1L) {
             stop(sprintf(
                 "%s `batch_size` (%d) must be at least 1\n",
@@ -183,7 +184,7 @@ setMethod("initialize", signature("tileIterator"), function(.Object, ...) {
     }
 
     .guard_bound <- function(x = NULL) {
-        x <- x %null% bound
+        x <- x %||% bound
         if (length(x) != 2L) {
             stop(prefix, "`bound` must be 2 numbers (start index, end index)\n", call. = FALSE)
         }
@@ -399,6 +400,7 @@ setMethod("$<-", signature("tileIterator"), function(x, name, value) {
 })
 
 #' @rdname hidden_docs
+#' @export
 setMethod("show", signature("tileIterator"), function(object) {
     cat(sprintf("Object of class %s\n", class(object)))
     plist <- list(
@@ -409,7 +411,7 @@ setMethod("show", signature("tileIterator"), function(object) {
         progress = sprintf("%s%s", object@funs$progress(), "%"),
         remaining = object@funs$remaining()
     )
-    GiottoUtils::print_list(plist)
+    .print_list(plist)
 })
 
 #' @rdname bracket
@@ -474,6 +476,7 @@ tileIterator <- function(tiles = NULL, position = 0, bound = NULL, batch_size = 
 
 #' @name iterSplit
 #' @title Create multiple walkers from a single iterator
+#' @family tile orchestration
 #' @description
 #' Utility function to create multiple independent walkers for parallel processing.
 #' Each iterator will have the same underlying iterator but independent state.
@@ -484,6 +487,10 @@ tileIterator <- function(tiles = NULL, position = 0, bound = NULL, batch_size = 
 #'  If not provided, inherits same `batch_size` as source `tiles`.
 #' @param distribute logical (default = `TRUE`). If `TRUE`, distribute tiles
 #' evenly across iterators. Otherwise return multiple true copies.
+#' @param ... additional params to pass (none implemented)
+NULL
+
+#' @rdname iterSplit
 #' @export
 setMethod(
     "iterSplit", signature("tileIterator"),
@@ -493,7 +500,7 @@ setMethod(
         checkmate::assert_integerish(n, len = 1L, lower = 1L)
         n <- as.integer(n)
         iters <- list()
-        batch_size <- batch_size %null% tiles$batch_size
+        batch_size <- batch_size %||% tiles$batch_size
 
         if (!distribute) {
             # each iterator gets the same settings
@@ -515,9 +522,9 @@ setMethod(
         start_pos <- tiles$position # init position index
 
         if (n > rem) {
-            warning(wrap_txtf(
-                "More iterators (%d) than remaining tiles (%d).
-            Creating %d iterators instead.", n, rem, rem
+            warning(sprintf(
+                "More iterators (%d) than remaining tiles (%d). \nCreating %d iterators instead.", 
+                n, rem, rem
             ), call. = FALSE)
             n <- rem
         }

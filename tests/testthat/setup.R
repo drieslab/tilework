@@ -1,1 +1,1 @@
-options("giotto.warn_sequential" = FALSE)
+options("tilework.warn_sequential" = FALSE)

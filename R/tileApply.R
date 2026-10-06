@@ -6,10 +6,11 @@
 
 # docs ####
 
-#' @name extending_giottotile
-#' @title Extending GiottoTile
+#' @name extending_tilework
+#' @title Extending \{tilework\}
+#' @family tilework extension
 #' @description
-#' GiottoTile provides an extensible framework for:
+#' \{tilework\} provides an extensible framework for:
 #'
 #' * [tile planning][tilePlan-class]
 #' * [tile selection][tileGroup-class]
@@ -36,7 +37,7 @@
 #'
 #' @section Adding new data type support:
 #'
-#' {GiottoTile} functionalities can be extended to work with  other data
+#' \{tilework\} functionalities can be extended to work with  other data
 #' types/backends by creating a [getBoundedData()] method for the data type.
 #' Optional additional steps:
 #'
@@ -59,6 +60,7 @@ NULL
 
 #' @name redispatch_tileapply
 #' @title *Developer API* Redispatch for `tileApply()`
+#' @family tilework extension
 #' @description
 #' Utility generic for modifying `tileApply()` calls for streamlining extension
 #' with new datatypes and forcing datatype-specific handling to be added in the
@@ -157,35 +159,60 @@ NULL
 #' @param default_callback internal use: Default callback function passed from an
 #'   upstream (likely more specific) `redispatch_tileapply()` method to use
 #'   as `callback_x` or `callback_y` if none has been provided.
+#' @param verbose verbosity. `TRUE`, `FALSE` or `"debug"` for more info on
+#'   stack tracing.
+#' @param parallel_strategy character. `"groups"` to parallelize across groups,
+#'   or `"tiles"` to parallelize within groups
+#' @param ... additional params to pass
 NULL
 
 
 #' @name tileApply
 #' @title Apply Functions Across Spatial Tiles
+#' @family tile processing
 #' @description
+#' **For more useful params info and examples, see the Tile Processing Methods
+#' section.**
+#'
 #' Apply a function across spatial tiles to speed up processing and manage
-#' memory usage for large data operations. This function dispatches to
-#' different processing methods based on the tile type.
+#' memory usage for large data operations. This is a landing page for the
+#' generic. `tileApply()` dispatches to different processing methods based on
+#' the tile type.
 #'
 #' `character` inputs to `x` and `y` are assumed to be \{terra\} readable.
 #' `SpatRaster` and `SpatVector` must first be written to file. If provided,
 #' they are traced to their filepaths with [terra::sources()] and then processed
 #' via their filepaths for memory efficiency.
 #'
-#' For other data types, see [extending_giottotile]
+#' For other data types, see [extending_tilework]
 #'
 #' @section Tile Processing Methods:
 #' - **Basic tiling**: See [tileApply-plan] for `spatialTilePlan` and `pixelTilePlan`
 #' - **Group processing**: See [tileApply-group] for `tileGroup` hierarchical processing
 #' - **Iterator processing**: See [tileApply-iterator] for `tileIterator` streaming/batch processing
 #'
+#' @section Boundary Inclusivity:
+#' Adjacent tiles share exact boundaries. Since \{tilework\} does not know the
+#' format or representation of the underlying data, it provides tile bounds as
+#' windows but does not enforce whether those boundaries are inclusive or
+#' exclusive — that is determined by the [getBoundedData()] method for the
+#' data type being processed.
+#'
+#' For raster data this is generally not an issue (pixel snapping assigns each
+#' cell unambiguously). For point or tabular data, features sitting exactly on
+#' a shared tile boundary may appear in multiple tiles unless the
+#' `getBoundedData()` implementation applies its own inclusive/exclusive
+#' filtering. Implementing packages can use the tile grid position (available
+#' via [getTile()]'s `get_params`) to determine which edges are shared and
+#' filter accordingly.
+#'
 #' @param x input data 1
 #' @param y input data 2 (optional)
 #' @param tiles tile* object (`tilePlan`, `tileGroup`, or `tileIterator`)
-#' @param FUN function to apply across tiles
-#' @param pad_y numeric. Additional padding applied to `y` tiling so `x` has full
-#' spatial context of `y`
-#' @param ... additional arguments passed to specific methods
+#' @param verbose verbosity. `TRUE`, `FALSE` or `"debug"` for more info on
+#'   stack tracing.
+#' @param ... additional arguments passed to specific methods (one of which is
+#' the `FUN` function applied across the tiles.)
 #'
 #' @seealso [tileApply-plan], [tileApply-group], [tileApply-iterator]
 #' @examples
@@ -201,8 +228,8 @@ NULL
 #' @keywords internal
 #' @export
 setMethod("tileApply", signature("ANY", "missing", "ANY"), function(x, tiles, verbose = NULL, ...) {
-    vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] x only. Start redispatch x...
-         Dot params:", toString(names(list(...))))
+    .dmsg(.v = verbose, "[tileApply] x only. Start redispatch x...",
+          plist = list(...))
     redispatch_tileapply(x, tiles, param_xy = "x", verbose = verbose, ...)
 })
 
@@ -210,8 +237,8 @@ setMethod("tileApply", signature("ANY", "missing", "ANY"), function(x, tiles, ve
 #' @keywords internal
 #' @export
 setMethod("tileApply", signature("ANY", "ANY", "ANY"), function(x, y, tiles, verbose = NULL, ...) {
-    vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] x and y. Start redispatch x...
-         Dot params:", toString(names(list(...))))
+    .dmsg(.v = verbose, "[tileApply] x and y. Start redispatch x...",
+          plist = list(...))
     redispatch_tileapply(x, tiles, y = y, param_xy = "x", verbose = verbose, ...)
 })
 
@@ -219,8 +246,8 @@ setMethod("tileApply", signature("ANY", "ANY", "ANY"), function(x, y, tiles, ver
 #' @keywords internal
 #' @export
 setMethod("tileApply", signature("token", "ANY", "ANY"), function(x, y, tiles, verbose = NULL, ...) {
-    vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] x done. Start redispatch y...
-         Dot params:", toString(names(list(...))))
+    .dmsg(.v = verbose, "[tileApply] x done. Start redispatch y...",
+          plist = list(...))
     redispatch_tileapply(y, tiles, param_xy = "y", x = x, verbose = verbose, ...)
 })
 
@@ -232,7 +259,8 @@ setAs("ANY", "token", function(from) {
 })
 
 #' @rdname token-class
-#' @usage
+#' @param x,i,j,...,drop not used
+#' @examples
 #' # Flag as being ready for processing
 #' x <- as(letters, "token")
 #'
@@ -253,20 +281,20 @@ setMethod("redispatch_tileapply", signature("ANY", "ANY"), function(
         ...) {
     checkmate::assert_list(default_get_params)
     param_xy <- match.arg(param_xy, c("x", "y"))
-    vmsg(.v = verbose, .is_debug = TRUE, "[redispatch] step done. Route as", param_xy, "...")
+    .dmsg(.v = verbose, "[redispatch] step done. Route as", param_xy, "...")
     # default is no change
     sig <- as(sig, "token")
     # args list
     a <- list(tiles = tiles, verbose = verbose, ...)
 
     if (param_xy == "x") {
-        vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(list(...))))
+        .dmsg(.v = verbose, .initial = "  ", plist = list(...))
         a$get_params_x <- c(a$get_params_x, default_get_params)
         ns <- names(a$get_params_x)
         a$get_params_x <- a$get_params_x[!duplicated(ns)]
         do.call(tileApply, c(list(x = sig), a))
     } else {
-        vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(list(...))))
+        .dmsg(.v = verbose, .initial = "  ", plist = list(...))
         a$get_params_y <- c(a$get_params_y, default_get_params)
         ns <- names(a$get_params_y)
         a$get_params_y <- a$get_params_y[!duplicated(ns)]
@@ -282,10 +310,8 @@ setMethod("redispatch_tileapply", signature("ANY", "ANY"), function(
     if (!any(x == "")) {
         return(invisible())
     }
-    stop(call. = FALSE, wrap_txtf(
-        "[tileApply] no filepath found for %s.
-        Please first write to disk.", what
-    ))
+    stop(call. = FALSE, c("[tileApply] no filepath found for ", what,
+        ".\n Please first write to disk."))
 }
 
 .guard_disk_terra_raster <- function(x) {

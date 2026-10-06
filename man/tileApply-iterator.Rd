@@ -14,9 +14,9 @@
   setup_FUN = NULL,
   callback_x = NULL,
   log = FALSE,
-  logpath = tempdir(),
+  logpath = getTileworkLogDir(),
   simplify = FALSE,
-  future_params = list(future.seed = TRUE),
+  parallel_params = list(),
   verbose = NULL,
   ...
 )
@@ -33,9 +33,9 @@
   callback_x = NULL,
   callback_y = NULL,
   log = FALSE,
-  logpath = tempdir(),
+  logpath = getTileworkLogDir(),
   simplify = FALSE,
-  future_params = list(future.seed = TRUE),
+  parallel_params = list(),
   verbose = NULL,
   ...
 )
@@ -63,6 +63,11 @@ of \code{FUN} begins.}
 
 \item{simplify}{logical. Whether to flatten results}
 
+\item{parallel_params}{named param list. See \link{parallel_params}}
+
+\item{verbose}{verbosity. \code{TRUE}, \code{FALSE} or \code{"debug"} for more info on
+stack tracing.}
+
 \item{\dots}{additional params to pass to \code{\link[=bracket]{[}}}
 
 \item{y}{input data 2 (optional)}
@@ -76,10 +81,6 @@ spatial context of \code{y}}
 \item{callback_y}{function, (advanced). If provided, programmatic escape hatch for
 preprocessing \code{y} per worker before \code{setup_FUN} and batch streamed processing
 of \code{FUN} begins.}
-
-\item{lyr}{numeric. Layer number(s) to use (optional)}
-
-\item{future.seed}{logical. Enable reproducible random seeds}
 }
 \description{
 Apply functions using tileIterator objects for memory-constrained batch
@@ -87,8 +88,8 @@ processing. Ideal for very large datasets or when you need fine control
 over processing workflow.
 
 \strong{\code{token}} is a stand-in for any input data class (e.g. \code{SpatRaster},
-\code{SpatExtent}, filpath, etc). See \link{redispatch_tileapply}
-and \link{extending_giottotile} for further information.
+\code{SpatExtent}, filepath, etc). See \link{redispatch_tileapply}
+and \link{extending_tilework} for further information.
 }
 \section{Worker Distribution}{
 
@@ -178,5 +179,13 @@ while (large_iter$has_next) {
 }
 }
 \seealso{
-\link{tileApply}, \code{\link[=tileIterator]{tileIterator()}}, \linkS4class{tileIterator}
+\link{tileApply}, \code{\link[=tileIterator]{tileIterator()}}, \link[=tileIterator-class]{tileIterator}
+
+Other tile processing:
+\code{\link[=getBoundedData]{getBoundedData()}},
+\code{\link[=getTile]{getTile()}},
+\code{\link[=tileApply]{tileApply()}},
+\code{\link{tileApply-group}},
+\code{\link{tileApply-plan}}
 }
+\concept{tile processing}

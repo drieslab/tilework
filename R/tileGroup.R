@@ -1,5 +1,6 @@
 #' @name tileGroup
 #' @title Create a Tile Group
+#' @family tile orchestration
 #' @description
 #' Organize tiles from a tilePlan into hierarchical groups for batch processing.
 #' Groups can represent spatial regions, processing stages, or any logical
@@ -50,8 +51,8 @@ NULL
 
 #' @rdname tileGroup
 #' @export
-tileGroup <- function(tp, groups = list()) {
-    new("tileGroup", tp = tp, groups = groups)
+tileGroup <- function(tp, groups = list(), metadata = data.frame()) {
+    new("tileGroup", tp = tp, groups = groups, metadata = metadata)
 }
 
 setMethod("initialize", signature("tileGroup"), function(.Object, ...) {
@@ -59,7 +60,7 @@ setMethod("initialize", signature("tileGroup"), function(.Object, ...) {
     # Initialize metadata if empty
     if (nrow(x@metadata) == 0 && length(x@groups) > 0) {
         x@metadata <- data.frame(
-            group = names(x@groups) %null% paste0("group_", seq_along(x@groups)),
+            group = names(x@groups) %||% paste0("group_", seq_along(x@groups)),
             n_tiles = lengths(x@groups),
             row.names = NULL
         )
@@ -67,17 +68,19 @@ setMethod("initialize", signature("tileGroup"), function(.Object, ...) {
     x
 })
 
+#' @rdname hidden_docs
+#' @export
 setMethod("show", signature("tileGroup"), function(object) {
     cat(sprintf("<%s>: %s\n", class(object), class(object@tp)))
     if (.has_active(object)) {
         cat("active:", object@active, "\n")
     }
-    cat(color_yellow("groups-------------------------\n"))
+    cat(.color_yellow("groups-------------------------\n"))
     plist <- lapply(object@groups, function(g) {
         len <- .g_length(g)
         sprintf("%d tiles", len)
     })
-    print_list(plist, pre = "  ")
+    .print_list(plist, pre = "  ")
 })
 
 #' @rdname dollar
@@ -106,6 +109,8 @@ setMethod("$", signature("tileGroup"), function(x, name) {
     x@metadata[[name]]
 })
 
+#' @rdname hidden_docs
+#' @export
 setMethod("names", signature("tileGroup"), function(x) {
     names(x@groups)
 })
@@ -155,6 +160,8 @@ setMethod("[", signature("tileGroup", "numeric", ".index", "missing"), function(
     x@tp[i = ij[[1L]], j = ij[[2L]], expand_grid = FALSE]
 })
 
+#' @rdname dim
+#' @export
 setMethod("length", signature("tileGroup"), function(x) {
     if (length(x@active) > 0) {
         g <- x@groups[[x@active]]

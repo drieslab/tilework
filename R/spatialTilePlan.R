@@ -7,6 +7,7 @@
 #' @name spatialTilePlan-class
 #' @title Spatial Tile Plan
 #' @aliases spatialTilePlan
+#' @family tile plans
 #' @description
 #' Utility class that simplifies the setup of tiles across a spatial extent.
 #' Tiles are stored in a lightweight format safe to be passed to child
@@ -16,10 +17,10 @@
 #' A `spatialTilePlan` needs both a spatial extent to tile across and also a
 #' request for a certain number of tiles.
 #'
-#' * `spatialTilePlan()` is used to create a `spatialTilePlan` instance.
-#' * `ext()<-` can be used to set up the spatial extent.
+#' * `spatialTilePlan(ext, n)` is used to create a `spatialTilePlan` instance.
+#'   `ext` and `n` can also be supplied after construction via `ext()<-` and
+#'   `length()<-`.
 #' * `ext()` is used to check extent.
-#' * `length()<-` is used to request a number of tiles.
 #' * `length()` can be used to find out how many tiles there are.
 #' * `dim()`/`nrow()`/`ncol()` basic generics are implemented and return
 #' information about how the tiles are arranged.
@@ -57,13 +58,10 @@
 #' selected tiles.
 #'
 #' @examples
-#' x <- tilePlan()
-#' force(x)
-#' ext(x) <- c(0, 100, 0, 100)
-#' length(x) <- 8 # generated tiles will be AT LEAST this value
+#' x <- spatialTilePlan(ext = c(0, 100, 0, 100), n = 8)
 #' force(x)
 #'
-#' length(x) # how many were actually generated?
+#' length(x) # how many were actually generated? AT LEAST n
 #' dim(x)
 #' nrow(x)
 #' ncol(x)
@@ -162,7 +160,7 @@ setMethod("show", signature("spatialTilePlan"), function(object) {
         dim = paste(dim(object), collapse = " "),
         pad = object@pad
     )
-    print_list(plist)
+    .print_list(plist)
 })
 
 #' @rdname dim
@@ -176,7 +174,7 @@ setMethod("length<-", signature("spatialTilePlan"), function(x, value) {
 #' @export
 setMethod("ext", signature("spatialTilePlan"), function(x, ...) {
     if (length(x@extent) == 0L) {
-        stop("spatialTilePlan: No extent set", call. = FALSE)
+        stop("[spatialTilePlan] No extent set", call. = FALSE)
     }
     ext(x@extent, ...)
 })
@@ -199,7 +197,7 @@ setMethod("[", signature(x = "spatialTilePlan", i = "numeric", j = "numeric", dr
 setMethod(
     "centroids", signature("spatialTilePlan"),
     function(x, zero = FALSE, ...) {
-        a <- GiottoUtils::get_args_list(...)
+        a <- .get_args_list(...)
         a$fun <- vect
         e <- ext(x)
         a$offset <- c(terra::ymin(e), terra::xmin(e))
@@ -207,6 +205,41 @@ setMethod(
     }
 )
 
+
+#' @rdname spatialTilePlan-class
+#' @param ext numeric or `SpatExtent`. Spatial extent to tile across. Equivalent
+#'   to calling `ext(x) <- value` after construction.
+#' @param n numeric. Desired number of tiles. Equivalent to calling
+#'   `length(x) <- value` after construction.
+#' @param ... additional params passed to `new()`.
+#' @export
+spatialTilePlan <- function(ext = NULL, n = NULL, ...) {
+    x <- new("spatialTilePlan", ...)
+    if (!is.null(ext)) terra::ext(x) <- ext
+    if (!is.null(n)) length(x) <- n
+    x
+}
+
+
+# * as.polygons ####
+
+#' @rdname as.polygons
+#' @export
+setMethod("as.polygons", signature("spatialTilePlan"), function(x, ...) {
+    if (length(x) == 0L) return(terra::vect())
+    nr <- nrow(x); nc <- ncol(x)
+    w  <- x@tile_dims[[2L]]; h <- x@tile_dims[[1L]]
+    p  <- x@pad; e <- x@extent
+    j_idx <- rep(seq_len(nc), nr)
+    i_idx <- rep(seq_len(nr), each = nc)
+    bounds <- cbind(
+        e[[1L]] + (j_idx - 1L) * w - p,
+        e[[1L]] +  j_idx       * w + p,
+        e[[3L]] + (i_idx - 1L) * h - p,
+        e[[3L]] +  i_idx       * h + p
+    )
+    .tile_bounds_to_sv(bounds)
+})
 
 # helpers ####
 

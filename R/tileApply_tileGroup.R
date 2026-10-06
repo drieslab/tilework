@@ -2,14 +2,15 @@
 
 #' @name tileApply-group
 #' @title Hierarchical Tile Group Processing
+#' @family tile processing
 #' @description
 #' Apply functions across tileGroup objects with control over parallelization
 #' strategy. Useful when tiles are organized into logical groups that need
 #' different processing or aggregation.
 #'
 #' **`token`** is a stand-in for any input data class (e.g. `SpatRaster`,
-#' `SpatExtent`, filpath, etc). See [redispatch_tileapply]
-#' and [extending_giottotile] for further information.
+#' `SpatExtent`, filepath, etc). See [redispatch_tileapply]
+#' and [extending_tilework] for further information.
 #'
 #' @section Parallelization Strategies:
 #' - `"groups"` - Process groups in parallel, tiles within groups sequentially
@@ -49,12 +50,13 @@
 #' @param callback_y function. Optional preprocessing function for `y` per
 #'   worker when `parallel_strategy = "groups"`
 #' @param group_FUN function. Optional function to apply to each group's results
-#' @param lyr numeric. Layer number(s) to use (optional)
-#' @param future.seed logical. Enable reproducible random seeds
 #' @param log logical. Whether to log processing steps
 #' @param logpath character. Log file path (if log = `TRUE`)
 #' @param simplify logical. Whether to flatten group results into single list.
 #'   Group names will not be retained.
+#' @param parallel_params named param list. See [parallel_params]
+#' @param verbose verbosity. `TRUE`, `FALSE` or `"debug"` for more info on
+#'   stack tracing.
 #' @param \dots additional params to pass to [`[`][bracket]
 #'
 #' @seealso [tileApply], [tileGroup()], [tileGroup-class]
@@ -105,7 +107,7 @@ NULL
 
 # methods ####
 
-# token x ####
+#* token x ####
 
 #' @rdname tileApply-group
 #' @export
@@ -119,26 +121,22 @@ setMethod(
         group_FUN = NULL,
         callback_x = NULL,
         log = FALSE,
-        logpath = tempdir(),
+        logpath = getTileworkLogDir(),
         simplify = FALSE,
-        future_params = list(
-            future.seed = TRUE
-        ),
+        parallel_params = list(),
         verbose = NULL,
         ...) {
         parallel_strategy <- match.arg(parallel_strategy, choices = c("groups", "tiles"))
         checkmate::assert_list(get_params_x)
-        checkmate::assert_list(future_params)
+        checkmate::assert_list(parallel_params)
         checkmate::assert_function(FUN)
         checkmate::assert_function(group_FUN, null.ok = TRUE)
 
-        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
-         Dot params:", names(list(...)))
+        .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
-        a <- GiottoUtils::get_args_list(...) # get all args
+        a <- .get_args_list(...) # get all args
         # remove args not used downstream
         a$parallel_strategy <- NULL
-        a$verbose <- NULL
         if (parallel_strategy == "tiles") {
             a$setup_FUN <- NULL
             a$callback_x <- NULL
@@ -168,27 +166,23 @@ setMethod(
         callback_x = NULL,
         callback_y = NULL,
         log = FALSE,
-        logpath = tempdir(),
+        logpath = getTileworkLogDir(),
         simplify = FALSE,
-        future_params = list(
-            future.seed = TRUE
-        ),
+        parallel_params = list(),
         verbose = NULL,
         ...) {
         parallel_strategy <- match.arg(parallel_strategy, choices = c("groups", "tiles"))
         checkmate::assert_list(get_params_x)
         checkmate::assert_list(get_params_y)
-        checkmate::assert_list(future_params)
+        checkmate::assert_list(parallel_params)
         checkmate::assert_function(FUN)
         checkmate::assert_function(group_FUN, null.ok = TRUE)
 
-        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
-         Dot params:", names(list(...)))
+        .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
-        a <- GiottoUtils::get_args_list(...) # get all args
+        a <- .get_args_list(...) # get all args
         # remove args not used downstream
         a$parallel_strategy <- NULL
-        a$verbose <- NULL
         if (parallel_strategy == "tiles") {
             a$setup_FUN <- NULL
             a$callback_x <- NULL
@@ -208,7 +202,7 @@ setMethod(
 setMethod(
     "redispatch_tileapply", signature("character", "tileGroup"),
     function(sig, tiles, ...) {
-        sig <- GiottoUtils::handle_warnings(.terra_read(sig))$result
+        sig <- .handle_warnings(.terra_read(sig))$result
         redispatch_tileapply(sig, tiles, ...)
     }
 )
@@ -256,9 +250,9 @@ setMethod(
         lyr <- NULL # default
         dots <- list(...)
         if (param_xy == "x") {
-            lyr <- dots$get_params_x$lyr %null% lyr
+            lyr <- dots$get_params_x$lyr %||% lyr
         } else {
-            lyr <- dots$get_params_y$lyr %null% lyr
+            lyr <- dots$get_params_y$lyr %||% lyr
         }
 
         a <- list(f, tiles, param_xy = param_xy, ...)
@@ -308,25 +302,25 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
     checkmate::assert_list(default_get_params)
     param_xy <- match.arg(param_xy, c("x", "y"))
 
-    vmsg(.v = verbose, .is_debug = TRUE, "[redispatch] step done. Route as", param_xy, "...")
+    .dmsg(.v = verbose, "[redispatch] step done. Route as", param_xy, "...")
     # default is no change
     sig <- as(sig, "token")
     # args list
     a <- list(tiles = tiles, verbose = verbose, ...)
 
+    .dmsg(.v = verbose, .initial = "  ", plist = list(...))
+
     if (param_xy == "x") {
-        vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(dots)))
         a$get_params_x <- c(a$get_params_x, default_get_params)
         ns <- names(a$get_params_x)
         a$get_params_x <- a$get_params_x[!duplicated(ns)]
-        a$callback_x <- a$callback_x %null% default_callback
+        a$callback_x <- a$callback_x %||% default_callback
         do.call(tileApply, c(list(x = sig), a))
     } else {
-        vmsg(.v = verbose, .is_debug = TRUE, .initial = "  ", "Dot params:", toString(names(dots)))
         a$get_params_y <- c(a$get_params_y, default_get_params)
         ns <- names(a$get_params_y)
         a$get_params_y <- a$get_params_y[!duplicated(ns)]
-        a$callback_y <- a$callback_y %null% default_callback
+        a$callback_y <- a$callback_y %||% default_callback
         do.call(tileApply, c(list(y = sig), a))
     }
 })
@@ -340,22 +334,27 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         group_FUN = NULL,
         callback_x = NULL,
         callback_y = NULL,
-        future_params,
+        parallel_params,
         log,
         logpath,
         simplify = FALSE,
+        verbose = NULL,
         ...) {
     ngroups <- length(tiles)
-    with_pbar({
-        p <- pbar(steps = ngroups)
+    if (log) {
+        jid <- getTileworkJobID(advance = TRUE)
+        .vmsg(.v = verbose, "logging as job", jid)
+    }
+    progressr::with_progress({
+        p <- progressr::progressor(steps = ngroups)
 
         .future_fun <- function(group) {
             # logging ---- #
+            conn <- NULL
             if (log) {
-                vmsg(
-                    .v = "log", sprintf("[group %s] start", group),
-                    .log_path = logpath
-                )
+                conn <- .log_conn(log_dir = logpath, job_id = jid)
+                on.exit(close(conn), add = TRUE)
+                .log_write(conn, sprintf("[group %s] start", group))
             }
             # logging ---- #
 
@@ -383,7 +382,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
                 group = group,
                 setup_out = setup_out,
                 log = log,
-                logpath = logpath,
+                logconn = conn,
                 ...
             )
             gres <- do.call(.process_seq_tile, pst_args)
@@ -397,25 +396,20 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
             }
 
             # logging ---- #
-            if (log) {
-                vmsg(
-                    .v = "log", sprintf("[group %s] done", group),
-                    .log_path = logpath
-                )
-            }
+            if (log) .log_write(conn, sprintf("[group %s] done", group))
             # logging ---- #
 
             p(message = sprintf("[group %s] done", group))
             return(gres)
         }
 
-        future_params <- c(
+        parallel_params <- c(
             X = list(names(tiles)),
             FUN = .future_fun,
-            future_params
+            parallel_params
         )
 
-        group_results <- do.call(lapply_flex, future_params)
+        group_results <- do.call(.par_lapply, parallel_params)
 
         if (simplify) {
             group_results <- unlist(group_results,
@@ -433,32 +427,43 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
 .tapp_seq_groups <- function(
         tiles,
         group_FUN,
-        future_params,
+        parallel_params,
         log,
         logpath,
         simplify = FALSE,
+        verbose = NULL,
         ...) {
     ngroups <- length(tiles)
     # allocate group results list
     group_results <- vector("list", length = ngroups)
     names(group_results) <- names(tiles)
 
-    with_pbar({
-        p <- pbar(steps = ngroups)
+    if (log) {
+        jid <- getTileworkJobID(advance = TRUE)
+        .vmsg(.v = verbose, "logging as job", jid)
+        # make master directory for individual group jobs
+        logpath <- file.path(logpath, jid)
+        conn <- .log_conn(log_dir = logpath, job_id = jid)
+        on.exit(close(conn), add = TRUE)
+    }
+
+    progressr::with_progress({
+        p <- progressr::progressor(steps = ngroups)
 
         for (group in names(tiles)) {
             # logging ---- #
             if (log) {
-                vmsg(
-                    .v = "log", sprintf("[group %s] start", group),
-                    .log_path = logpath
-                )
+                .log_write(conn, sprintf("[group %s] start", group))
+                sjid <- getTileworkJobID(advance = TRUE)
+                .vmsg(.v = verbose,
+                      sprintf("[group %s] logging as sub-job %s", group, sjid))
             }
+
             # logging ---- #
 
             gres <- .process_par_tile(
                 tiles = tiles, group = group, log = log, logpath = logpath,
-                future_params = future_params, ...
+                parallel_params = parallel_params, jid = sjid, ...
             )
 
             # Apply group function if provided
@@ -471,12 +476,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
             group_results[[group]] <- gres # append
 
             # logging ---- #
-            if (log) {
-                vmsg(
-                    .v = "log", sprintf("[group %s] done", group),
-                    .log_path = logpath
-                )
-            }
+            if (log) .log_write(conn, sprintf("[group %s] done", group))
             # logging ---- #
 
             p(message = sprintf("[group %s] done", group))
@@ -499,7 +499,8 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         FUN,
         log,
         logpath,
-        future_params,
+        jid = "",
+        parallel_params,
         ...) {
     tiles$active <- group
 
@@ -510,23 +511,23 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         ij <- .tile_idx_to_ij(tiles[], tile_idx)
         tile_id <- sprintf("[group %s][tile %d]", group, tile_idx)
 
+
         # logging ---- #
         if (log) {
-            vmsg(
-                .v = "log", sprintf(
-                    "%s start (row %d, col %d)",
-                    tile_id, ij[[1]], ij[[2]]
-                ),
-                .log_path = logpath
-            )
+            # sub-job ID passed from master session
+            conn <- .log_conn(log_dir = logpath, job_id = jid)
+            on.exit(close(conn), add = TRUE)
+            .log_write(conn, sprintf("%s start (row %d, col %d)",
+                tile_id, ij[[1]], ij[[2]]
+            ))
         }
         # logging ---- #
 
-        get_params_x <- c(list(x, tiles, i = i), get_params_x, list(...))
-        tile_x <- do.call(getTile, get_params_x)[[1L]] # returns as list
+        gt_params_x <- c(list(x, tiles, i = i), get_params_x, list(...))
+        tile_x <- do.call(getTile, gt_params_x)[[1L]] # returns as list
         if (!is.null(y)) {
-            get_params_y <- c(list(y, tiles, i = i, pad = pad_y), get_params_y, list(...))
-            tile_y <- do.call(getTile, get_params_y)[[1L]]
+            gt_params_y <- c(list(y, tiles, i = i, pad = pad_y), get_params_y, list(...))
+            tile_y <- do.call(getTile, gt_params_y)[[1L]]
         }
 
         # Prepare function arguments
@@ -543,20 +544,18 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         results <- do.call(FUN, args = a)
 
         # logging ---- #
-        if (log) {
-            vmsg(.v = "log", sprintf("%s done", tile_id), .log_path = logpath)
-        }
+        if (log) .log_write(conn, sprintf("%s done", tile_id))
         # logging ---- #
         return(results)
     }
 
-    future_params <- c(
+    parallel_params <- c(
         X = list(seq_along(tiles)),
         FUN = .future_fun,
-        future_params
+        parallel_params
     )
 
-    do.call(lapply_flex, future_params)
+    do.call(.par_lapply, parallel_params)
 }
 
 # group: group index (character name)
@@ -568,14 +567,14 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         FUN,
         setup_out = NULL,
         log,
-        logpath,
+        logconn, # conn opened and closed in calling function
         ...) {
     tiles$active <- group
     results <- vector("list", length = length(tiles))
 
-    get_params_x <- c(list(x, tiles), get_params_x, list(...))
+    gt_params_x <- c(list(x, tiles), get_params_x, list(...))
     if (!is.null(y)) {
-        get_params_y <- c(list(y, tiles, pad = pad_y), get_params_y, list(...))
+        gt_params_y <- c(list(y, tiles, pad = pad_y), get_params_y, list(...))
     }
 
     for (i in seq_along(tiles)) {
@@ -586,22 +585,18 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         # logging ---- #
         tile_id <- sprintf("[group %s][tile %d]", group, tile_idx)
         if (log) {
-            vmsg(
-                .v = "log", sprintf(
-                    "%s start (row %d, col %d)",
-                    tile_id, ij[[1L]], ij[[2L]]
-                ),
-                .log_path = logpath
-            )
+            .log_write(logconn, sprintf("%s start (row %d, col %d)",
+                tile_id, ij[[1L]], ij[[2L]]
+            ))
         }
         # logging ---- #
 
         # assign index to get
-        get_params_x$i <- i
-        tile_x <- do.call(getTile, get_params_x)[[1L]] # returns as list
+        gt_params_x$i <- i
+        tile_x <- do.call(getTile, gt_params_x)[[1L]] # returns as list
         if (!is.null(y)) {
-            get_params_y$i <- i
-            tile_y <- do.call(getTile, get_params_y)[[1L]]
+            gt_params_y$i <- i
+            tile_y <- do.call(getTile, gt_params_y)[[1L]]
         }
 
         # Prepare function arguments
@@ -619,9 +614,7 @@ setMethod("redispatch_tileapply", signature("ANY", "tileGroup"), function(
         results[[i]] <- do.call(FUN, args = a)
 
         # logging ---- #
-        if (log) {
-            vmsg(.v = "log", sprintf("%s done", tile_id), .log_path = logpath)
-        }
+        if (log) .log_write(logconn, sprintf("%s done", tile_id))
         # logging ---- #
     }
 

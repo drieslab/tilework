@@ -1,15 +1,13 @@
-# GiottoTile
+# tilework
 
-Open source and S4 extensible framework for efficient spatial and pixel-based tiling operations on large datasets (currently only raster).
-GiottoTile provides easy-to-use tile iterators that enable memory-efficient processing of spatial data through parallelizable tile-based operations.
-
-This package is part of the Giotto Suite ecosystem for spatial-omics analysis, although the only other Giotto Suite package it depends on is {GiottoUtils}.
+Open source and S4 extensible framework for efficient spatial and pixel-based tiling operations on large datasets.
+{tilework} provides easy-to-use tile planners that enable memory-efficient processing of spatial data through parallelizable tile-based operations.
 
 For another approach to spatially tiled computation, see: [chopin](https://github.com/ropensci/chopin/tree/main)
 
 # Features
 
-- Flexible Tiling: Support for both spatial extent-based and pixel-exact tiling
+- Flexible Tiling: Support for spatial extent-based, pixel-exact, arbitrary point-centered, and adaptive variable-size tiling
 - Memory Efficient: Process tilewise or batchwise without loading entire datasets into memory
 - Stateful Iteration: Iterator patterns for streaming and batch processing
 - Parallel Processing: Built-in support for parallel execution via the {future} framework
@@ -20,7 +18,7 @@ For another approach to spatially tiled computation, see: [chopin](https://githu
 # Installation
 ```r
 # Install from GitHub
-devtools::install_github("drieslab/GiottoTile")
+devtools::install_github("drieslab/tilework")
 ```
 
 # Quick Start
@@ -28,7 +26,7 @@ devtools::install_github("drieslab/GiottoTile")
 ## Spatial Tiling
 
 ```r
-library(GiottoTile)
+library(tilework)
 library(terra)
 
 # Load a raster
@@ -36,9 +34,7 @@ f <- system.file("ex/elev.tif", package = "terra")
 r <- rast(f)
 
 # Create a spatial tile iterator
-tp <- tilePlan("spatial")
-ext(tp) <- ext(r)          # Set spatial extent
-length(tp) <- 16           # Request 16 tiles (actual number may be higher)
+tp <- spatialTilePlan(ext = ext(r), n = 16)
 
 # Check tile layout
 tp
@@ -51,7 +47,7 @@ tile_grid <- tp[1, 2:3]  # Get specific grid positions
 
 # Apply a function across tiles
 outdir <- tempdir()
-tileApply(r, tp = tp, FUN = function(x, .I) {
+tileApply(r, tiles = tp, FUN = function(x, .I) {
     writeRaster(x, file.path(outdir, sprintf("tile_%03d.tif", .I)))
 })
 ```
@@ -60,10 +56,7 @@ tileApply(r, tp = tp, FUN = function(x, .I) {
 
 ```r
 # Create a pixel-based tile iterator
-px <- tilePlan("pixel")
-px$pxdims <- c(500, 500)  # 500x500 pixel raster
-px$ncols <- 100           # 100 pixel tiles
-px$nrows <- 100           # 100 pixel tiles
+px <- pixelTilePlan(pxdims = c(500, 500), ncols = 100, nrows = 100)
 
 # Check dimensions
 dim(px)     # Grid dimensions
@@ -71,7 +64,7 @@ length(px)  # Total number of tiles
 plot(px)    # Visualize grid
 
 # Apply processing with pixel tiles
-tileApply(r, tp = px, FUN = function(x) {
+tileApply(r, tiles = px, FUN = function(x) {
     # Process each 100x100 pixel tile
     mean(values(x), na.rm = TRUE)
 })
@@ -97,10 +90,8 @@ For spatial extent-based tiling:
 - {terra} `SpatExtent` integration
 
 ```r
-tp <- tilePlan("spatial")
-ext(tp) <- c(0, 100, 0, 100)  # xmin, xmax, ymin, ymax
-length(tp) <- 9               # Request 9 tiles
-dim(tp)                       # Returns [3, 3] - actual grid layout
+tp <- spatialTilePlan(ext = c(0, 100, 0, 100), n = 9)
+dim(tp)  # Returns [3, 3] - actual grid layout
 ```
 
 **`pixelTilePlan`**
@@ -112,10 +103,64 @@ For pixel-exact tiling:
 - Ideal for image processing workflows
 
 ```r
-pti <- tilePlan("pixel")
-pti$pxdims <- c(1000, 1000)  # Total image dimensions
-pti$ncols <- 250             # Pixels per tile (width)
-pti$nrows <- 250             # Pixels per tile (height)
+pti <- pixelTilePlan(pxdims = c(1000, 1000), ncols = 250, nrows = 250)
+```
+
+**`pointTilePlan`**
+
+For tiling centered on arbitrary (x, y) coordinates with uniform tile dimensions.
+Tile placement is driven by supplied point locations rather than a grid.
+Supports spatial (CRS units) or pixel coordinate modes via `input` / `output`
+toggles; cross-mode conversion is resolved automatically at extraction time when
+a raster is provided. See the
+[tile plans vignette](https://drieslab.github.io/tilework/articles/tile-plans.html)
+for full coverage of coordinate modes.
+
+```r
+tp <- pointTilePlan("spatial",
+    coords = cbind(x = c(10, 50, 90), y = c(10, 50, 90)),
+    width  = 20,
+    height = 20
+)
+```
+
+**`freeTilePlan`**
+
+For explicit per-tile bounds with no required uniformity in size or spacing.
+Tile bounds are the canonical representation — positions are not computed from
+a formula. The primary use case is adaptive decomposition via `quadtreePlan()`,
+where high-density regions use small tiles and sparse regions use large tiles.
+
+```r
+# Manual bounds (e.g. from an external partitioning algorithm)
+tp <- freeTilePlan()
+tp$bounds <- rbind(
+    c(0,  50,  0,  50),
+    c(50, 100, 0,  50),
+    c(0,  50,  50, 100),
+    c(50, 100, 50, 100)
+)
+length(tp)  # 4
+tp[2]       # SpatExtent for tile 2
+plot(tp)
+```
+
+`quadtreePlan()` builds a `freeTilePlan` automatically by iteratively
+subdividing tiles whose `FUN` value exceeds a threshold, then merging
+neighboring leaf tiles back together when their combined value stays ≤
+`threshold`. The last `FUN` value per leaf is stored in `$n_records`.
+
+```r
+# Points on disk (required for tileApply dispatch)
+pts <- terra::vect(f, proxy = TRUE)
+
+fp <- quadtreePlan(
+    x             = pts,
+    threshold     = 500L,
+    min_tile_size = 1
+)
+plot(fp)
+fp$n_records  # point count per leaf tile
 ```
 
 **`tileGroup`**
@@ -140,10 +185,12 @@ tg[, 2]     # Second tile from active group
 
 **`tileIterator`**
 
-Stateful iterator for streaming processing. These can be created on top of 
-`tilePlan` and `tileGroup` (when an active group is set) inheriting structures.
-Use with `tileApply()` for distribution of batches across parallelized {future} 
-workers.
+Stateful iterator for streaming processing. Created on top of `tilePlan` or
+`tileGroup` (with `$active` set). Use with `tileApply()` for distribution of
+batches across parallelized {future} workers. A `setup_FUN` argument initializes
+per-worker state (e.g. loading a model) once before batch processing begins —
+see the [ML vignette](https://drieslab.github.io/tilework/articles/patch-feature-extraction.html)
+for a worked example.
 
 ```r
 # Create iterator for batch processing
@@ -164,6 +211,17 @@ while (iter$has_next) {
 iter$reset()
 ```
 
+**`tileSelection`**
+
+Lazy drop = FALSE selection wrapper — preserves a subset of tile indices without materialising bounds. Useful for selecting specific tiles to process without modifying the underlying plan.
+
+```r
+# Select tiles of interest (e.g. from a spatial query)
+sel <- tp[c(1, 3, 7), drop = FALSE]
+length(sel)   # 3
+tileApply(r, tiles = sel, FUN = function(x) terra::global(x, "mean"))
+```
+
 # Processing Data
 
 ## Basic Tile Extraction with `getTile()`
@@ -174,10 +232,7 @@ f <- system.file("ex/elev.tif", package="terra")
 r <- terra::rast(f)
 
 # Create tile plan matching raster
-tp <- tilePlan("pixel")
-tp$pxdims <- dim(r)[1:2]
-tp$nrows <- 100
-tp$ncols <- 100
+tp <- pixelTilePlan(pxdims = dim(r)[1:2], nrows = 100, ncols = 100)
 
 # Extract tiles
 tiles <- getTile(r, tp, i = 1:4)  # Get first 4 tiles
@@ -286,8 +341,7 @@ library(future)
 plan(multisession, workers = 4)
 
 # Parallel tile processing
-results <- tileApply(r, tp = tp, 
-    cores = 4,
+results <- tileApply(r, tiles = tp,
     FUN = function(x) {
         # Your processing function
         mean(values(x), na.rm = TRUE)
@@ -316,7 +370,7 @@ all_tiles <- tp[]
 
 1. Memory Management: Use appropriate tile sizes to balance memory usage and processing efficiency
 2. Pad Planning: Consider padding requirements for spatial operations to avoid edge effects
-3. Parallel Strategy: Choose between parallelizing across groups vs. within groups based on your workflow
+3. Parallel Strategy: Choose between parallelizing across groups vs. within groups based on your workflow — see the [decision table](https://drieslab.github.io/tilework/articles/tile-orchestration.html#choosing-between-them) in the orchestration vignette
 4. Metadata Usage: Leverage metadata for complex processing logic and file organization
 5. Iterator Patterns: Use stateful iterators for streaming large datasets that don't fit in memory
 
@@ -329,9 +383,7 @@ Processing Large Satellite Images
 large_raster <- rast("large_satellite_image.tif")
 
 # Create efficient tiling scheme
-tp <- tilePlan("spatial")
-ext(tp) <- ext(large_raster)
-length(tp) <- 100  # 100+ tiles for manageable processing
+tp <- spatialTilePlan(ext = ext(large_raster), n = 100)
 
 # Add padding for edge effects
 tp <- tp + 50  # 50-unit padding
@@ -339,8 +391,7 @@ tp <- tp + 50  # 50-unit padding
 # Process tiles in parallel
 plan(multisession, workers = 8)
 
-results <- tileApply(large_raster, tp = tp,
-                    cores = 8,
+results <- tileApply(large_raster, tiles = tp,
                     FUN = function(x, .I) {
                         # Apply NDVI calculation
                         ndvi <- (x[[4]] - x[[3]]) / (x[[4]] + x[[3]])
@@ -362,13 +413,10 @@ results <- tileApply(large_raster, tp = tp,
 image <- rast("high_res_image.tif")
 
 # Create pixel-exact tiles
-pti <- tilePlan("pixel")
-pti$pxdims <- c(nrow(image), ncol(image))
-pti$ncols <- 512    # 512x512 pixel tiles
-pti$nrows <- 512
+pti <- pixelTilePlan(pxdims = c(nrow(image), ncol(image)), ncols = 512, nrows = 512)
 
 # Process each tile
-texture_metrics <- tileApply(image, tp = pti,
+texture_metrics <- tileApply(image, tiles = pti,
                            FUN = function(x) {
                                # Calculate texture metrics
                                vals <- values(x)
@@ -386,11 +434,12 @@ Dependencies
 * **terra**: Spatial data handling and raster operations
 * **checkmate**: Input validation
 * **future.apply**: Parallel processing support
-* **GiottoUtils**: Utility functions (part of Giotto ecosystem)
 
-# Integration
+# Vignettes
 
-GiottoTile is part of the broader Giotto ecosystem for spatial data analysis. It provides the foundational tiling capabilities used by other Giotto packages for efficient processing of large-scale spatial datasets.
+- [Choosing and Creating a Tile Plan](https://drieslab.github.io/tilework/articles/tile-plans.html) — when to use `spatialTilePlan`, `pixelTilePlan`, `pointTilePlan`, or `freeTilePlan`; adaptive quadtree decomposition; coordinate modes; padding
+- [Selecting, Grouping, and Iterating Tiles](https://drieslab.github.io/tilework/articles/tile-orchestration.html) — `tileSelection`, `tileGroup` parallelization strategies, `tileIterator` streaming and per-worker setup
+- [Patch-Based Feature Extraction for Machine Learning](https://drieslab.github.io/tilework/articles/patch-feature-extraction.html) — end-to-end ML inference pipeline using `tileGroup`, `tileIterator`, and `setup_FUN`
 
 # Contributing
 Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.

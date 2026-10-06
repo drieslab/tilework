@@ -8,10 +8,12 @@
 #' Dummy documentation for things that do not need much explanation (like
 #' `show` methods)
 #' @param object object
+#' @keywords internal
 NULL
 
 #' @title Get Tile Centroids
 #' @name centroids
+#' @family tile* methods
 #' @description
 #' Get the centroids of the tiles. For spatialTilePlan, these will be returned
 #' as `SpatVector` centroids. For non-spatial plans like pixelTileGrid, this
@@ -33,6 +35,7 @@ NULL
 
 #' @title Get and Set Tile Metadata and Params
 #' @name dollar
+#' @family tile* methods
 #' @description
 #' Get and set tile metadata. Some params can also be modified with
 #' this operator, for example the `$pad` value or `$pxdims`, `$ncols`, or
@@ -57,6 +60,7 @@ NULL
 
 #' @name plot
 #' @title Plot a `tilePlan`
+#' @family tile* methods
 #' @description
 #' Plot and preview the tile plan. This is likely to be very slow if there are
 #' a lot of tiles (in the neighborhood of >10,000)
@@ -80,6 +84,7 @@ NULL
 #' @name dim
 #' @title Tile Plan Array Characteristics
 #' @aliases nrow ncol length length<-
+#' @family tile* methods
 #' @description
 #' Get dimension characteristics of the `tilePlan` tiling plan. These
 #' produce information on how the tiles are arrayed in rows `nrow()`, cols `ncol()`,
@@ -102,7 +107,9 @@ NULL
 NULL
 
 #' @name bracket
+#' @aliases [
 #' @title Extract Bounds from Tile Object
+#' @family tile* methods
 #' @description
 #' Get a set of tile bounds from a `tile*` object. Values are always returned as
 #' a `list`, even when length one to reduce surprises with `lapply()` usage.
@@ -118,6 +125,7 @@ NULL
 #' `pixelTilePlan`)
 #' @param expand_grid logical (internal) whether to use `expand.grid()` on ij
 #' indices.
+#' @param value `ANY` value to set
 #' @param ... addtional params to pass (not used).
 #' @param drop not used.
 #' @examples
@@ -139,12 +147,15 @@ NULL
 NULL
 
 #' @name double_bracket
+#' @aliases [[
 #' @title Get and set metadata
+#' @family tile* methods
 #' @description
 #' `[[` can be used to get the table of metadata for a specific tile.
 #' @param x `tilePlan`
-#' @param i tile vector index
-#' @param j not used.
+#' @param i `integer-like`. tile vector index
+#' @param j `character`. Name of metadata information to get
+#' @param value `ANY` value to set
 #' @param ... not used.
 #' @examples
 #' spat <- tilePlan("spatial")
@@ -163,6 +174,7 @@ setMethod("centroids", signature("tilePlan"), function(x, fun = function(x) x, o
 
 #' @name arith
 #' @title Tile Pads
+#' @family tile* methods
 #' @description
 #' Tile padding extends the bounds of the tile beyond the region that
 #' they are initially planned for by an equal amount on all 4 sides. This can
@@ -172,6 +184,11 @@ setMethod("centroids", signature("tilePlan"), function(x, fun = function(x) x, o
 #' Padding can be added either via [`$pad`][dollar] or `+` and `-` operators.
 #' The + and - operators specifically modify the padding value based on the
 #' arithmetic ops. This is similar to their usage in [terra::Arith-methods]
+#'
+#' `$stride<-` is an alternative way to set padding via the stride between
+#' tile starts: `pad = (tile_dim - stride) / 2`. Requires `tile_dims` to be
+#' set (i.e. not `freeTilePlan`). `$stride` returns the effective stride given
+#' the current pad.
 #'
 #' @section spatial and pixel differences:
 #'
@@ -205,6 +222,7 @@ NULL
 #' @name ext
 #' @title Get and Set Spatial Extent
 #' @aliases ext<-
+#' @family tile* methods
 #' @description
 #' Get and set a spatial extent.
 #' @param x `tilePlan`
@@ -213,14 +231,45 @@ NULL
 #' @returns tilePlan if `ext<-()` and `SpatExtent` if `ext()`
 NULL
 
+#' @name as.polygons
+#' @title Coerce a tile plan to polygons
+#' @description
+#' Convert a `tilePlan`-inheriting object to a `SpatVector` of rectangle
+#' polygons, one per tile, with a `tile` attribute column holding the tile
+#' index. Padding is included in the polygon bounds.
+#'
+#' Accelerated vectorized methods are provided for `spatialTilePlan`,
+#' `freeTilePlan`, and `pointTilePlan`. All other `tilePlan` subclasses fall
+#' back to extracting bounds via `x[]`.
+#' @param x `tilePlan`-inheriting object
+#' @param ... additional arguments (ignored)
+#' @returns `SpatVector` of polygons
+#' @family tile* methods
+NULL
+
+#' @rdname as.polygons
+#' @export
+setMethod("as.polygons", signature("tilePlan"), function(x, ...) {
+    extents <- x[]
+    bounds <- do.call(rbind, lapply(extents, .ext_to_num_vec))
+    .tile_bounds_to_sv(bounds)
+})
+
 #' @name tilePlan
 #' @title Create a Tiling Plan
-#' @param type character. One of `"spatial"`, `"pixel"`. Type of plan to create.
-#' @param ... additional params to pass to `new()` call.
+#' @family tile plans
+#' @param type character. One of `"spatial"`, `"pixel"`, `"point"`, `"free"`.
+#'   Type of plan to create.
+#' @param ... additional params passed to the specific constructor:
+#'   [spatialTilePlan()], [pixelTilePlan()], [pointTilePlan()], or
+#'   [freeTilePlan()].
 #' @examples
 #' tilePlan("spatial")
 #' tilePlan("pixel")
-#' @seealso [spatialTilePlan] and [pixelTilePlan] classes
+#' tilePlan("point")
+#' tilePlan("free")
+#' @seealso [spatialTilePlan-class], [pixelTilePlan-class],
+#'   [pointTilePlan-class], [freeTilePlan-class]
 NULL
 
 
@@ -228,12 +277,44 @@ NULL
 
 #' @rdname tilePlan
 #' @export
-tilePlan <- function(type = c("spatial", "pixel"), ...) {
-    type <- match.arg(type, choices = c("spatial", "pixel"))
+tilePlan <- function(type = c("spatial", "pixel", "point", "free"), ...) {
+    type <- match.arg(type)
     switch(type,
-        "spatial" = new("spatialTilePlan", ...),
-        "pixel" = new("pixelTilePlan", ...)
+        "spatial" = spatialTilePlan(...),
+        "pixel"   = pixelTilePlan(...),
+        "point"   = pointTilePlan(...),
+        "free"    = freeTilePlan(...)
     )
+}
+
+#' @rdname pointTilePlan-class
+#' @param input character. Coordinate space of coords, dims, and padding:
+#'   `"spatial"` for CRS units, `"pixel"` for pixel indices.
+#' @param output character. Bound type returned by [getTile()]. Defaults to
+#'   `input`. Cross-mode conversion requires a `SpatRaster` at [getTile()] time
+#'   (or `@rast_dims`/`@extent` set on the plan for standalone use).
+#' @param coords n x 2 matrix or data frame of tile center coordinates (columns:
+#'   x, y). Data frames are coerced via `as.matrix()`. Equivalent to
+#'   `x$coords <- value` after construction.
+#' @param width numeric. Uniform tile width in input coordinate units. Equivalent
+#'   to `x$width <- value` after construction.
+#' @param height numeric. Uniform tile height in input coordinate units.
+#'   Equivalent to `x$height <- value` after construction.
+#' @param ... additional params to pass to `pointTilePlan` class constructor
+#' @export
+pointTilePlan <- function(input = c("spatial", "pixel"),
+                          output = input,
+                          coords = NULL,
+                          width = NULL,
+                          height = NULL,
+                          ...) {
+    input  <- match.arg(input)
+    output <- match.arg(output, c("spatial", "pixel"))
+    x <- new("pointTilePlan", input = input, output = output, ...)
+    if (!is.null(coords)) x$coords <- coords
+    if (!is.null(width))  x$width  <- width
+    if (!is.null(height)) x$height <- height
+    x
 }
 
 #' @rdname dollar
@@ -241,6 +322,15 @@ tilePlan <- function(type = c("spatial", "pixel"), ...) {
 setMethod("$<-", signature("tilePlan", "ANY"), function(x, name, value) {
     if (name == "pad") {
         x@pad <- value
+        return(initialize(x))
+    }
+    if (name == "stride") {
+        checkmate::assert_numeric(value, min.len = 1L, max.len = 2L)
+        if (length(x@tile_dims) == 0L)
+            stop("$stride requires tile_dims to be set", call. = FALSE)
+        dims <- rep_len(x@tile_dims, 2L)
+        stride <- rep_len(value, 2L)
+        x@pad <- mean((dims - stride) / 2)
         return(initialize(x))
     }
     x@metadata[[name]] <- value
@@ -252,6 +342,10 @@ setMethod("$<-", signature("tilePlan", "ANY"), function(x, name, value) {
 setMethod("$", signature("tilePlan"), function(x, name) {
     if (name == "pad") {
         return(x@pad)
+    }
+    if (name == "stride") {
+        if (length(x@tile_dims) == 0L) return(NULL)
+        return(x@tile_dims - 2 * x@pad)
     }
     x@metadata[[name]]
 })
@@ -271,7 +365,7 @@ setMethod(
         p$extent_list <- x[]
 
         if (x@pad > 0) {
-            p$alpha <- p$alpha %null% 0.3
+            p$alpha <- p$alpha %||% 0.3
         }
 
         do.call(.preview_chunk_plan, args = p)
@@ -307,9 +401,22 @@ setMethod("dim", signature("tilePlan"), function(x) {
 setMethod("[", signature(x = "tilePlan", i = "numeric", j = "missing", drop = "missing"), function(x, i, ..., drop) {
     i <- as.integer(i)
     if (any(is.na(i))) stop("[tilePlan] i index may not be NA", call. = FALSE)
+    if (nargs() - length(list(...)) == 3L) {
+        # row case
+        if (any(i > nrow(x) | i <= 0)) stop("[tilePlan] subscript out of bounds", call. = FALSE)
+        return(x[i, j = seq_len(ncol(x)), expand_grid = TRUE, ...]) # pass to numeric/numeric method
+    }
+    # flat case
     if (any(i > length(x) | i <= 0)) stop("[tilePlan] subscript out of bounds", call. = FALSE)
     ij <- .tile_idx_to_ij(x, i)
     x[ij[[1L]], ij[[2L]], expand_grid = FALSE, ...] # pass to numeric/numeric method
+})
+
+#' @rdname bracket
+#' @export
+setMethod("[", signature(x = "tilePlan", i = "missing", j = "numeric", drop = "missing"), function(x, i, j, ..., drop) {
+    j <- as.integer(j)
+    x[i = seq_len(nrow(x)), j, expand_grid = TRUE, ...]
 })
 
 #' @rdname bracket
@@ -327,18 +434,114 @@ setMethod(
 )
 
 #' @rdname bracket
-#' @usage
-#' ## S4 method for signature 'tilePlan,missing,missing,missing'
-#' x[]
 #' @export
 setMethod("[", signature(x = "tilePlan", i = "missing", j = "missing", drop = "missing"), function(x, i, j) {
     x[seq_len(length(x))] # pass to numeric/missing method
+})
+
+#' @rdname bracket
+#' @export
+setMethod("[", signature(x = "tilePlan", i = "numeric", j = "missing", drop = "logical"), function(x, i, ..., drop) {
+    checkmate::assert_integerish(i)
+    dots <- list(...)
+    if ("expand_grid" %in% names(dots)) {
+        stop("[tilePlan] expand_grid param not allowed when j is missing")
+    }
+    if (length(dots) > 0) {
+        warning("[tilePlan] ... params are not passed when drop = FALSE")
+    }
+    if (nargs() - length(dots) == 4) {
+        # row case
+        j <- seq_len(ncol(x))
+        if (drop) return(x[i, j = j, expand_grid = TRUE, ...])
+        return(x[i, j, expand_grid = TRUE, drop = FALSE])
+    }
+    # flat case
+    if (drop) return(x[i, ...])
+    if (any(i > length(x) | i <= 0)) stop("[tilePlan] subscript out of bounds\n", call. = FALSE)
+    new("tileSelection", tp = x, indices = as.integer(i))
+})
+
+#' @rdname bracket
+#' @export
+setMethod("[", signature(x = "tilePlan", i = "missing", j = "numeric", drop = "logical"), function(x, i, j, ..., drop) {
+    if (drop) return(x[, j = j, ...])
+    dots <- list(...)
+    if ("expand_grid" %in% names(dots)) {
+        stop("[tilePlan] expand_grid param not allowed when i is missing")
+    }
+    if (length(dots) > 0) {
+        warning("[tilePlan] ... params are not passed when drop = FALSE")
+    }
+    checkmate::assert_integerish(j)
+    x[i = seq_len(nrow(x)), j, expand_grid = TRUE, drop = FALSE]
+})
+
+#' @rdname bracket
+#' @export
+setMethod(
+    "[", signature(x = "tilePlan", i = "numeric", j = "numeric", drop = "logical"),
+    function(x, i, j, expand_grid = TRUE, ..., drop) {
+        if (drop) return(x[i, j, expand_grid = expand_grid, ...])
+        dots <- list(...)
+        if (length(dots) > 0) {
+            warning("[tilePlan] ... params are not passed when drop = FALSE")
+        }
+        checkmate::assert_integerish(i)
+        checkmate::assert_integerish(j)
+        if (isTRUE(expand_grid)) {
+            var_tab <- expand.grid(j, i) # j/i switch is intentional
+            i <- var_tab$Var2
+            j <- var_tab$Var1
+        }
+        i_final <- .ij_to_tile_idx(x, i, j)
+        x[i_final, drop = FALSE]
+    }
+)
+
+#' @rdname bracket
+#' @export
+setMethod("[", signature(x = "tilePlan", i = "missing", j = "missing", drop = "logical"), function(x, i, j, drop) {
+    if (drop) return(x[])
+    x[seq_len(length(x)), drop = FALSE] # pass to numeric/missing method
 })
 
 #' @rdname double_bracket
 #' @export
 setMethod("[[", signature("tilePlan", i = "numeric", j = "missing"), function(x, i, j, ...) {
     x@metadata[i, , drop = FALSE]
+})
+
+#' @rdname double_bracket
+#' @export
+setMethod("[[", signature("tilePlan", i = "missing", j = "missing"), function(x, i, j, ...) {
+    x@metadata
+})
+
+#' @rdname double_bracket
+#' @export
+setMethod("[[", signature("tilePlan", i = "missing", j = "character"), function(x, i, j, ...) {
+    x@metadata[, j, drop = FALSE]
+})
+
+#' @rdname double_bracket
+#' @export
+setMethod("[[", signature("tilePlan", i = "numeric", j = "character"), function(x, i, j, ...) {
+    x@metadata[i, j, drop = FALSE]
+})
+
+#' @rdname double_bracket
+#' @export
+setMethod("[[<-", signature("tilePlan", i = "numeric", j = "character", value = "ANY"), function(x, i, j, ..., value) {
+    x@metadata[i, j] <- value
+    x
+})
+
+#' @rdname double_bracket
+#' @export
+setMethod("[[<-", signature("tilePlan", i = "missing", j = "character", value = "ANY"), function(x, i, j, ..., value) {
+    x@metadata[, j] <- value
+    x
 })
 
 #' @rdname arith
@@ -357,7 +560,7 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
 # helpers ####
 
 .DollarNames.tilePlan <- function(x, pattern) {
-    c(colnames(x@metadata), "pad")
+    c(colnames(x@metadata), "pad", "stride")
 }
 
 # x: the extent array

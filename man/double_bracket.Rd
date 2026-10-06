@@ -2,19 +2,37 @@
 % Please edit documentation in R/tilePlan.R
 \name{double_bracket}
 \alias{double_bracket}
+\alias{[[}
 \alias{[[,tilePlan,numeric,missing-method}
+\alias{[[,tilePlan,missing,missing-method}
+\alias{[[,tilePlan,missing,character-method}
+\alias{[[,tilePlan,numeric,character-method}
+\alias{[[<-,tilePlan,numeric,character-method}
+\alias{[[<-,tilePlan,missing,character-method}
 \title{Get and set metadata}
 \usage{
 \S4method{[[}{tilePlan,numeric,missing}(x, i, j, ...)
+
+\S4method{[[}{tilePlan,missing,missing}(x, i, j, ...)
+
+\S4method{[[}{tilePlan,missing,character}(x, i, j, ...)
+
+\S4method{[[}{tilePlan,numeric,character}(x, i, j, ...)
+
+\S4method{[[}{tilePlan,numeric,character}(x, i, j, ...) <- value
+
+\S4method{[[}{tilePlan,missing,character}(x, i, j, ...) <- value
 }
 \arguments{
 \item{x}{\code{tilePlan}}
 
-\item{i}{tile vector index}
+\item{i}{\code{integer-like}. tile vector index}
 
-\item{j}{not used.}
+\item{j}{\code{character}. Name of metadata information to get}
 
 \item{...}{not used.}
+
+\item{value}{\code{ANY} value to set}
 }
 \value{
 \code{data.frame}
@@ -30,4 +48,16 @@ spat[[1]]
 }
 \seealso{
 \link{dollar}
+
+Other tile* methods:
+\code{\link{arith}},
+\code{\link{as.polygons}},
+\code{\link{bracket}},
+\code{\link{centroids}},
+\code{\link{dim}},
+\code{\link{dollar}},
+\code{\link{ext}},
+\code{\link{intersect}},
+\code{\link{plot}}
 }
+\concept{tile* methods}

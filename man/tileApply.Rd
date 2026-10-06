@@ -18,26 +18,29 @@
 
 \item{tiles}{tile* object (\code{tilePlan}, \code{tileGroup}, or \code{tileIterator})}
 
-\item{...}{additional arguments passed to specific methods}
+\item{verbose}{verbosity. \code{TRUE}, \code{FALSE} or \code{"debug"} for more info on
+stack tracing.}
+
+\item{...}{additional arguments passed to specific methods (one of which is
+the \code{FUN} function applied across the tiles.)}
 
 \item{y}{input data 2 (optional)}
-
-\item{FUN}{function to apply across tiles}
-
-\item{pad_y}{numeric. Additional padding applied to \code{y} tiling so \code{x} has full
-spatial context of \code{y}}
 }
 \description{
+\strong{For more useful params info and examples, see the Tile Processing Methods
+section.}
+
 Apply a function across spatial tiles to speed up processing and manage
-memory usage for large data operations. This function dispatches to
-different processing methods based on the tile type.
+memory usage for large data operations. This is a landing page for the
+generic. \code{tileApply()} dispatches to different processing methods based on
+the tile type.
 
 \code{character} inputs to \code{x} and \code{y} are assumed to be \{terra\} readable.
 \code{SpatRaster} and \code{SpatVector} must first be written to file. If provided,
 they are traced to their filepaths with \code{\link[terra:sources]{terra::sources()}} and then processed
 via their filepaths for memory efficiency.
 
-For other data types, see \link{extending_giottotile}
+For other data types, see \link{extending_tilework}
 }
 \section{Tile Processing Methods}{
 
@@ -48,6 +51,23 @@ For other data types, see \link{extending_giottotile}
 }
 }
 
+\section{Boundary Inclusivity}{
+
+Adjacent tiles share exact boundaries. Since \{tilework\} does not know the
+format or representation of the underlying data, it provides tile bounds as
+windows but does not enforce whether those boundaries are inclusive or
+exclusive — that is determined by the \code{\link[=getBoundedData]{getBoundedData()}} method for the
+data type being processed.
+
+For raster data this is generally not an issue (pixel snapping assigns each
+cell unambiguously). For point or tabular data, features sitting exactly on
+a shared tile boundary may appear in multiple tiles unless the
+\code{getBoundedData()} implementation applies its own inclusive/exclusive
+filtering. Implementing packages can use the tile grid position (available
+via \code{\link[=getTile]{getTile()}}'s \code{get_params}) to determine which edges are shared and
+filter accordingly.
+}
+
 \examples{
 # See specific help pages for detailed examples:
 # ?`tileApply-plan`     # Basic spatial/pixel tiling
@@ -56,5 +76,13 @@ For other data types, see \link{extending_giottotile}
 }
 \seealso{
 \link{tileApply-plan}, \link{tileApply-group}, \link{tileApply-iterator}
+
+Other tile processing:
+\code{\link[=getBoundedData]{getBoundedData()}},
+\code{\link[=getTile]{getTile()}},
+\code{\link{tileApply-group}},
+\code{\link{tileApply-iterator}},
+\code{\link{tileApply-plan}}
 }
+\concept{tile processing}
 \keyword{internal}

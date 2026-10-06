@@ -4,12 +4,13 @@
 
 #' @name tileApply-plan
 #' @title Basic Tile Processing
+#' @family tile processing
 #' @description
 #' Apply functions across `tilePlan`-inheriting objects.
 #'
 #' **`token`** is a stand-in for any input data class (e.g. `SpatRaster`,
-#' `SpatExtent`, filpath, etc). See [redispatch_tileapply]
-#' and [extending_giottotile] for further information.
+#' `SpatExtent`, filepath, etc). See [redispatch_tileapply]
+#' and [extending_tilework] for further information.
 #'
 #' @section Special Function Parameters:
 #' Your `FUN` can optionally include these special parameters:
@@ -28,10 +29,11 @@
 #'   `y`
 #' @param pad_y numeric. Additional padding applied to `y` tiling so `x` has full
 #' spatial context of `y`
-#' @param future.seed logical. Enable reproducible random seeds
+#' @param parallel_params named param list. See [parallel_params]
 #' @param log logical. Whether to log processing steps
 #' @param logpath character. Log file path (if log = `TRUE`)
-#' @param verbose be verbose. Set as "debug" for more info on stack tracing.
+#' @param verbose verbosity. `TRUE`, `FALSE` or `"debug"` for more info on
+#'   stack tracing.
 #' @param \dots additional params to pass to [`[`][bracket]
 #'
 #' @seealso [tileApply], [tilePlan()], [spatialTilePlan-class], [pixelTilePlan-class]
@@ -87,35 +89,39 @@ setMethod(
         x, tiles, FUN,
         get_params_x = list(),
         log = FALSE,
-        logpath = tempdir(),
-        future_params = list(future.seed = TRUE),
+        logpath = getTileworkLogDir(),
+        parallel_params = list(),
         verbose = NULL,
         ...) {
-        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
-         Dot params:", toString(names(list(...))))
+        .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
         checkmate::assert_list(get_params_x)
-        checkmate::assert_list(future_params)
+        checkmate::assert_list(parallel_params)
         checkmate::assert_function(FUN)
-        with_pbar({
-            p <- pbar(along = tiles)
+        checkmate::assert_flag(log)
+        jid <- getTileworkJobID(advance = TRUE)
+        if (log) .vmsg(.v = verbose, "logging as job", jid)
+        progressr::with_progress({
+            p <- progressr::progressor(along = tiles)
 
             .future_fun <- function(i) {
                 ij <- .tile_idx_to_ij(tiles, i)
                 tile_id <- sprintf("[tile %d]", i)
                 if (log) {
-                    vmsg(.v = "log", sprintf("%s start (row %d, col %d)", tile_id, ij[[1]], ij[[2]]), .log_path = logpath)
+                    conn <- .log_conn(log_dir = logpath, job_id = jid)
+                    on.exit(close(conn), add = TRUE)
+                    .log_write(conn, sprintf("%s start (row %d, col %d)", tile_id, ij[[1]], ij[[2]]))
                 }
 
                 tile_ext <- tiles[i][[1L]]
 
                 if (log) {
-                    vmsg(.v = "log", tile_id, "bounds:", .ext_to_num_vec(tile_ext), .log_path = logpath)
-                    vmsg(.v = "log", tile_id, "pad:", tiles@pad, .log_path = logpath)
+                    .log_write(conn, tile_id, "bounds:", .ext_to_num_vec(tile_ext))
+                    .log_write(conn, tile_id, "pad:", tiles@pad)
                 }
 
-                get_params_x <- c(list(x, tiles, i = i), get_params_x, list(...))
-                tile_data <- do.call(getTile, get_params_x)[[1L]]
+                gt_params_x <- c(list(x, tiles, i = i), get_params_x, list(...))
+                tile_data <- do.call(getTile, gt_params_x)[[1L]]
 
                 # special args injection
                 a <- list(tile_data)
@@ -127,17 +133,18 @@ setMethod(
 
                 res <- do.call(FUN, args = a)
 
-                p(message = sprintf("[tile %d] done", i))
+                p(message = paste(tile_id, "done"))
+                if (log) .log_write(conn, paste(tile_id, "done"))
                 return(res)
             }
 
-            future_params <- c(
+            parallel_params <- c(
                 X = list(seq_along(tiles)),
                 FUN = .future_fun,
-                future_params
+                parallel_params
             )
 
-            do.call(lapply_flex, future_params)
+            do.call(.par_lapply, parallel_params)
         })
     }
 )
@@ -154,41 +161,45 @@ setMethod(
         get_params_y = list(),
         pad_y = NULL,
         log = FALSE,
-        logpath = tempdir(),
-        future_params = list(future.seed = TRUE),
+        logpath = getTileworkLogDir(),
+        parallel_params = list(),
         verbose = NULL,
         ...) {
-        vmsg(.v = verbose, .is_debug = TRUE, "[tileApply] running...
-         Dot params:", names(list(...)))
+        .dmsg(.v = verbose, "[tileApply] running...", plist = list(...))
 
         checkmate::assert_list(get_params_x)
         checkmate::assert_list(get_params_y)
-        checkmate::assert_list(future_params)
+        checkmate::assert_list(parallel_params)
         checkmate::assert_function(FUN)
+        checkmate::assert_flag(log)
+        jid <- getTileworkJobID(advance = TRUE)
+        if (log) .vmsg(.v = verbose, "logging as job", jid)
         if (is.null(y)) stop("[tileApply] `y` may not be NULL\n.", call. = FALSE)
-        with_pbar({
-            p <- pbar(along = tiles)
+        progressr::with_progress({
+            p <- progressr::progressor(along = tiles)
 
             .future_fun <- function(i) {
                 ij <- .tile_idx_to_ij(tiles, i)
                 tile_id <- sprintf("[tile %d]", i)
                 if (log) {
-                    vmsg(.v = "log", sprintf("%s start (row %d, col %d)", tile_id, ij[[1]], ij[[2]]), .log_path = logpath)
+                    conn <- .log_conn(log_dir = logpath, job_id = jid)
+                    on.exit(close(conn), add = TRUE)
+                    .log_write(conn, sprintf("%s start (row %d, col %d)", tile_id, ij[[1]], ij[[2]]))
                 }
 
                 tile_ext <- tiles[i][[1L]]
 
                 if (log) {
-                    vmsg(.v = "log", tile_id, "bounds:", .ext_to_num_vec(tile_ext), .log_path = logpath)
-                    vmsg(.v = "log", tile_id, "pad:", tiles@pad, .log_path = logpath)
+                    .log_write(conn, tile_id, "bounds:", .ext_to_num_vec(tile_ext))
+                    .log_write(conn, tile_id, "pad:", tiles@pad)
                 }
 
                 # prep args
-                get_params_x <- c(list(x, tiles, i = i), get_params_x, list(...))
-                get_params_y <- c(list(y, tiles, i = i, pad = pad_y), get_params_y, list(...))
+                gt_params_x <- c(list(x, tiles, i = i), get_params_x, list(...))
+                gt_params_y <- c(list(y, tiles, i = i, pad = pad_y), get_params_y, list(...))
                 # these are retrieved as list of 1
-                tile_x <- do.call(getTile, get_params_x)[[1L]]
-                tile_y <- do.call(getTile, get_params_y)[[1L]]
+                tile_x <- do.call(getTile, gt_params_x)[[1L]]
+                tile_y <- do.call(getTile, gt_params_y)[[1L]]
 
                 # special args injection
                 a <- list(tile_x, tile_y)
@@ -200,17 +211,18 @@ setMethod(
 
                 res <- do.call(FUN, args = a)
 
-                p(message = sprintf("[tile %d] done", i))
+                p(message = paste(tile_id, "done"))
+                if (log) .log_write(conn, paste(tile_id, "done"))
                 return(res)
             }
 
-            future_params <- c(
+            parallel_params <- c(
                 X = list(seq_along(tiles)),
                 FUN = .future_fun,
-                future_params
+                parallel_params
             )
 
-            do.call(lapply_flex, future_params)
+            do.call(.par_lapply, parallel_params)
         })
     }
 )
@@ -223,7 +235,7 @@ setMethod(
     "redispatch_tileapply", signature("character", "tilePlan"),
     function(sig, tiles, ...) {
         # expect warning about unknown type if wrong (rast vs vect) fun
-        sig <- GiottoUtils::handle_warnings(.terra_read(sig))$result
+        sig <- .handle_warnings(.terra_read(sig))$result
         redispatch_tileapply(sig, tiles, ...)
     }
 )
@@ -251,7 +263,6 @@ setMethod("redispatch_tileapply", signature("SpatRaster", "spatialTilePlan"), fu
     e <- .ext_to_num_vec(ext(sig))
     callNextMethod(f, tiles,
         default_get_params = list(
-            lyr = NULL, # to getTile,SpatRaster
             prefer = "raster", # to getTile,character
             ext = e # to getTile,character
         ),
@@ -268,11 +279,24 @@ setMethod("redispatch_tileapply", signature("SpatRaster", "pixelTilePlan"), func
     e <- .ext_to_num_vec(ext(sig))
     callNextMethod(f, tiles,
         default_get_params = list(
-            lyr = NULL, # to getTile,SpatRaster
             prefer = "raster", # to getTile,character
-            ext = e, # to getTile,character
-            extend = FALSE, # to getTile,SpatRaster,pixelTilePlan
-            fill = NA # to getTile,SpatRaster,pixelTilePlan
+            ext = e # to getTile,character
+        ),
+        ...
+    )
+})
+
+#' @rdname redispatch_tileapply
+#' @export
+setMethod("redispatch_tileapply", signature("SpatRaster", "pointTilePlan"), function(sig, tiles, ...) {
+    f <- terra::sources(sig)
+    f <- unique(f)
+    .guard_disk_terra_raster(f)
+    e <- .ext_to_num_vec(ext(sig))
+    callNextMethod(f, tiles,
+        default_get_params = list(
+            prefer = "raster", # to getTile,character
+            ext = e # to getTile,character
         ),
         ...
     )

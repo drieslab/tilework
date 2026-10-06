@@ -1,15 +1,17 @@
 setClassUnion(".index", c("numeric", "character", "logical", "integer"))
 
-#' @name giottoTile-class
-#' @title Virtual Class `giottoTile`
+#' @name tilework-class
+#' @title Virtual Class `tilework`
 #' @description
-#' The `giottoTile` class ia s a class contaiend by all actual classes in the
-#' \pkg{GiottoTile} package. It is a "virtual" class.
-#' @exportClass giottoTile
-setClass("giottoTile", contains = "VIRTUAL")
+#' The `tilework` class is a class contained by all tile* classes in the
+#' \pkg{tilework} package. It is a "virtual" class.
+#' @exportClass tilework
+#' @family tile plans
+setClass("tilework", contains = "VIRTUAL")
 
 #' @name token-class
 #' @title `token` Class
+#' @family tilework extension
 #' @description
 #' Utility class for flagging a piece of data as being ready for processing.
 #' This is internal machinery that is mainly useful for forcing S4 dispatch to
@@ -28,6 +30,7 @@ setClass("token",
 
 #' @name tilePlan-class
 #' @title Tile Plan
+#' @family tile plans
 #' @description
 #' Virtual parent class for tile planning objects. These objects are for planning
 #' tiles/patches of data to be operated over. Objects are indexable across
@@ -47,7 +50,7 @@ setClass("token",
 #' [tilePlan()] for creation of these objects.
 setClass(
     "tilePlan",
-    contains = c("VIRTUAL", "giottoTile"),
+    contains = c("VIRTUAL", "tilework"),
     slots = list(
         n = "numeric",
         dims = "integer",
@@ -57,6 +60,53 @@ setClass(
     ),
     prototype = list(
         pad = 0
+    )
+)
+
+setClass(
+    "tileSelection",
+    slots = list(
+        tp = "tilePlan",
+        indices = "integer"
+    )
+)
+
+#' @rdname pointTilePlan-class
+#' @slot coords matrix. n x 2 matrix of tile center coordinates (columns: x, y).
+#' @slot input character. Coordinate space of coords, dims, and padding:
+#' `"spatial"` for CRS units, `"pixel"` for pixel indices.
+#' @slot output character. Bound type returned by [getTile()]: `"spatial"` or
+#' `"pixel"`. Defaults to `input`. Evaluated at [getTile()] time, not `[i]`.
+#' @slot rast_dims numeric. `c(nrow, ncol)` of the reference raster. Required
+#' for `plot()` when `input = "pixel"` and for cross-mode conversion without a
+#' raster.
+#' @slot extent numeric. `c(xmin, xmax, ymin, ymax)` of the reference raster.
+#' Required for pixel → CRS conversion without a raster.
+#' @slot n numeric. Number of tiles (equals number of input points).
+#' @slot dims integer. Always `c(n, 1L)`.
+#' @slot tile_dims numeric. Uniform `c(height, width)` in input coordinate units.
+#' @slot pad numeric. Tile padding in input coordinate units.
+#' @slot metadata data.frame. Per-tile metadata; always has `"tile"`, `"x"`,
+#' and `"y"` columns.
+#' @exportClass pointTilePlan
+setClass(
+    "pointTilePlan",
+    contains = "tilePlan",
+    slots = list(
+        coords    = "matrix",    # n × 2: x, y in input coordinate space
+        input     = "character", # "spatial" | "pixel"
+        output    = "character", # "spatial" | "pixel" — getTile concern only
+        rast_dims = "numeric",   # c(nrow, ncol) — for pixel input plotting / cross-mode
+        extent    = "numeric"    # c(xmin, xmax, ymin, ymax) — for px->CRS conversion
+    ),
+    prototype = list(
+        n         = 0,
+        dims      = c(0L, 1L),
+        tile_dims = c(0, 0),
+        metadata  = data.frame(),
+        coords    = matrix(numeric(0), ncol = 2L),
+        rast_dims = numeric(0),
+        extent    = numeric(0)
     )
 )
 
@@ -92,8 +142,33 @@ setClass(
     )
 )
 
+#' @name freeTilePlan-class
+#' @title Free Tile Plan
+#' @family tile plans
+#' @description
+#' Tile plan defined by explicit per-tile bounds with no required uniformity
+#' in size or spacing. The bounds matrix is the canonical representation —
+#' there is no center-plus-dims formula. Always returns `SpatExtent` from
+#' `[i]`. Primary use case is as the output of adaptive spatial decomposition
+#' algorithms such as quadtrees on vector/point data.
+#' @slot bounds matrix. n x 4 matrix: xmin, xmax, ymin, ymax (one row per tile).
+#' @note `@tile_dims` is intentionally not populated. Any method that requires
+#'   uniform tile dimensions will not work with `freeTilePlan`.
+#' @exportClass freeTilePlan
+setClass(
+    "freeTilePlan",
+    contains = "tilePlan",
+    slots = list(
+        bounds = "matrix"
+    ),
+    prototype = list(
+        bounds = matrix(numeric(0), ncol = 4L)
+    )
+)
+
 #' @name tileGroup-class
 #' @title Tile Group
+#' @family tile orchestration
 #' @description
 #' Class for organizing tiles into hierarchical groups for batch processing.
 #' Groups can represent spatial regions, processing stages, or any logical
@@ -105,7 +180,7 @@ setClass(
 #' @slot metadata data.frame. Metadata about each group
 #' @exportClass tileGroup
 setClass("tileGroup",
-    contains = "giottoTile",
+    contains = "tilework",
     slots = list(
         tp = "tilePlan",
         groups = "list",
@@ -116,6 +191,7 @@ setClass("tileGroup",
 
 #' @name tileIterator-class
 #' @title tileIterator
+#' @family tile orchestration
 #' @description
 #' A stateful iterator that progresses through tiles of an underlying `tilePlan`
 #' (or `tileGroup` if `$active` is set) object upon every call to `$next_batch()`
@@ -126,7 +202,7 @@ setClass("tileGroup",
 #' @seealso [tileIterator]
 #' @exportClass tileIterator
 setClass("tileIterator",
-    contains = "giottoTile",
+    contains = "tilework",
     slots = list(
         funs = "list"
     )
