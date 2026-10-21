@@ -116,14 +116,8 @@ setMethod("intersect", signature("spatialTilePlan", "ANY"), function(x, y) {
         if (length(candidates) == 0L) return(x[integer(0L), drop = FALSE])
         ij <- .tile_idx_to_ij(x, candidates)
         i_idx <- ij[[1L]]; j_idx <- ij[[2L]]
-        w <- x@tile_dims[[2L]]; h <- x@tile_dims[[1L]]
-        p <- x@pad; e <- x@extent
-        bounds <- cbind(
-            e[[1L]] + (j_idx - 1L) * w - p,
-            e[[1L]] +  j_idx       * w + p,
-            e[[3L]] + (i_idx - 1L) * h - p,
-            e[[3L]] +  i_idx       * h + p
-        )
+        bounds <- .spat_bounds_mat(x, i_idx, j_idx) +
+            rep(c(-1, 1, -1, 1) * x@pad, each = length(i_idx))
         tile_sv <- .tile_bounds_to_sv(bounds, ids = candidates)
         return(.intersect_poly_exact(x, tile_sv, y, candidates))
     }

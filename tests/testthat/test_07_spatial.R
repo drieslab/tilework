@@ -152,4 +152,15 @@ describe("intersect", {
         expect_equal(sort(sel$tile), seq_len(length(tp)))
     })
 
+    test_that("SpatVector query on the top and right extent edges hits a tile", {
+        # colon MERSCOPE centroids: ymin + nrow * h rounds 3.9e-13 below ymax
+        e <- c(-27.620482526870447, 12861.811725589658,
+               -8619.5213946071872, 48.193074606677719)
+        tp <- spatialTilePlan(ext = e, n = 8)
+        pts <- terra::vect(rbind(c(3000, e[[4L]]), c(e[[2L]], -4000)))
+        for (k in seq_along(pts)) {
+            expect_gte(length(intersect(tp, pts[k])), 1L)
+        }
+    })
+
 })
