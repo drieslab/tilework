@@ -516,6 +516,52 @@ describe("tileApply with tileIterator", {
 
         unlink(c(temp_file1, temp_file2))
     })
+
+    test_that("tileApply with iterator runs across multiple workers", {
+        oplan <- future::plan(future::multisession, workers = 2)
+        on.exit(future::plan(oplan), add = TRUE)
+
+        r <- create_test_raster(40, 40)
+        temp_file <- tempfile(fileext = ".tif")
+        terra::writeRaster(r, temp_file, overwrite = TRUE)
+        on.exit(unlink(temp_file), add = TRUE)
+
+        tp <- tilePlan("pixel")
+        tp$pxdims <- dim(r)[1:2]
+        tp$nrows <- 10
+        tp$ncols <- 10
+        iter <- tileIterator(tp, batch_size = 3)
+
+        results <- tileApply(temp_file, tiles = iter,
+            FUN = function(batch, .I) .I
+        )
+        expect_setequal(unlist(results), seq_len(length(tp)))
+        expect_length(unlist(results), length(tp))
+    })
+
+    test_that("tileApply with iterator and two datasets runs across multiple workers", {
+        oplan <- future::plan(future::multisession, workers = 2)
+        on.exit(future::plan(oplan), add = TRUE)
+
+        r1 <- create_test_raster(30, 30)
+        r2 <- create_test_raster(30, 30) * -2
+        temp_file1 <- tempfile(fileext = ".tif")
+        temp_file2 <- tempfile(fileext = ".tif")
+        terra::writeRaster(r1, temp_file1, overwrite = TRUE)
+        terra::writeRaster(r2, temp_file2, overwrite = TRUE)
+        on.exit(unlink(c(temp_file1, temp_file2)), add = TRUE)
+
+        tp <- tilePlan("spatial")
+        terra::ext(tp) <- terra::ext(r1)
+        length(tp) <- 9
+        iter <- tileIterator(tp, batch_size = 2)
+
+        results <- tileApply(x = temp_file1, y = temp_file2, tiles = iter,
+            FUN = function(batch_x, batch_y, .I) .I
+        )
+        expect_setequal(unlist(results), seq_len(length(tp)))
+        expect_length(unlist(results), length(tp))
+    })
 })
 
 # Test performance and edge cases ####
