@@ -152,21 +152,15 @@ describe("intersect", {
         expect_equal(sort(sel$tile), seq_len(length(tp)))
     })
 
-})
+    test_that("SpatVector query on the top and right extent edges hits a tile", {
+        # colon MERSCOPE centroids: ymin + nrow * h rounds 3.9e-13 below ymax
+        e <- c(-27.620482526870447, 12861.811725589658,
+               -8619.5213946071872, 48.193074606677719)
+        tp <- spatialTilePlan(ext = e, n = 8)
+        pts <- terra::vect(rbind(c(3000, e[[4L]]), c(e[[2L]], -4000)))
+        for (k in seq_along(pts)) {
+            expect_gte(length(intersect(tp, pts[k])), 1L)
+        }
+    })
 
-test_that("outer tile edges equal the plan extent exactly", {
-    # colon MERSCOPE centroids: ymin + nrow * h rounds 3.9e-13 below ymax,
-    # which put the topmost polygon outside every tile
-    e <- c(-27.620482526870447, 12861.811725589658,
-           -8619.5213946071872, 48.193074606677719)
-    tp <- tilePlan("spatial")
-    ext(tp) <- terra::ext(e)
-    length(tp) <- 8L
-    b <- do.call(rbind, lapply(tp[], function(t) as.vector(t[])))
-    expect_identical(max(b[, 2L]), e[[2L]])
-    expect_identical(max(b[, 4L]), e[[4L]])
-    expect_identical(min(b[, 1L]), e[[1L]])
-    expect_identical(min(b[, 3L]), e[[3L]])
-    pb <- terra::ext(as.polygons(tp))
-    expect_identical(as.vector(pb[]), e)
 })

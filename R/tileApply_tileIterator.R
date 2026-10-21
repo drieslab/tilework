@@ -241,7 +241,7 @@ setMethod(
             }
 
             parallel_params <- c(
-                X = seq_along(worker_iters), # parallelize on number of worker iters
+                X = list(seq_along(worker_iters)), # parallelize on number of worker iters
                 FUN = .future_fun,
                 parallel_params
             )
@@ -393,7 +393,7 @@ setMethod(
             }
 
             parallel_params <- c(
-                X = seq_along(worker_iters), # parallelize on number of worker iters
+                X = list(seq_along(worker_iters)), # parallelize on number of worker iters
                 FUN = .future_fun,
                 parallel_params
             )
