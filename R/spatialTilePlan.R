@@ -228,20 +228,30 @@ spatialTilePlan <- function(ext = NULL, n = NULL, ...) {
 setMethod("as.polygons", signature("spatialTilePlan"), function(x, ...) {
     if (length(x) == 0L) return(terra::vect())
     nr <- nrow(x); nc <- ncol(x)
-    w  <- x@tile_dims[[2L]]; h <- x@tile_dims[[1L]]
-    p  <- x@pad; e <- x@extent
     j_idx <- rep(seq_len(nc), nr)
     i_idx <- rep(seq_len(nr), each = nc)
-    bounds <- cbind(
-        e[[1L]] + (j_idx - 1L) * w - p,
-        e[[1L]] +  j_idx       * w + p,
-        e[[3L]] + (i_idx - 1L) * h - p,
-        e[[3L]] +  i_idx       * h + p
-    )
-    .tile_bounds_to_sv(bounds)
+    .tile_bounds_to_sv(.spat_bounds_mat(x, i_idx, j_idx) +
+        rep(c(-1, 1, -1, 1) * x@pad, each = length(i_idx)))
 })
 
 # helpers ####
+
+# Unpadded bounds (xmin, xmax, ymin, ymax) of tiles at rows `i_idx`, columns
+# `j_idx`. Outer edges are the plan extent itself: `xmin + ncol * w` can round
+# below `xmax`, which would leave data on the far edges outside every tile.
+.spat_bounds_mat <- function(x, i_idx, j_idx) {
+    w <- x@tile_dims[[2L]]; h <- x@tile_dims[[1L]]
+    e <- .ext_to_num_vec(x@extent)
+    b <- cbind(
+        e[[1L]] + (j_idx - 1L) * w,
+        e[[1L]] +  j_idx       * w,
+        e[[3L]] + (i_idx - 1L) * h,
+        e[[3L]] +  i_idx       * h
+    )
+    b[j_idx == ncol(x), 2L] <- e[[2L]]
+    b[i_idx == nrow(x), 4L] <- e[[4L]]
+    b
+}
 
 .get_dim_n_chunks <- function(n, e) {
     # find x to y ratio as 'r'

@@ -583,17 +583,9 @@ setMethod("-", signature("tilePlan", "numeric"), function(e1, e2) {
 }
 
 .spat_tile_bounds <- function(x, i, j) {
-    tile_dims <- x@tile_dims
-    e <- ext(x)
-    offset <- c(terra::ymin(e), terra::xmin(e))
     checkmate::assert_integerish(i, len = 1L)
     checkmate::assert_integerish(j, len = 1L)
-    c(
-        tile_dims[[2L]] * (j - 1L) + offset[[2L]],
-        tile_dims[[2L]] * j + offset[[2L]],
-        tile_dims[[1L]] * (i - 1L) + offset[[1L]],
-        tile_dims[[1L]] * i + offset[[1L]]
-    )
+    .spat_bounds_mat(x, i, j)[1L, ]
 }
 
 #' @name .preview_chunk_plan
