@@ -258,6 +258,11 @@ setMethod("as.polygons", signature("spatialTilePlan"), function(x, ...) {
     e <- e[]
     r <- (e[["xmax"]] - e[["xmin"]]) / (e[["ymax"]] - e[["ymin"]])
 
+    # a side of zero length: tiles along the other side only (a point: one)
+    if (is.nan(r)) return(c(1, 1))
+    if (r == 0) return(c(n, 1))
+    if (is.infinite(r)) return(c(1, n))
+
     # x * y = n = ... ry^2 = n
     y <- ceiling(sqrt(n / r))
     x <- ceiling(n / y)
