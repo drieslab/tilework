@@ -272,8 +272,7 @@ quadtreePlan <- function(x,
         tiles <- tilePlan("spatial")
         e <- ext(tiles) <- ext(x)
         erange <- range(e)
-        start_len <- round(max(erange) / min(erange)) * 4L
-        length(tiles) <- start_len
+        length(tiles) <- .seed_tile_count(erange)
     }
 
     # collect starting extents
@@ -357,6 +356,14 @@ quadtreePlan <- function(x,
 
 
 # helpers ####
+
+# Starting tiles for an extent with side lengths `erange`: four per unit of
+# aspect ratio. A zero width or height (one point, or every point on one
+# line) makes the ratio Inf or NaN; start from a single tile then.
+.seed_tile_count <- function(erange) {
+    n <- round(max(erange) / min(erange)) * 4L
+    if (is.finite(n)) n else 1L
+}
 
 .free_tile_bounds <- function(x, i, j) {
     # j is always 1 (dims = c(n, 1)); ignored
